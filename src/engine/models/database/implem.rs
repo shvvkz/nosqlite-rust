@@ -53,3 +53,9 @@ impl Display for Database {
         Ok(())
     }
 }
+
+impl Default for Database {
+    fn default() -> Self {
+        Database::new()
+    }
+}
