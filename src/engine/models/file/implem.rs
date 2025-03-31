@@ -10,6 +10,18 @@ use std::{fs, path::Path};
 const DEFAULT_KEY_PATH: &str = "db.key";
 
 impl File {
+    /// Loads the database from disk, or creates a new one if the file does not exist.
+    ///
+    /// If the database file exists, it is decrypted and deserialized into a [`Database`] instance.
+    /// Otherwise, a new empty database is returned.
+    ///
+    /// # Arguments
+    ///
+    /// * `db_path` - The path to the encrypted database file.
+    ///
+    /// # Panics
+    ///
+    /// Panics if reading, decrypting, or deserializing the database fails.
     pub fn load_or_create(db_path: &str) -> Database {
         let key = Self::load_or_generate_key(DEFAULT_KEY_PATH);
 
@@ -22,6 +34,19 @@ impl File {
         }
     }
 
+    /// Saves the database to disk in encrypted form.
+    ///
+    /// The database is serialized to JSON, encrypted using AES-256-GCM,
+    /// and written to the specified file path.
+    ///
+    /// # Arguments
+    ///
+    /// * `db_path` - The path to the output encrypted database file.
+    /// * `db` - The [`Database`] instance to persist.
+    ///
+    /// # Panics
+    ///
+    /// Panics if serialization, encryption, or file writing fails.
     pub fn save(db_path: &str, db: &Database) {
         let key = Self::load_or_generate_key(DEFAULT_KEY_PATH);
         let json = serde_json::to_string_pretty(db).expect("Serialization failed");
@@ -29,6 +54,20 @@ impl File {
         fs::write(db_path, encrypted).expect("Failed to write encrypted DB");
     }
 
+    /// Encrypts a plaintext string using AES-256-GCM.
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The plaintext string to encrypt.
+    /// * `key` - A 256-bit encryption key (32 bytes).
+    ///
+    /// # Returns
+    ///
+    /// A base64-encoded encrypted string containing the nonce and ciphertext.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `String` error if encryption fails.
     fn encrypt(data: &str, key: &[u8; 32]) -> Result<String, String> {
         let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(key));
         let nonce = Aes256Gcm::generate_nonce(&mut OsRng); // 12 bytes
@@ -41,6 +80,20 @@ impl File {
         Ok(general_purpose::STANDARD.encode(&result))
     }
 
+    /// Decrypts a base64-encoded encrypted string using AES-256-GCM.
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The base64-encoded ciphertext string.
+    /// * `key` - A 256-bit decryption key (32 bytes).
+    ///
+    /// # Returns
+    ///
+    /// The decrypted plaintext string.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `String` error if decoding or decryption fails.
     fn decrypt(data: &str, key: &[u8; 32]) -> Result<String, String> {
         let decoded = general_purpose::STANDARD
             .decode(data)
@@ -55,6 +108,22 @@ impl File {
         String::from_utf8(plaintext).map_err(|e| e.to_string())
     }
 
+    /// Loads an encryption key from a file or generates a new one if it doesn't exist.
+    ///
+    /// If the file exists, the key is read and decoded from hexadecimal.
+    /// Otherwise, a new random key is generated, saved in hex format, and returned.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the key file.
+    ///
+    /// # Returns
+    ///
+    /// A 256-bit key (32 bytes) to be used for encryption and decryption.
+    ///
+    /// # Panics
+    ///
+    /// Panics if reading, decoding, or writing the key file fails.
     fn load_or_generate_key(path: &str) -> [u8; 32] {
         if Path::new(path).exists() {
             let content = fs::read_to_string(path).expect("Failed to read key file");
