@@ -31,7 +31,9 @@ fn main() {
     .expect("Failed to insert document");
 
     // Étape 3 — Lister les utilisateurs
-    let docs = db.get_all_documents("users").expect("Failed to fetch users");
+    let docs = db
+        .get_all_documents("users")
+        .expect("Failed to fetch users");
     println!("\n👥 Utilisateurs:");
     for doc in docs {
         println!("{}", doc);
