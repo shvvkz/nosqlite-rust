@@ -1,8 +1,8 @@
 use super::model::Document;
 use crate::engine::models::utils::now;
 use serde_json::Value;
-use uuid::Uuid;
 use std::fmt::Display;
+use uuid::Uuid;
 
 impl Document {
     pub fn new(data: Value) -> Document {

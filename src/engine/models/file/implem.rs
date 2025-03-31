@@ -1,10 +1,10 @@
 use crate::engine::models::database::model::Database;
 use crate::engine::models::file::model::File;
 use aes_gcm::{
-    aead::{Aead, KeyInit, OsRng}, AeadCore, Aes256Gcm, Key, Nonce
+    aead::{Aead, KeyInit, OsRng},
+    AeadCore, Aes256Gcm, Key, Nonce,
 };
 use base64::{engine::general_purpose, Engine as _};
-use sha2::{Digest, Sha256};
 use std::{fs, path::Path};
 
 const DEFAULT_KEY_PATH: &str = "db.key";
@@ -32,7 +32,9 @@ impl File {
     fn encrypt(data: &str, key: &[u8; 32]) -> Result<String, String> {
         let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(key));
         let nonce = Aes256Gcm::generate_nonce(&mut OsRng); // 12 bytes
-        let ciphertext = cipher.encrypt(&nonce, data.as_bytes()).map_err(|e| e.to_string())?;
+        let ciphertext = cipher
+            .encrypt(&nonce, data.as_bytes())
+            .map_err(|e| e.to_string())?;
 
         let mut result = nonce.to_vec();
         result.extend(ciphertext);
@@ -40,13 +42,17 @@ impl File {
     }
 
     fn decrypt(data: &str, key: &[u8; 32]) -> Result<String, String> {
-        let decoded = general_purpose::STANDARD.decode(data).map_err(|e| e.to_string())?;
+        let decoded = general_purpose::STANDARD
+            .decode(data)
+            .map_err(|e| e.to_string())?;
         let (nonce_bytes, ciphertext) = decoded.split_at(12);
         let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(key));
         let nonce = Nonce::from_slice(nonce_bytes);
 
-        let plaintext = cipher.decrypt(nonce, ciphertext).map_err(|e| e.to_string())?;
-        Ok(String::from_utf8(plaintext).map_err(|e| e.to_string())?)
+        let plaintext = cipher
+            .decrypt(nonce, ciphertext)
+            .map_err(|e| e.to_string())?;
+        String::from_utf8(plaintext).map_err(|e| e.to_string())
     }
 
     fn load_or_generate_key(path: &str) -> [u8; 32] {

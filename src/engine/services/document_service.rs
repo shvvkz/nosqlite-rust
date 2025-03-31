@@ -94,7 +94,7 @@ pub fn get_documents_by_field<'a>(
     let result = collection
         .all_documents()
         .iter()
-        .filter(|doc| doc.data.get(field).map_or(false, |v| v == value))
+        .filter(|doc| doc.data.get(field).is_some_and(|v| v == value))
         .collect();
 
     Ok(result)
