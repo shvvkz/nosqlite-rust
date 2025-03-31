@@ -16,6 +16,9 @@ use serde_json::Value;
 /// # Example
 ///
 /// ```rust
+/// use serde_json::Value;
+/// use nosqlite_rust::engine::models::Document;;
+///
 /// let doc = Document {
 ///     id: "abc123".to_string(),
 ///     data: serde_json::json!({"title": "Hello", "views": 42}),

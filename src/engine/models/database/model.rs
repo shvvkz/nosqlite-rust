@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 /// # Example
 ///
 /// ```rust
-/// use your_crate::engine::models::database::model::Database;
+/// use nosqlite_rust::engine::models::Database;
 ///
 /// let db = Database {
 ///     collections: vec![],
