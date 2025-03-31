@@ -28,6 +28,6 @@ pub fn get_collection_mut<'a>(
 }
 
 /// Renvoie toutes les collections de la base.
-pub fn list_collections<'a>(db: &'a Database) -> Vec<&'a Collection> {
+pub fn list_collections(db: &Database) -> Vec<&Collection> {
     db.collections.iter().collect()
 }

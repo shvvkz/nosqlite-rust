@@ -1,0 +1,4 @@
+/target
+test_db.nosqlite
+db.key
+/.dist
