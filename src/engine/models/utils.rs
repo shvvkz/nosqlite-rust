@@ -36,7 +36,7 @@ pub fn now() -> u64 {
 /// ```rust
 /// use serde_json::json;
 /// use std::collections::BTreeMap;
-/// use crate::engine::models::utils::validate_against_structure;
+/// use nosqlite_rust::engine::models::utils::validate_against_structure;
 ///
 /// let schema = json!({ "title": "string", "views": "number" }).as_object().unwrap().clone();
 /// let doc = json!({ "title": "Hello", "views": 42 }).as_object().unwrap().clone();
