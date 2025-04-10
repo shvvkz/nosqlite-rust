@@ -1,4 +1,5 @@
 use super::model::Collection;
+use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::document::model::Document;
 use crate::engine::models::utils::{now, validate_against_structure};
 use serde_json::Value;
@@ -36,17 +37,31 @@ impl Collection {
     /// - The document is not a JSON object.
     /// - The collection structure is not a valid JSON object.
     /// - The document does not match the expected structure.
-    pub fn add_document(&mut self, data: Value) -> Result<(), String> {
+    pub fn add_document(
+        &mut self,
+        data: Value,
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         if let Value::Object(ref doc_map) = data {
             if let Value::Object(expected_structure) = &self.structure {
                 if !validate_against_structure(doc_map, expected_structure) {
-                    return Err("Document does not match the collection's structure".into());
+                    let error = NosqliteError::DocumentInvalid(
+                        "Document does not match the collection's structure".into(),
+                    );
+                    handler.log_error(error.clone());
+                    return Err(error);
                 }
             } else {
-                return Err("Collection structure is invalid".into());
+                let error = NosqliteError::InvalidCollectionStructure(
+                    "Collection structure is not a valid JSON object".into(),
+                );
+                handler.log_error(error.clone());
+                return Err(error);
             }
         } else {
-            return Err("Document must be a JSON object".into());
+            let error = NosqliteError::DocumentInvalid("Document must be a JSON object".into());
+            handler.log_error(error.clone());
+            return Err(error);
         }
 
         let document = Document::new(data);
@@ -66,17 +81,30 @@ impl Collection {
     /// Returns an error if:
     /// - The document is not found.
     /// - The new data does not match the expected structure.
-    pub fn update_document(&mut self, id: &str, new_data: Value) -> Result<(), String> {
+    pub fn update_document(
+        &mut self,
+        id: &str,
+        new_data: Value,
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         let position = self
             .documents
             .iter()
             .position(|d| d.id == id)
-            .ok_or_else(|| format!("Document with ID '{}' not found", id))?;
+            .ok_or_else(|| {
+                let error = NosqliteError::DocumentNotFound(id.to_string());
+                handler.log_error(error.clone());
+                error
+            })?;
 
         if let Value::Object(ref doc_map) = new_data {
             if let Value::Object(expected_structure) = &self.structure {
                 if !validate_against_structure(doc_map, expected_structure) {
-                    return Err("Updated document does not match the collection's structure".into());
+                    let error = NosqliteError::DocumentInvalid(
+                        "New data does not match the collection's structure".into(),
+                    );
+                    handler.log_error(error.clone());
+                    return Err(error);
                 }
             }
         }
@@ -107,17 +135,24 @@ impl Collection {
         id: &str,
         field: &str,
         value: Value,
-    ) -> Result<(), String> {
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         let position = self
             .documents
             .iter()
             .position(|d| d.id == id)
-            .ok_or_else(|| format!("Document with ID '{}' not found", id))?;
+            .ok_or_else(|| {
+                let error = NosqliteError::DocumentNotFound(id.to_string());
+                handler.log_error(error.clone());
+                error
+            })?;
 
         if let Value::Object(ref mut doc_map) = self.documents[position].data {
             doc_map.insert(field.to_string(), value);
         } else {
-            return Err("Document data is not a JSON object".into());
+            let error = NosqliteError::DocumentInvalid("Document data is not a JSON object".into());
+            handler.log_error(error.clone());
+            return Err(error);
         }
 
         self.documents[position].updated_at = now();
@@ -133,12 +168,20 @@ impl Collection {
     /// # Errors
     ///
     /// Returns an error if the document is not found.
-    pub fn delete_document(&mut self, id: &str) -> Result<(), String> {
+    pub fn delete_document(
+        &mut self,
+        id: &str,
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         let position = self
             .documents
             .iter()
             .position(|d| d.id == id)
-            .ok_or_else(|| format!("Document with ID '{}' not found", id))?;
+            .ok_or_else(|| {
+                let error = NosqliteError::DocumentNotFound(id.to_string());
+                handler.log_error(error.clone());
+                error
+            })?;
 
         self.documents.remove(position);
         Ok(())

@@ -1,3 +1,4 @@
+use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::database::model::Database;
 use crate::engine::models::document::model::Document;
 use serde_json::Value;
@@ -19,12 +20,18 @@ pub fn insert_document(
     db: &mut Database,
     collection_name: &str,
     data: Value,
-) -> Result<(), String> {
-    let collection = db
-        .get_collection_mut(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
-    collection.add_document(data)
+    collection.add_document(data, handler)
 }
 
 /// Fully replaces the content of an existing document by ID.
@@ -46,12 +53,18 @@ pub fn update_document(
     collection_name: &str,
     id: &str,
     data: Value,
-) -> Result<(), String> {
-    let collection = db
-        .get_collection_mut(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
-    collection.update_document(id, data)
+    collection.update_document(id, data, handler)
 }
 
 /// Updates a specific field of a document by ID.
@@ -75,12 +88,18 @@ pub fn update_document_field(
     id: &str,
     field: &str,
     value: Value,
-) -> Result<(), String> {
-    let collection = db
-        .get_collection_mut(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
-    collection.update_field_document(id, field, value)
+    collection.update_field_document(id, field, value, handler)
 }
 
 /// Deletes a document from a collection by ID.
@@ -95,12 +114,22 @@ pub fn update_document_field(
 ///
 /// Returns an error if:
 /// - The collection or document does not exist.
-pub fn delete_document(db: &mut Database, collection_name: &str, id: &str) -> Result<(), String> {
-    let collection = db
-        .get_collection_mut(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+pub fn delete_document(
+    db: &mut Database,
+    collection_name: &str,
+    id: &str,
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
-    collection.delete_document(id)
+    collection.delete_document(id, handler)
 }
 
 /// Retrieves a document by ID from a collection.
@@ -122,14 +151,22 @@ pub fn get_document_by_id<'a>(
     db: &'a Database,
     collection_name: &str,
     id: &str,
-) -> Result<&'a Document, String> {
-    let collection = db
-        .get_collection(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<&'a Document, NosqliteError> {
+    let collection = db.get_collection(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
-    collection
-        .get_document(id)
-        .ok_or_else(|| format!("Document with ID '{}' not found", id))
+    collection.get_document(id).ok_or_else(|| {
+        let error = NosqliteError::DocumentNotFound(format!("Document '{}' not found", id));
+        handler.log_error(error.clone());
+        error
+    })
 }
 
 /// Retrieves all documents within a collection.
@@ -149,10 +186,16 @@ pub fn get_document_by_id<'a>(
 pub fn get_all_documents<'a>(
     db: &'a Database,
     collection_name: &str,
-) -> Result<&'a Vec<Document>, String> {
-    let collection = db
-        .get_collection(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<&'a Vec<Document>, NosqliteError> {
+    let collection = db.get_collection(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
     Ok(collection.all_documents())
 }
@@ -178,10 +221,16 @@ pub fn get_documents_by_field<'a>(
     collection_name: &str,
     field: &str,
     value: &str,
-) -> Result<Vec<&'a Document>, String> {
-    let collection = db
-        .get_collection(collection_name)
-        .ok_or_else(|| format!("Collection '{}' not found", collection_name))?;
+    handler: &mut NosqliteErrorHandler,
+) -> Result<Vec<&'a Document>, NosqliteError> {
+    let collection = db.get_collection(collection_name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!(
+            "Collection '{}' not found",
+            collection_name
+        ));
+        handler.log_error(error.clone());
+        error
+    })?;
 
     let result = collection
         .all_documents()

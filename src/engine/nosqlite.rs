@@ -8,25 +8,31 @@ use crate::engine::services::{
 
 use serde_json::Value;
 
+use super::error::{NosqliteError, NosqliteErrorHandler};
+
 /// Public API for interacting with the NoSQLite engine.
 pub struct Nosqlite {
     path: String,
+    error_handler: NosqliteErrorHandler,
     db: Database,
 }
 
 impl Nosqlite {
     /// Opens or creates a new NoSQLite database using the given path.
-    pub fn open(path: &str) -> Self {
-        let db = load_or_create_database(path);
-        Self {
-            path: path.to_string(),
+    pub fn open(path: &str) -> Result<Self, NosqliteError> {
+        let db = File::load_or_create(path, &mut NosqliteErrorHandler::new(path.to_string()))?;
+        let error_handler = NosqliteErrorHandler::new(path.to_string());
+
+        Ok(Self {
             db,
-        }
+            error_handler,
+            path: path.to_string(),
+        })
     }
 
     /// Creates a new collection in the database.
-    pub fn create_collection(&mut self, name: &str, structure: Value) -> Result<(), String> {
-        let result = create_collection(&mut self.db, name, structure);
+    pub fn create_collection(&mut self, name: &str, structure: Value) -> Result<(), NosqliteError> {
+        let result = create_collection(&mut self.db, name, structure, &mut self.error_handler);
         if result.is_ok() {
             self.auto_save();
         }
@@ -34,8 +40,8 @@ impl Nosqlite {
     }
 
     /// Deletes a collection from the database.
-    pub fn delete_collection(&mut self, name: &str) -> Result<(), String> {
-        let result = delete_collection(&mut self.db, name);
+    pub fn delete_collection(&mut self, name: &str) -> Result<(), NosqliteError> {
+        let result = delete_collection(&mut self.db, name, &mut self.error_handler);
         if result.is_ok() {
             self.auto_save();
         }
@@ -43,8 +49,8 @@ impl Nosqlite {
     }
 
     /// Inserts a document into the specified collection.
-    pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), String> {
-        let result = insert_document(&mut self.db, collection, data);
+    pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), NosqliteError> {
+        let result = insert_document(&mut self.db, collection, data, &mut self.error_handler);
         if result.is_ok() {
             self.auto_save();
         }
@@ -57,8 +63,14 @@ impl Nosqlite {
         collection: &str,
         id: &str,
         new_data: Value,
-    ) -> Result<(), String> {
-        let result = update_document(&mut self.db, collection, id, new_data);
+    ) -> Result<(), NosqliteError> {
+        let result = update_document(
+            &mut self.db,
+            collection,
+            id,
+            new_data,
+            &mut self.error_handler,
+        );
         if result.is_ok() {
             self.auto_save();
         }
@@ -72,8 +84,15 @@ impl Nosqlite {
         id: &str,
         field: &str,
         value: Value,
-    ) -> Result<(), String> {
-        let result = update_document_field(&mut self.db, collection, id, field, value);
+    ) -> Result<(), NosqliteError> {
+        let result = update_document_field(
+            &mut self.db,
+            collection,
+            id,
+            field,
+            value,
+            &mut self.error_handler,
+        );
         if result.is_ok() {
             self.auto_save();
         }
@@ -81,8 +100,8 @@ impl Nosqlite {
     }
 
     /// Deletes a document from the specified collection.
-    pub fn delete_document(&mut self, collection: &str, id: &str) -> Result<(), String> {
-        let result = delete_document(&mut self.db, collection, id);
+    pub fn delete_document(&mut self, collection: &str, id: &str) -> Result<(), NosqliteError> {
+        let result = delete_document(&mut self.db, collection, id, &mut self.error_handler);
         if result.is_ok() {
             self.auto_save();
         }
@@ -90,23 +109,27 @@ impl Nosqlite {
     }
 
     /// Retrieves a document by ID.
-    pub fn get_document_by_id(&self, collection: &str, id: &str) -> Result<&Document, String> {
-        get_document_by_id(&self.db, collection, id)
+    pub fn get_document_by_id(
+        &mut self,
+        collection: &str,
+        id: &str,
+    ) -> Result<&Document, NosqliteError> {
+        get_document_by_id(&self.db, collection, id, &mut self.error_handler)
     }
 
     /// Retrieves all documents from a collection.
-    pub fn get_all_documents(&self, collection: &str) -> Result<&Vec<Document>, String> {
-        get_all_documents(&self.db, collection)
+    pub fn get_all_documents(&mut self, collection: &str) -> Result<&Vec<Document>, NosqliteError> {
+        get_all_documents(&self.db, collection, &mut self.error_handler)
     }
 
     /// Retrieves all documents where a field equals a specific value.
     pub fn get_documents_by_field(
-        &self,
+        &mut self,
         collection: &str,
         field: &str,
         value: &str,
-    ) -> Result<Vec<&Document>, String> {
-        get_documents_by_field(&self.db, collection, field, value)
+    ) -> Result<Vec<&Document>, NosqliteError> {
+        get_documents_by_field(&self.db, collection, field, value, &mut self.error_handler)
     }
 
     /// Lists all collections in the database.
@@ -115,7 +138,8 @@ impl Nosqlite {
     }
 
     /// Internal function to persist changes automatically.
-    fn auto_save(&self) {
-        save_database(&self.path, &self.db);
+    fn auto_save(&mut self) -> Result<(), NosqliteError> {
+        save_database(&self.path, &self.db, &mut self.error_handler)?;
+        Ok(())
     }
 }

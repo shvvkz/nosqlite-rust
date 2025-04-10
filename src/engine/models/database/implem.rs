@@ -1,4 +1,5 @@
 use super::model::Database;
+use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::collection::model::Collection;
 use serde_json::Value;
 use std::fmt::Display;
@@ -9,7 +10,7 @@ impl Database {
     /// # Returns
     ///
     /// A [`Database`] with no collections.
-    pub fn new() -> Self {
+    pub fn new(db_path: &str) -> Self {
         Database {
             collections: Vec::new(),
         }
@@ -27,13 +28,23 @@ impl Database {
     /// Returns an error if:
     /// - A collection with the same name already exists.
     /// - The provided structure is not a valid JSON object.
-    pub fn add_collection(&mut self, name: &str, structure: Value) -> Result<(), String> {
+    pub fn add_collection(
+        &mut self,
+        name: &str,
+        structure: Value,
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         if self.collections.iter().any(|c| c.name == name) {
-            return Err("A collection with this name already exists".into());
+            let error = NosqliteError::CollectionAlreadyExists(name.to_string());
+            handler.log_error(error.clone());
+            return Err(error);
         }
 
         if !structure.is_object() {
-            return Err("The structure must be a JSON object".into());
+            let error =
+                NosqliteError::DocumentInvalid("The structure must be a JSON object".into());
+            handler.log_error(error.clone());
+            return Err(error);
         }
 
         let collection = Collection::new(name.to_string(), structure);
@@ -50,12 +61,20 @@ impl Database {
     /// # Errors
     ///
     /// Returns an error if the collection does not exist.
-    pub fn remove_collection(&mut self, name: &str) -> Result<(), String> {
+    pub fn remove_collection(
+        &mut self,
+        name: &str,
+        handler: &mut NosqliteErrorHandler,
+    ) -> Result<(), NosqliteError> {
         let index = self
             .collections
             .iter()
             .position(|c| c.name == name)
-            .ok_or_else(|| format!("Collection '{}' not found", name))?;
+            .ok_or_else(|| {
+                let error = NosqliteError::CollectionNotFound(name.to_string());
+                handler.log_error(error.clone());
+                error
+            })?;
 
         self.collections.remove(index);
         Ok(())
@@ -108,6 +127,6 @@ impl Default for Database {
     ///
     /// A [`Database`] with no collections.
     fn default() -> Self {
-        Database::new()
+        Database::new("db.nosqlite")
     }
 }

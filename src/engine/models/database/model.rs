@@ -1,4 +1,4 @@
-use crate::engine::models::collection::model::Collection;
+use crate::engine::{error::NosqliteErrorHandler, models::collection::model::Collection};
 use serde::{Deserialize, Serialize};
 
 /// Represents a NoSQL-style database containing multiple collections.

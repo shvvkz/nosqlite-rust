@@ -1,23 +1,20 @@
 mod engine;
 
-use nosqlite_rust::engine::Nosqlite;
+use nosqlite_rust::engine::{error::NosqliteError, Nosqlite};
 use serde_json::json;
 
-fn main() {
-    let mut db = Nosqlite::open("mydb.nosqlite");
+fn main() -> Result<(), NosqliteError> {
+    let mut db = Nosqlite::open("mydb.nosqlite")?;
 
     // Étape 1 — Créer la collection "users" (si pas encore présente)
-    if db.list_collections().iter().all(|c| c.name != "users") {
-        db.create_collection(
-            "users",
-            json!({
-                "_id": "string",
-                "name": "string",
-                "email": "string"
-            }),
-        )
-        .expect("Failed to create collection");
-    }
+    db.create_collection(
+        "users",
+        json!({
+            "_id": "string",
+            "name": "string",
+            "email": "string"
+        }),
+    )?;
 
     // Étape 2 — Insérer un utilisateur
     db.insert_document(
@@ -37,12 +34,13 @@ fn main() {
     println!("\n👥 Utilisateurs:");
     for doc in docs {
         println!("{}", doc);
+        println!("\n🗑️ Utilisateur supprimé !");
     }
 
     // Étape 4 — Modifier un champ
     db.update_document_field(
         "users",
-        "ae39fa73-b6c2-48a1-af9a-d123d08afca2",
+        "20996851-bc00-4b44-9ee3-6918c59c7766",
         "email",
         json!("valentin.new@example.com"),
     )
@@ -50,14 +48,15 @@ fn main() {
 
     // Étape 5 — Vérifier la modification
     let updated = db
-        .get_document_by_id("users", "ae39fa73-b6c2-48a1-af9a-d123d08afca2")
+        .get_document_by_id("users", "20996851-bc00-4b44-9ee3-6918c59c7766")
         .expect("Document not found");
     println!("\n📝 Document mis à jour:");
     println!("{}", updated);
 
     // Étape 6 — Supprimer l'utilisateur
-    db.delete_document("users", "ae39fa73-b6c2-48a1-af9a-d123d08afca2")
+    db.delete_document("users", "20996851-bc00-4b44-9ee3-6918c59c7766")
         .expect("Failed to delete user");
 
     println!("\n🗑️ Utilisateur supprimé !");
+    Ok(())
 }

@@ -1,3 +1,4 @@
+use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::collection::model::Collection;
 use crate::engine::models::database::model::Database;
 use serde_json::Value;
@@ -13,8 +14,14 @@ use serde_json::Value;
 /// # Errors
 ///
 /// Returns an error if a collection with the same name already exists or if the structure is invalid.
-pub fn create_collection(db: &mut Database, name: &str, structure: Value) -> Result<(), String> {
-    db.add_collection(name, structure)
+pub fn create_collection(
+    db: &mut Database,
+    name: &str,
+    structure: Value,
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    db.add_collection(name, structure, handler)?;
+    Ok(())
 }
 
 /// Removes a collection from the database by name.
@@ -27,8 +34,13 @@ pub fn create_collection(db: &mut Database, name: &str, structure: Value) -> Res
 /// # Errors
 ///
 /// Returns an error if the collection does not exist.
-pub fn delete_collection(db: &mut Database, name: &str) -> Result<(), String> {
-    db.remove_collection(name)
+pub fn delete_collection(
+    db: &mut Database,
+    name: &str,
+    handler: &mut NosqliteErrorHandler,
+) -> Result<(), NosqliteError> {
+    db.remove_collection(name, handler)?;
+    Ok(())
 }
 
 /// Retrieves an immutable reference to a collection by name.
@@ -41,9 +53,16 @@ pub fn delete_collection(db: &mut Database, name: &str) -> Result<(), String> {
 /// # Returns
 ///
 /// A reference to the [`Collection`] if found, or an error if it does not exist.
-pub fn get_collection<'a>(db: &'a Database, name: &str) -> Result<&'a Collection, String> {
-    db.get_collection(name)
-        .ok_or_else(|| format!("Collection '{}' not found", name))
+pub fn get_collection<'a>(
+    db: &'a Database,
+    name: &str,
+    handler: &mut NosqliteErrorHandler,
+) -> Result<&'a Collection, NosqliteError> {
+    db.get_collection(name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!("Collection '{}' not found", name));
+        handler.log_error(error.clone());
+        error
+    })
 }
 
 /// Retrieves a mutable reference to a collection by name.
@@ -59,9 +78,13 @@ pub fn get_collection<'a>(db: &'a Database, name: &str) -> Result<&'a Collection
 pub fn get_collection_mut<'a>(
     db: &'a mut Database,
     name: &str,
-) -> Result<&'a mut Collection, String> {
-    db.get_collection_mut(name)
-        .ok_or_else(|| format!("Collection '{}' not found", name))
+    handler: &mut NosqliteErrorHandler,
+) -> Result<&'a mut Collection, NosqliteError> {
+    db.get_collection_mut(name).ok_or_else(|| {
+        let error = NosqliteError::CollectionNotFound(format!("Collection '{}' not found", name));
+        handler.log_error(error.clone());
+        error
+    })
 }
 
 /// Lists all collections stored in the database.
