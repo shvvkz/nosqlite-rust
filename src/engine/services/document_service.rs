@@ -3,19 +3,46 @@ use crate::engine::models::database::model::Database;
 use crate::engine::models::document::model::Document;
 use serde_json::Value;
 
-/// Inserts a new document into a specific collection.
+/// Inserts a new document into the specified collection.
 ///
-/// # Arguments
+/// This function validates the incoming document against the collection's schema before
+/// assigning it a unique ID and timestamps. If the validation fails or the collection
+/// does not exist, the error is logged and returned.
 ///
-/// * `db` - A mutable reference to the [`Database`] instance.
-/// * `collection_name` - The name of the target collection.
-/// * `data` - The JSON content of the document to insert.
+/// # Parameters
 ///
-/// # Errors
+/// - `db`: A mutable reference to the [`Database`] instance.
+/// - `collection_name`: The name of the target collection.
+/// - `data`: The document content as a [`serde_json::Value`] (must be a JSON object).
+/// - `handler`: The error handler used for logging schema or collection errors.
 ///
-/// Returns an error if:
-/// - The collection does not exist.
-/// - The document does not match the collection's structure.
+/// # Returns
+///
+/// - `Ok(())` on successful validation and insertion
+/// - `Err(NosqliteError)` if validation fails or collection is missing
+///
+/// # Example
+///
+/// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::insert_document;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// insert_document(&mut db, "users", json!({ "id": 1, "name": "Alice" }), &mut handler)?;
+/// ```
+///
+/// # See Also
+///
+/// - [`update_document`] — full document replacement
+/// - [`get_document_by_id`] — lookup inserted document
+///
+/// ---  
+///
+/// 📝 Schema-safe, ID-tracked document insertion.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn insert_document(
     db: &mut Database,
     collection_name: &str,
@@ -34,20 +61,46 @@ pub fn insert_document(
     collection.add_document(data, handler)
 }
 
-/// Fully replaces the content of an existing document by ID.
+/// Replaces an existing document’s entire content by its ID.
 ///
-/// # Arguments
+/// This method validates the new content against the collection schema,
+/// and if successful, replaces the existing document's data and updates the timestamp.
 ///
-/// * `db` - A mutable reference to the [`Database`] instance.
-/// * `collection_name` - The name of the target collection.
-/// * `id` - The ID of the document to update.
-/// * `data` - The new content of the document as JSON.
+/// # Parameters
 ///
-/// # Errors
+/// - `db`: A mutable reference to the [`Database`] instance.
+/// - `collection_name`: The name of the collection.
+/// - `id`: The ID of the document to update.
+/// - `data`: The new content (must be a valid JSON object).
+/// - `handler`: Error handler for logging validation and lookup issues.
 ///
-/// Returns an error if:
-/// - The collection or document does not exist.
-/// - The new data does not match the collection's structure.
+/// # Returns
+///
+/// - `Ok(())` if the update is successful
+/// - `Err(NosqliteError)` if the document or collection is missing or invalid
+///
+/// # Example
+///
+/// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::update_document;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// update_document(&mut db, "users", "abc123", json!({ "id": 1, "name": "Alice Updated" }), &mut handler)?;
+/// ```
+///
+/// # See Also
+///
+/// - [`update_document_field`] — partial updates
+/// - [`get_document_by_id`] — read after update
+///
+/// ---  
+///
+/// ✏️ Full document overwrite with schema safety.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn update_document(
     db: &mut Database,
     collection_name: &str,
@@ -67,21 +120,46 @@ pub fn update_document(
     collection.update_document(id, data, handler)
 }
 
-/// Updates a specific field of a document by ID.
+/// Updates a single field in an existing document by its ID.
 ///
-/// # Arguments
+/// This function performs a partial update on a document by setting a specific field
+/// to a new value. It does **not** revalidate the document against the schema.
 ///
-/// * `db` - A mutable reference to the [`Database`] instance.
-/// * `collection_name` - The name of the target collection.
-/// * `id` - The ID of the document to update.
-/// * `field` - The name of the field to update.
-/// * `value` - The new value for the field.
+/// # Parameters
 ///
-/// # Errors
+/// - `db`: A mutable reference to the [`Database`] instance.
+/// - `collection_name`: The name of the target collection.
+/// - `id`: The ID of the document to modify.
+/// - `field`: The field name to change.
+/// - `value`: The new value for that field.
+/// - `handler`: For logging document or collection errors.
 ///
-/// Returns an error if:
-/// - The collection or document does not exist.
-/// - The document data is not a JSON object.
+/// # Returns
+///
+/// - `Ok(())` if the field is updated
+/// - `Err(NosqliteError)` if the document is not found or not an object
+///
+/// # Example
+///
+/// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::update_document_field;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// update_document_field(&mut db, "users", "abc123", "email", json!("alice@example.com"), &mut handler)?;
+/// ```
+///
+/// # See Also
+///
+/// - [`update_document`] — full document replacement
+///
+/// ---  
+///
+/// 🔧 Patch a single field without overwriting the document.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn update_document_field(
     db: &mut Database,
     collection_name: &str,
@@ -102,18 +180,39 @@ pub fn update_document_field(
     collection.update_field_document(id, field, value, handler)
 }
 
-/// Deletes a document from a collection by ID.
+/// Deletes a document from a collection by its unique ID.
 ///
-/// # Arguments
+/// This function performs a linear scan of the collection to locate the document
+/// by its `id` and removes it. If not found, logs and returns an error.
 ///
-/// * `db` - A mutable reference to the [`Database`] instance.
-/// * `collection_name` - The name of the target collection.
-/// * `id` - The ID of the document to delete.
+/// # Parameters
 ///
-/// # Errors
+/// - `db`: A mutable reference to the [`Database`] instance.
+/// - `collection_name`: The name of the target collection.
+/// - `id`: The ID of the document to delete.
+/// - `handler`: Used to log document/collection errors.
 ///
-/// Returns an error if:
-/// - The collection or document does not exist.
+/// # Returns
+///
+/// - `Ok(())` if the document was deleted
+/// - `Err(NosqliteError::DocumentNotFound)` if not found
+///
+/// # Example
+///
+/// ```rust
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::delete_document;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// delete_document(&mut db, "users", "abc123", &mut handler)?;
+/// ```
+///
+/// ---  
+///
+/// 🗑️ Permanently remove a document from memory.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn delete_document(
     db: &mut Database,
     collection_name: &str,
@@ -132,21 +231,44 @@ pub fn delete_document(
     collection.delete_document(id, handler)
 }
 
-/// Retrieves a document by ID from a collection.
+/// Retrieves a document by its ID from a specific collection.
 ///
-/// # Arguments
+/// Searches the target collection and returns a reference to the matching [`Document`],
+/// or logs and returns an error if it does not exist.
 ///
-/// * `db` - A reference to the [`Database`] instance.
-/// * `collection_name` - The name of the target collection.
-/// * `id` - The ID of the document to retrieve.
+/// # Parameters
+///
+/// - `db`: A reference to the [`Database`] instance.
+/// - `collection_name`: The name of the target collection.
+/// - `id`: The document's ID to locate.
+/// - `handler`: Logs a lookup failure if not found.
 ///
 /// # Returns
 ///
-/// A reference to the [`Document`] if found.
+/// - `Ok(&Document)` if the document exists
+/// - `Err(NosqliteError::DocumentNotFound)` otherwise
 ///
-/// # Errors
+/// # Example
 ///
-/// Returns an error if the collection or document does not exist.
+/// ```rust
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::get_document_by_id;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// let doc = get_document_by_id(&db, "users", "abc123", &mut handler)?;
+/// println!("Doc: {}", doc);
+/// ```
+///
+/// # See Also
+///
+/// - [`get_all_documents`] — to inspect all documents
+///
+/// ---  
+///
+/// 🔍 Targeted document retrieval by ID.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn get_document_by_id<'a>(
     db: &'a Database,
     collection_name: &str,
@@ -169,20 +291,44 @@ pub fn get_document_by_id<'a>(
     })
 }
 
-/// Retrieves all documents within a collection.
+/// Returns all documents stored in a specific collection.
 ///
-/// # Arguments
+/// This function retrieves the internal document vector of a collection for inspection,
+/// listing, or iteration. If the collection does not exist, the error is logged.
 ///
-/// * `db` - A reference to the [`Database`] instance.
-/// * `collection_name` - The name of the collection.
+/// # Parameters
+///
+/// - `db`: A reference to the [`Database`] instance.
+/// - `collection_name`: The name of the collection to inspect.
+/// - `handler`: Logs collection lookup failures.
 ///
 /// # Returns
 ///
-/// A reference to a vector of [`Document`]s.
+/// - `Ok(&Vec<Document>)` — if the collection exists
+/// - `Err(NosqliteError::CollectionNotFound)` otherwise
 ///
-/// # Errors
+/// # Example
 ///
-/// Returns an error if the collection does not exist.
+/// ```rust
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::get_all_documents;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// for doc in get_all_documents(&db, "users", &mut handler)? {
+///     println!("{}", doc);
+/// }
+/// ```
+///
+/// # See Also
+///
+/// - [`get_documents_by_field`] — for conditional filtering
+///
+/// ---  
+///
+/// 📄 Dump every document in a collection — read-only.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn get_all_documents<'a>(
     db: &'a Database,
     collection_name: &str,
@@ -200,22 +346,50 @@ pub fn get_all_documents<'a>(
     Ok(collection.all_documents())
 }
 
-/// Retrieves all documents in a collection where a specific field matches a given value.
+/// Retrieves documents where a specific field equals the given value (string match).
 ///
-/// # Arguments
+/// This function performs a filter on all documents in the collection,
+/// returning only those where the given field exists and equals the specified value.
 ///
-/// * `db` - A reference to the [`Database`] instance.
-/// * `collection_name` - The name of the collection.
-/// * `field` - The name of the field to match.
-/// * `value` - The expected value of the field (as a string).
+/// # Parameters
+///
+/// - `db`: A reference to the [`Database`] instance.
+/// - `collection_name`: The name of the collection to query.
+/// - `field`: The field name to match against.
+/// - `value`: The expected field value (as a string).
+/// - `handler`: For logging collection lookup failures.
 ///
 /// # Returns
 ///
-/// A vector of references to [`Document`]s where the field matches the value.
+/// - `Ok(Vec<&Document>)` with matching documents
+/// - `Err(NosqliteError)` if the collection is not found
 ///
-/// # Errors
+/// # Example
 ///
-/// Returns an error if the collection does not exist.
+/// ```rust
+/// use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Database};
+/// use nosqlite_rust::engine::services::document_service::get_documents_by_field;
+///
+/// let mut db = Database::new("db.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+/// let results = get_documents_by_field(&db, "posts", "author", "alice", &mut handler)?;
+/// println!("Found {} posts by Alice", results.len());
+/// ```
+///
+/// # Notes
+///
+/// - Only exact string matches are supported.
+/// - No schema validation is enforced here.
+///
+/// # See Also
+///
+/// - [`get_all_documents`] — fetch all then filter manually
+///
+/// ---  
+///
+/// 🔍 In-memory query by field value — fast and flexible.
+///
+/// 🔨🤖🔧 Powered by Rust
 pub fn get_documents_by_field<'a>(
     db: &'a Database,
     collection_name: &str,

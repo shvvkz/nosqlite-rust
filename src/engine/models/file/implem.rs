@@ -13,16 +13,65 @@ const DEFAULT_KEY_PATH: &str = "db.key";
 impl File {
     /// Loads the database from disk, or creates a new one if the file does not exist.
     ///
-    /// If the database file exists, it is decrypted and deserialized into a [`Database`] instance.
-    /// Otherwise, a new empty database is returned.
+    /// This function attempts to read, decrypt, and deserialize a database file into a [`Database`] instance.
+    /// If the file does not exist, a new in-memory database is created using the specified path.
     ///
-    /// # Arguments
+    /// It also ensures a valid encryption key is available by attempting to load or generate one
+    /// from the default key path (`DEFAULT_KEY_PATH`).
     ///
-    /// * `db_path` - The path to the encrypted database file.
+    /// # Parameters
+    ///
+    /// - `db_path`: The filesystem path to the encrypted `.nosqlite` database file.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for structured logging and error tracking.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(Database)` if the database was successfully loaded or created.
+    /// - `Err(NosqliteError)` if any stage of key loading, file reading, decryption, or deserialization fails.
+    ///
+    /// # Behavior
+    ///
+    /// - If the file **exists**:
+    ///   1. Reads its contents as an encrypted string
+    ///   2. Attempts decryption using the AES key from `DEFAULT_KEY_PATH`
+    ///   3. Attempts deserialization of the decrypted JSON into a [`Database`]
+    ///
+    /// - If the file **does not exist**:
+    ///   - Returns a new `Database` instance with no collections
     ///
     /// # Panics
     ///
-    /// Panics if reading, decrypting, or deserializing the database fails.
+    /// This method **may panic** only in unrecoverable conditions such as:
+    /// - Inability to open the database file (e.g. permissions issues not caught earlier)
+    /// - Internal `expect()`/`unwrap()` usage in key/decryption layers
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+    /// let db = Database::load_or_create("db.nosqlite", &mut handler)
+    ///     .expect("Failed to load or create database");
+    /// println!("{}", db);
+    /// ```
+    ///
+    /// # Security Notes
+    ///
+    /// - Encryption is handled via [`Database::decrypt`]
+    /// - Keys are managed via [`Database::load_or_generate_key`] and stored at `DEFAULT_KEY_PATH`
+    /// - Ensure secure handling of key and file paths in production deployments
+    ///
+    /// # See Also
+    ///
+    /// - [`Database::new`] — creates a new empty database
+    /// - [`Database::decrypt`] — decrypts the database string
+    /// - [`NosqliteErrorHandler`] — handles structured error logging
+    /// - [`NosqliteError`] — error type used throughout the system
+    ///
+    /// ---  
+    ///
+    /// 🔐 Secure, resilient entrypoint for encrypted document databases.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn load_or_create(
         db_path: &str,
         handler: &mut NosqliteErrorHandler,
@@ -55,19 +104,63 @@ impl File {
         }
     }
 
-    /// Saves the database to disk in encrypted form.
+    /// Saves the [`Database`] to disk in encrypted form.
     ///
-    /// The database is serialized to JSON, encrypted using AES-256-GCM,
-    /// and written to the specified file path.
+    /// This method serializes the entire database to pretty-printed JSON, encrypts it
+    /// using AES-256-GCM, and writes the result to the provided path. It ensures that all
+    /// saved data remains secure and tamper-resistant.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
-    /// * `db_path` - The path to the output encrypted database file.
-    /// * `db` - The [`Database`] instance to persist.
+    /// - `db_path`: The file path where the encrypted database should be written.
+    /// - `db`: The [`Database`] instance to be serialized and persisted.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for structured logging of any I/O,
+    ///   serialization, or encryption errors.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())` if the database was successfully saved
+    /// - `Err(NosqliteError)` if any step in the pipeline fails
+    ///
+    /// # Pipeline Steps
+    ///
+    /// 1. **Key management**: Loads or generates an AES encryption key via [`load_or_generate_key`]
+    /// 2. **Serialization**: Converts the `Database` instance to pretty-printed JSON
+    /// 3. **Encryption**: Encrypts the JSON payload with AES-256-GCM
+    /// 4. **File write**: Saves the encrypted data to `db_path`
     ///
     /// # Panics
     ///
-    /// Panics if serialization, encryption, or file writing fails.
+    /// While this method uses structured error logging (`try_or_log`) throughout, it may still
+    /// panic in rare cases (e.g. internal `expect()` calls in utility methods).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let db = Database::default();
+    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+    ///
+    /// Database::save("db.nosqlite", &db, &mut handler).expect("Failed to save database");
+    /// ```
+    ///
+    /// # Security Notes
+    ///
+    /// - Encryption is performed using AES-256-GCM with keys stored at `DEFAULT_KEY_PATH`
+    /// - The resulting file at `db_path` is **not human-readable**
+    /// - For plaintext backups or inspection, implement a `save_as_json()` variant
+    ///
+    /// # See Also
+    ///
+    /// - [`Database::load_or_create`] — for loading the encrypted database back
+    /// - [`NosqliteError`] — unified error type
+    /// - [`NosqliteErrorHandler`] — used for logging any failures in the pipeline
+    ///
+    /// ---  
+    ///
+    /// 💾 Securely persists your in-memory database to disk — encrypted and audit-logged.
+    ///
+    /// 🔐🔒🔏  
+    /// 🔨🤖🔧 Powered by Rust
     pub fn save(
         db_path: &str,
         db: &Database,
@@ -87,20 +180,61 @@ impl File {
         Ok(())
     }
 
-    /// Encrypts a plaintext string using AES-256-GCM.
+    /// Encrypts a plaintext string using AES-256-GCM and returns a base64-encoded result.
     ///
-    /// # Arguments
+    /// This method performs authenticated encryption using the AES-256-GCM algorithm. The resulting
+    /// ciphertext is prepended with the generated 12-byte nonce and encoded using base64. This format
+    /// is compact and easy to store or transmit.
     ///
-    /// * `data` - The plaintext string to encrypt.
-    /// * `key` - A 256-bit encryption key (32 bytes).
+    /// # Parameters
+    ///
+    /// - `data`: The plaintext string to encrypt.
+    /// - `key`: A 256-bit AES key (`[u8; 32]`) used for encryption. This must match the key
+    ///   used during decryption.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] used to log any encryption failure.
     ///
     /// # Returns
     ///
-    /// A base64-encoded encrypted string containing the nonce and ciphertext.
+    /// - `Ok(String)`: A base64-encoded string containing `[nonce || ciphertext]`
+    /// - `Err(NosqliteError::EncryptionError)`: If encryption fails internally
     ///
-    /// # Errors
+    /// # Format
     ///
-    /// Returns a `String` error if encryption fails.
+    /// The returned string encodes:
+    /// ```text
+    /// [12-byte nonce][ciphertext] -> base64
+    /// ```
+    /// The nonce is randomly generated per encryption and included in the output for
+    /// later decryption.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let plaintext = "my secret data";
+    /// let key = [0u8; 32]; // normally loaded from disk or a secure source
+    /// let mut handler = NosqliteErrorHandler::new("securedb.nosqlite".to_string());
+    ///
+    /// let encrypted = Database::encrypt(plaintext, &key, &mut handler).unwrap();
+    /// println!("Encrypted (base64): {}", encrypted);
+    /// ```
+    ///
+    /// # Security Notes
+    ///
+    /// - A unique random nonce is generated for every call to `encrypt`
+    /// - Do **not reuse** the same nonce with the same key across different messages
+    /// - This method uses AES-256-GCM from the [`aes-gcm`] crate (authenticated encryption)
+    ///
+    /// # See Also
+    ///
+    /// - [`Database::decrypt`] — decrypts output from this method
+    /// - [`NosqliteError`] — error enum for encryption/decryption failures
+    /// - [`Aes256Gcm`] — the underlying cipher
+    ///
+    /// ---  
+    ///
+    /// 🔐 AES-256-GCM with nonce-included base64 output — encrypted, authenticated, portable.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     fn encrypt(
         data: &str,
         key: &[u8; 32],
@@ -119,18 +253,61 @@ impl File {
 
     /// Decrypts a base64-encoded encrypted string using AES-256-GCM.
     ///
-    /// # Arguments
+    /// This method reverses the process performed by [`encrypt`]. It:
+    /// 1. Base64-decodes the input string
+    /// 2. Extracts the 12-byte nonce from the beginning of the byte stream
+    /// 3. Decrypts the remaining ciphertext using AES-256-GCM
+    /// 4. Converts the plaintext bytes back into a UTF-8 string
     ///
-    /// * `data` - The base64-encoded ciphertext string.
-    /// * `key` - A 256-bit decryption key (32 bytes).
+    /// # Parameters
+    ///
+    /// - `data`: A base64-encoded string produced by the [`encrypt`] method. Must contain
+    ///   both the nonce and ciphertext in the correct order.
+    /// - `key`: A 256-bit AES decryption key (`[u8; 32]`). This must match the key used during encryption.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging any decode/decrypt errors.
     ///
     /// # Returns
     ///
-    /// The decrypted plaintext string.
+    /// - `Ok(String)`: The successfully decrypted plaintext string
+    /// - `Err(NosqliteError)`: If decoding, decryption, or UTF-8 conversion fails
     ///
-    /// # Errors
+    /// # Format Assumptions
     ///
-    /// Returns a `String` error if decoding or decryption fails.
+    /// The input string must have been generated by [`Database::encrypt`] and should follow:
+    /// ```text
+    /// base64([12-byte nonce][ciphertext])
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let key = [0u8; 32];
+    /// let plaintext = "secret data";
+    /// let mut handler = NosqliteErrorHandler::new("securedb.nosqlite".to_string());
+    ///
+    /// let encrypted = Database::encrypt(plaintext, &key, &mut handler).unwrap();
+    /// let decrypted = Database::decrypt(&encrypted, &key, &mut handler).unwrap();
+    /// assert_eq!(decrypted, plaintext);
+    /// ```
+    ///
+    /// # Security Notes
+    ///
+    /// - Decryption is **authenticated** — tampering with the ciphertext or nonce will cause it to fail
+    /// - The nonce is extracted from the first 12 bytes of the decoded input
+    /// - AES-256-GCM provides both confidentiality and integrity
+    ///
+    /// # See Also
+    ///
+    /// - [`Database::encrypt`] — encrypts plaintext using AES-256-GCM
+    /// - [`NosqliteError`] — contains possible decryption and decoding error variants
+    /// - [`general_purpose::STANDARD`] — the base64 variant used
+    ///
+    /// ---  
+    ///
+    /// 🔓 Reversible, safe, authenticated decryption — ready for any NoSQL payload.
+    ///
+    /// 🔐💬  
+    /// 🔨🤖🔧 Powered by Rust
     fn decrypt(
         data: &str,
         key: &[u8; 32],
@@ -152,22 +329,68 @@ impl File {
         Ok(decrypt)
     }
 
-    /// Loads an encryption key from a file or generates a new one if it doesn't exist.
+    /// Loads a 256-bit AES encryption key from a file, or generates and stores a new one if it doesn’t exist.
     ///
-    /// If the file exists, the key is read and decoded from hexadecimal.
-    /// Otherwise, a new random key is generated, saved in hex format, and returned.
+    /// This method ensures that a valid 32-byte key is always available for encryption and decryption.
+    /// It checks for the existence of the key file:
     ///
-    /// # Arguments
+    /// - If the file **exists**:
+    ///   - Reads it as a hex-encoded string
+    ///   - Decodes it into a 256-bit key (`[u8; 32]`)
     ///
-    /// * `path` - Path to the key file.
+    /// - If the file **does not exist**:
+    ///   - Generates a new secure random 256-bit key
+    ///   - Encodes it as a hex string
+    ///   - Writes it to disk at the specified `path`
+    ///
+    /// # Parameters
+    ///
+    /// - `path`: The path to the key file to load or create.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] used to log any I/O or decoding errors.
     ///
     /// # Returns
     ///
-    /// A 256-bit key (32 bytes) to be used for encryption and decryption.
+    /// - `Ok([u8; 32])` — a 256-bit AES key loaded or generated successfully
+    /// - `Err(NosqliteError)` — if any step (file I/O, decoding, or writing) fails
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+    /// let key = Database::load_or_generate_key("key.nosqlite", &mut handler)
+    ///     .expect("Failed to initialize encryption key");
+    /// assert_eq!(key.len(), 32);
+    /// ```
+    ///
+    /// # Behavior
+    ///
+    /// - The generated key is encoded in lowercase hexadecimal (64 characters) before being written to disk.
+    /// - The same key must be used for both encryption and decryption.
+    /// - Ensures idempotent key access: same file, same key across reboots.
     ///
     /// # Panics
     ///
-    /// Panics if reading, decoding, or writing the key file fails.
+    /// This method panics **only if** the random number generator or file system encounters
+    /// unrecoverable issues not caught by `try_or_log` (e.g. path permission failure + missing error log).
+    ///
+    /// # Security Notes
+    ///
+    /// - The generated key should be kept secret and backed up securely.
+    /// - Avoid sharing the same key across different databases unless intentional.
+    /// - Do not edit the key file manually unless you're restoring from a trusted backup.
+    ///
+    /// # See Also
+    ///
+    /// - [`Database::encrypt`] / [`Database::decrypt`] — uses this key
+    /// - [`NosqliteErrorHandler`] — for persistent error logging
+    /// - [`rand::rng`] — used to generate secure random bytes
+    ///
+    /// ---  
+    ///
+    /// 🗝️ Guaranteed access to a strong AES-256 key — loaded if present, generated if not.
+    ///
+    /// 🔐✨  
+    /// 🔨🤖🔧 Powered by Rust
     fn load_or_generate_key(
         path: &str,
         handler: &mut NosqliteErrorHandler,

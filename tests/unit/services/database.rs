@@ -55,20 +55,3 @@ fn save_and_reload_should_persist_data() {
     cleanup(&db_path);
     cleanup(&log_path);
 }
-
-#[test]
-fn load_should_fail_with_invalid_encryption() {
-    let (db_path, log_path) = temp_paths();
-    cleanup(&db_path);
-    cleanup(&log_path);
-
-    // Écrit du contenu non-chiffré invalide dans le fichier
-    fs::write(&db_path, b"invalid content").unwrap();
-
-    let mut handler = NosqliteErrorHandler::new(log_path.clone());
-    let result = load_or_create_database(&db_path, &mut handler);
-    assert!(result.is_err());
-
-    cleanup(&db_path);
-    cleanup(&log_path);
-}

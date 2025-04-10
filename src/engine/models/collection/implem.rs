@@ -8,16 +8,16 @@ use std::fmt::Display;
 impl Collection {
     /// Constructs a new, empty [`Collection`] with a specified name and document structure.
     ///
-    /// This function initializes a new [`Collection`] instance, which is a container designed to 
-    /// hold a set of structured documents. The `structure` parameter defines the expected 
+    /// This function initializes a new [`Collection`] instance, which is a container designed to
+    /// hold a set of structured documents. The `structure` parameter defines the expected
     /// schema of each document within the collection, typically represented as a JSON object.
     ///
     /// # Parameters
     ///
-    /// - `name`: A `String` specifying the name of the collection. This can be used for 
+    /// - `name`: A `String` specifying the name of the collection. This can be used for
     ///   identification or indexing purposes.
-    /// - `structure`: A [`serde_json::Value`] representing the schema or blueprint of the 
-    ///   documents this collection will accept. While not enforced at runtime, this schema 
+    /// - `structure`: A [`serde_json::Value`] representing the schema or blueprint of the
+    ///   documents this collection will accept. While not enforced at runtime, this schema
     ///   can be used for validation or schema-driven logic.
     ///
     /// # Returns
@@ -79,7 +79,7 @@ impl Collection {
     /// # Parameters
     ///
     /// - `data`: A [`serde_json::Value`] representing the document to insert. This must be a
-    ///   JSON object (i.e., `serde_json::Value::Object`). Fields are expected to align with 
+    ///   JSON object (i.e., `serde_json::Value::Object`). Fields are expected to align with
     ///   the schema defined in the collection's `structure`.
     ///
     /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] instance, which is used
@@ -112,7 +112,7 @@ impl Collection {
     ///
     /// let valid_doc = json!({ "id": 1, "title": "Hello, world!" });
     /// let mut handler = NosqliteErrorHandler::new();
-    /// 
+    ///
     /// assert!(collection.add_document(valid_doc, &mut handler).is_ok());
     ///
     /// let invalid_doc = json!({ "id": "wrong_type", "title": "Oops" });
@@ -650,7 +650,6 @@ impl Display for Collection {
         Ok(())
     }
 }
-
 
 impl Default for Collection {
     /// Creates a default [`Collection`] instance with the name `"default"` and an empty structure.
