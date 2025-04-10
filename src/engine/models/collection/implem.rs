@@ -6,16 +6,61 @@ use serde_json::Value;
 use std::fmt::Display;
 
 impl Collection {
-    /// Creates a new empty collection with a given name and expected document structure.
+    /// Constructs a new, empty [`Collection`] with a specified name and document structure.
     ///
-    /// # Arguments
+    /// This function initializes a new [`Collection`] instance, which is a container designed to 
+    /// hold a set of structured documents. The `structure` parameter defines the expected 
+    /// schema of each document within the collection, typically represented as a JSON object.
     ///
-    /// * `name` - The name of the collection.
-    /// * `structure` - A JSON object representing the expected structure/schema of documents.
+    /// # Parameters
+    ///
+    /// - `name`: A `String` specifying the name of the collection. This can be used for 
+    ///   identification or indexing purposes.
+    /// - `structure`: A [`serde_json::Value`] representing the schema or blueprint of the 
+    ///   documents this collection will accept. While not enforced at runtime, this schema 
+    ///   can be used for validation or schema-driven logic.
     ///
     /// # Returns
     ///
-    /// A new instance of [`Collection`] with no documents and a creation timestamp.
+    /// Returns a new instance of [`Collection`] with:
+    /// - An empty `documents` vector
+    /// - The provided `name`
+    /// - The provided `structure`
+    /// - A timestamp (`created_at`) set to the current time, retrieved via the [`now()`] function.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    /// let schema = json!({
+    ///     "id": "number",
+    ///     "name": "string",
+    ///     "email": "string"
+    /// });
+    /// let collection = Collection::new("users".to_string(), schema);
+    /// assert_eq!(collection.name, "users");
+    /// assert!(collection.documents.is_empty());
+    /// ```
+    ///
+    /// # See Also
+    /// - [`Collection`]: The main struct representing a collection of structured documents.
+    /// - [`now()`]: A utility function to retrieve the current system timestamp.
+    ///
+    /// # Panics
+    ///
+    /// This function will not panic under normal circumstances.
+    ///
+    /// # Notes
+    ///
+    /// This constructor does **not** perform any schema validation. It is the caller's responsibility
+    /// to ensure the `structure` provided is consistent with the intended document format.
+    ///
+    /// ---
+    ///
+    /// Designed for use cases such as in-memory document stores, schema-aware data pipelines,
+    /// or embedded JSON-like databases.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn new(name: String, structure: Value) -> Self {
         Collection {
             name,
@@ -25,18 +70,76 @@ impl Collection {
         }
     }
 
-    /// Adds a new document to the collection after validating it against the collection's structure.
+    /// Attempts to insert a new document into the collection after validating its structure.
     ///
-    /// # Arguments
+    /// This method ensures that the incoming document (`data`) conforms to the collection’s
+    /// predefined structure before adding it to the internal document list. It relies on a
+    /// schema validation function to compare field types and structure consistency.
     ///
-    /// * `data` - A JSON object representing the document to insert.
+    /// # Parameters
+    ///
+    /// - `data`: A [`serde_json::Value`] representing the document to insert. This must be a
+    ///   JSON object (i.e., `serde_json::Value::Object`). Fields are expected to align with 
+    ///   the schema defined in the collection's `structure`.
+    ///
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] instance, which is used
+    ///   to log any encountered validation or structural errors.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())` if the document is successfully validated and inserted.
+    /// - `Err(NosqliteError)` if any of the following conditions are met:
+    ///   - The document is **not** a valid JSON object.
+    ///   - The collection's `structure` is **not** a valid JSON object.
+    ///   - The document’s structure **does not match** the expected schema.
     ///
     /// # Errors
     ///
-    /// Returns an error if:
-    /// - The document is not a JSON object.
-    /// - The collection structure is not a valid JSON object.
-    /// - The document does not match the expected structure.
+    /// Returns [`NosqliteError::DocumentInvalid`] when:
+    /// - The input is not a JSON object
+    /// - The document’s fields/types do not match the collection's expected structure
+    ///
+    /// Returns [`NosqliteError::InvalidCollectionStructure`] when:
+    /// - The collection's internal `structure` is not a JSON object
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "title": "string" });
+    /// let mut collection = Collection::new("posts".to_string(), schema);
+    ///
+    /// let valid_doc = json!({ "id": 1, "title": "Hello, world!" });
+    /// let mut handler = NosqliteErrorHandler::new();
+    /// 
+    /// assert!(collection.add_document(valid_doc, &mut handler).is_ok());
+    ///
+    /// let invalid_doc = json!({ "id": "wrong_type", "title": "Oops" });
+    /// assert!(collection.add_document(invalid_doc, &mut handler).is_err());
+    /// ```
+    ///
+    /// # Implementation Notes
+    ///
+    /// - Validation logic is delegated to [`validate_against_structure`], which checks field presence
+    ///   and type compatibility.
+    /// - Inserted documents are wrapped in the [`Document`] type before being pushed into `self.documents`.
+    ///
+    /// # See Also
+    ///
+    /// - [`validate_against_structure`] - Ensures the document matches the schema.
+    /// - [`NosqliteErrorHandler`] - Logs and manages structured errors.
+    /// - [`NosqliteError`] - Enum defining possible error cases for document operations.
+    ///
+    /// # Panics
+    ///
+    /// This method does **not panic** under normal usage. All validation failures return gracefully as `Err`.
+    ///
+    /// ---
+    ///
+    /// 📦 Structured JSON insertions made safe, schema-aware, and smooth as Rust.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn add_document(
         &mut self,
         data: Value,
@@ -69,18 +172,71 @@ impl Collection {
         Ok(())
     }
 
-    /// Updates the entire content of an existing document identified by its ID.
+    /// Replaces the contents of a document in the collection, given its ID.
     ///
-    /// # Arguments
+    /// This method performs a **full update** of an existing document, overwriting its entire
+    /// data payload with `new_data`, after verifying that the structure of the new content
+    /// conforms to the collection’s schema.
     ///
-    /// * `id` - The unique identifier of the document to update.
-    /// * `new_data` - A new JSON object to replace the current document data.
+    /// # Parameters
+    ///
+    /// - `id`: A string slice (`&str`) that uniquely identifies the target document.
+    /// - `new_data`: A [`serde_json::Value`] representing the new content for the document. This must be a
+    ///   JSON object matching the expected structure of the collection.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging any encountered errors.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())` if the document was found, validated, and updated successfully.
+    /// - `Err(NosqliteError)` if:
+    ///   - No document with the given ID exists
+    ///   - The new document data is invalid or mismatches the expected structure
     ///
     /// # Errors
     ///
-    /// Returns an error if:
-    /// - The document is not found.
-    /// - The new data does not match the expected structure.
+    /// - [`NosqliteError::DocumentNotFound`]: Returned if no document in the collection matches the provided ID.
+    /// - [`NosqliteError::DocumentInvalid`]: Returned if the new data does not match the schema.
+    /// - [`NosqliteError::InvalidCollectionStructure`]: Would apply if the collection's structure was malformed (guarded elsewhere).
+    ///
+    /// # Behavior
+    ///
+    /// - Updates the document's `data` field with `new_data`.
+    /// - Updates the document’s `updated_at` field with the current timestamp via [`now()`].
+    /// - The document is fully replaced — **partial updates are not supported** by this method.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "name": "string" });
+    /// let mut collection = Collection::new("users".to_string(), schema);
+    ///
+    /// let mut handler = NosqliteErrorHandler::new();
+    /// let original = json!({ "id": 1, "name": "Alice" });
+    /// collection.add_document(original, &mut handler).unwrap();
+    ///
+    /// let updated = json!({ "id": 1, "name": "Alice Updated" });
+    /// let doc_id = collection.documents[0].id.clone();
+    ///
+    /// collection.update_document(&doc_id, updated, &mut handler).unwrap();
+    /// ```
+    ///
+    /// # See Also
+    ///
+    /// - [`add_document`]: For inserting new documents into the collection.
+    /// - [`validate_against_structure`]: Validates structural conformance.
+    /// - [`NosqliteError`], [`NosqliteErrorHandler`], [`Document`]
+    ///
+    /// # Panics
+    ///
+    /// This method does **not panic**. All operational failures are handled via `Result`.
+    ///
+    /// ---
+    ///
+    /// 📁 Use this when it's time to give an old document a fresh new life — but only if it follows the rules.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn update_document(
         &mut self,
         id: &str,
@@ -117,19 +273,73 @@ impl Collection {
         Ok(())
     }
 
-    /// Updates a single field in a document identified by its ID.
+    /// Updates a single field within a document, identified by its unique ID.
     ///
-    /// # Arguments
+    /// This method performs a **partial update** by setting the value of a specified field
+    /// inside an existing document. It directly mutates the JSON object in place and records
+    /// the update timestamp.
     ///
-    /// * `id` - The unique identifier of the document to update.
-    /// * `field` - The field name to update.
-    /// * `value` - The new value to set for the specified field.
+    /// # Parameters
+    ///
+    /// - `id`: A string slice identifying the document to be updated.
+    /// - `field`: The name of the field to update or insert (if it doesn't already exist).
+    /// - `value`: A [`serde_json::Value`] representing the new value for the given field.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] used to track and log errors.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())` if the document exists and the update was successful.
+    /// - `Err(NosqliteError)` if:
+    ///   - The document could not be found
+    ///   - The document’s `data` is not a JSON object
     ///
     /// # Errors
     ///
-    /// Returns an error if:
-    /// - The document is not found.
-    /// - The document's data is not a valid JSON object.
+    /// - [`NosqliteError::DocumentNotFound`] is returned if no document with the given ID is found.
+    /// - [`NosqliteError::DocumentInvalid`] is returned if the internal `data` field is not a JSON object.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "name": "string", "age": "number" });
+    /// let mut collection = Collection::new("users".to_string(), schema);
+    ///
+    /// let mut handler = NosqliteErrorHandler::new();
+    /// collection.add_document(json!({ "id": 1, "name": "Alice", "age": 30 }), &mut handler).unwrap();
+    ///
+    /// let doc_id = collection.documents[0].id.clone();
+    /// collection.update_field_document(&doc_id, "age", json!(31), &mut handler).unwrap();
+    ///
+    /// assert_eq!(collection.documents[0].data["age"], json!(31));
+    /// ```
+    ///
+    /// # Behavior
+    ///
+    /// - If the field exists, its value is overwritten.
+    /// - If the field does not exist, it is inserted.
+    /// - The `updated_at` timestamp is refreshed using [`now()`].
+    ///
+    /// # Limitations
+    ///
+    /// - This method does **not** validate field types against the collection schema.
+    ///   Use with caution if strict typing is required.
+    ///
+    /// # See Also
+    ///
+    /// - [`update_document`] for replacing an entire document
+    /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
+    ///
+    /// # Panics
+    ///
+    /// This method does **not panic**. All errors are returned via `Result`.
+    ///
+    /// ---
+    ///
+    /// 🛠️ Ideal for quick, targeted tweaks to documents without full replacement.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn update_field_document(
         &mut self,
         id: &str,
@@ -159,15 +369,63 @@ impl Collection {
         Ok(())
     }
 
-    /// Deletes a document from the collection based on its ID.
+    /// Removes a document from the collection by its unique identifier.
     ///
-    /// # Arguments
+    /// This method searches for a document by its `id` and removes it from the collection if found.
+    /// It is a destructive operation — the document is permanently deleted from the in-memory store.
     ///
-    /// * `id` - The unique identifier of the document to delete.
+    /// # Parameters
+    ///
+    /// - `id`: A string slice (`&str`) representing the unique identifier of the document to remove.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`], used to log error cases such as "not found".
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(())` if the document was found and successfully deleted.
+    /// - `Err(NosqliteError)` if the document could not be found.
     ///
     /// # Errors
     ///
-    /// Returns an error if the document is not found.
+    /// - [`NosqliteError::DocumentNotFound`] is returned if no document with the specified `id` exists in the collection.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "title": "string" });
+    /// let mut collection = Collection::new("notes".to_string(), schema);
+    ///
+    /// let mut handler = NosqliteErrorHandler::new();
+    /// collection.add_document(json!({ "id": 1, "title": "First note" }), &mut handler).unwrap();
+    ///
+    /// let doc_id = collection.documents[0].id.clone();
+    /// collection.delete_document(&doc_id, &mut handler).unwrap();
+    ///
+    /// assert!(collection.documents.is_empty());
+    /// ```
+    ///
+    /// # Behavior
+    ///
+    /// - Performs a linear search for the document by ID.
+    /// - If found, the document is removed from the internal `documents` vector.
+    /// - If not found, an error is returned and logged via the provided `handler`.
+    ///
+    /// # See Also
+    ///
+    /// - [`add_document`] for inserting documents
+    /// - [`update_document`] for replacing document content
+    /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
+    ///
+    /// # Panics
+    ///
+    /// This method does **not panic**. It handles missing entries gracefully via `Result::Err`.
+    ///
+    /// ---
+    ///
+    /// 🗑️ Safe, schema-aware deletion for your embedded NoSQL documents.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn delete_document(
         &mut self,
         id: &str,
@@ -187,37 +445,201 @@ impl Collection {
         Ok(())
     }
 
-    /// Retrieves a reference to a document by its ID.
+    /// Retrieves a reference to a document from the collection by its unique identifier.
     ///
-    /// # Arguments
+    /// This method performs a non-mutating lookup in the collection’s document list, searching
+    /// for a document with the specified `id`. If found, a reference to the [`Document`] is returned.
+    /// If no match is found, `None` is returned.
     ///
-    /// * `id` - The unique identifier of the document.
+    /// # Parameters
+    ///
+    /// - `id`: A string slice (`&str`) representing the unique ID of the document to retrieve.
     ///
     /// # Returns
     ///
-    /// An [`Option`] containing a reference to the [`Document`] if found, or `None` otherwise.
+    /// - `Some(&Document)` if a document with the given ID exists in the collection.
+    /// - `None` if no document matches the given ID.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "title": "string" });
+    /// let mut collection = Collection::new("articles".to_string(), schema);
+    /// let mut handler = NosqliteErrorHandler::new();
+    ///
+    /// let doc = json!({ "id": 1, "title": "Intro to Rust" });
+    /// collection.add_document(doc, &mut handler).unwrap();
+    ///
+    /// let doc_id = collection.documents[0].id.clone();
+    /// let result = collection.get_document(&doc_id);
+    /// assert!(result.is_some());
+    /// assert_eq!(result.unwrap().data["title"], json!("Intro to Rust"));
+    /// ```
+    ///
+    /// # Performance
+    ///
+    /// - Performs a linear scan through the collection's internal document vector.
+    /// - For large collections, consider indexing for more efficient lookups.
+    ///
+    /// # See Also
+    ///
+    /// - [`add_document`] for inserting new documents
+    /// - [`delete_document`] for removing documents
+    /// - [`Document`] for the structure being returned
+    ///
+    /// # Panics
+    ///
+    /// This method does **not panic**. It is safe and read-only.
+    ///
+    /// ---
+    ///
+    /// 🔎 Simple and efficient reference-based retrieval.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn get_document(&self, id: &str) -> Option<&Document> {
         self.documents.iter().find(|d| d.id == id)
     }
 
-    /// Returns a reference to all documents stored in the collection.
+    /// Returns a reference to all documents currently stored in the collection.
+    ///
+    /// This method provides read-only access to the internal list of documents held by the
+    /// collection. It is useful for inspection, iteration, exporting, or reporting purposes.
     ///
     /// # Returns
     ///
-    /// A reference to a vector of [`Document`] instances.
+    /// A reference to the internal vector of [`Document`] instances:  
+    /// `&Vec<Document>`
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "name": "string" });
+    /// let mut collection = Collection::new("people".to_string(), schema);
+    /// let mut handler = NosqliteErrorHandler::new();
+    ///
+    /// collection.add_document(json!({ "id": 1, "name": "Alice" }), &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 2, "name": "Bob" }), &mut handler).unwrap();
+    ///
+    /// let docs = collection.all_documents();
+    /// assert_eq!(docs.len(), 2);
+    /// for doc in docs {
+    ///     println!("Document ID: {}", doc.id);
+    /// }
+    /// ```
+    ///
+    /// # Notes
+    ///
+    /// - The returned reference is read-only. To modify document contents, use methods like
+    ///   [`update_document`], [`update_field_document`], or create a mutable variant.
+    /// - The order of documents in the vector reflects the order of insertion, unless modified.
+    ///
+    /// # Performance
+    ///
+    /// - This is a zero-cost accessor; no allocation or transformation is performed.
+    ///
+    /// # See Also
+    ///
+    /// - [`get_document`] — for retrieving a single document by ID
+    /// - [`add_document`] — for inserting documents
+    /// - [`Document`] — the structure returned by this method
+    ///
+    /// ---
+    ///
+    /// 📚 Snapshot of everything your collection knows — clean and immutable.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn all_documents(&self) -> &Vec<Document> {
         &self.documents
     }
 
+    /// Returns the total number of documents stored in the collection.
+    ///
+    /// This method provides a quick way to determine the size of the collection. It simply
+    /// returns the length of the internal documents vector.
+    ///
+    /// # Returns
+    ///
+    /// - A `usize` representing the number of documents currently in the collection.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use serde_json::json;
+    ///
+    /// let schema = json!({ "id": "number", "name": "string" });
+    /// let mut collection = Collection::new("users".to_string(), schema);
+    /// let mut handler = NosqliteErrorHandler::new();
+    ///
+    /// collection.add_document(json!({ "id": 1, "name": "Alice" }), &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 2, "name": "Bob" }), &mut handler).unwrap();
+    ///
+    /// assert_eq!(collection.document_count(), 2);
+    /// ```
+    ///
+    /// # Performance
+    ///
+    /// - Constant time (`O(1)`) operation; no iteration or allocation.
+    ///
+    /// # See Also
+    ///
+    /// - [`all_documents`] — for retrieving a reference to all stored documents
+    /// - [`add_document`] — for inserting new documents
+    /// - [`delete_document`] — for removing documents
+    ///
+    /// ---
+    ///
+    /// 📏 Perfect for summaries, analytics, and pagination logic.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     pub fn document_count(&self) -> usize {
         self.documents.len()
     }
 }
 
 impl Display for Collection {
-    /// Formats the collection for display purposes.
+    /// Formats the [`Collection`] for human-readable display.
     ///
-    /// Outputs the collection name, its expected structure, and a list of document IDs.
+    /// This implementation provides a clean, structured textual representation of the collection,
+    /// including:
+    /// - The collection's name
+    /// - The expected document structure (as a JSON value)
+    /// - A list of stored document IDs
+    ///
+    /// # Example Output
+    ///
+    /// ```
+    /// Collection 'users'
+    ///   Required Structure: {"id":"number","name":"string"}
+    ///   2 document(s):
+    ///     - a1f3c2d9
+    ///     - b7e1d5f0
+    /// ```
+    ///
+    /// # Usage
+    ///
+    /// This formatting is ideal for:
+    /// - CLI tools or REPLs displaying collections
+    /// - Debug logs and diagnostics
+    /// - Quick summaries in developer-facing tools
+    ///
+    /// # Returns
+    ///
+    /// Returns a [`std::fmt::Result`] indicating success or formatting failure.
+    ///
+    /// # See Also
+    ///
+    /// - [`std::fmt::Display`] — the Rust trait being implemented here
+    /// - [`Collection`] — the data structure being formatted
+    ///
+    /// ---  
+    ///
+    /// 🖨️ Clean textual output for JSON-powered collections.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Collection '{}'", self.name)?;
         writeln!(f, "  Required Structure: {}", self.structure)?;
@@ -229,12 +651,49 @@ impl Display for Collection {
     }
 }
 
+
 impl Default for Collection {
-    /// Creates a default collection with the name "default" and an empty JSON object as its structure.
+    /// Creates a default [`Collection`] instance with the name `"default"` and an empty structure.
+    ///
+    /// This implementation is useful for initializing a placeholder or fallback collection.
+    /// The resulting collection:
+    /// - Has the name `"default"`
+    /// - Expects an empty JSON object as its schema (`{}`)
+    /// - Contains no documents
     ///
     /// # Returns
     ///
-    /// A new instance of [`Collection`] with the default name and structure.
+    /// A [`Collection`] initialized with default values:
+    /// - `name`: `"default"`
+    /// - `structure`: `{}` (empty JSON object)
+    /// - `documents`: empty vector
+    /// - `created_at`: current system timestamp
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let default_collection = Collection::default();
+    /// assert_eq!(default_collection.name, "default");
+    /// assert!(default_collection.structure.is_object());
+    /// assert!(default_collection.documents.is_empty());
+    /// ```
+    ///
+    /// # Use Cases
+    ///
+    /// - Fallback collections
+    /// - Simplified test setup
+    /// - Placeholder values when working with generics
+    ///
+    /// # See Also
+    ///
+    /// - [`Collection::new`] — for custom initialization
+    /// - [`serde_json::Value::Object`] — for creating JSON structures
+    ///
+    /// ---  
+    ///
+    /// 🧱 Your zero-config starting point for schema-driven documents.
+    ///
+    /// 🔨🤖🔧 Powered by Rust
     fn default() -> Self {
         Collection::new("default".to_string(), Value::Object(serde_json::Map::new()))
     }

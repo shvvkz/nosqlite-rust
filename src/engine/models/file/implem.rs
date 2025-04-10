@@ -42,12 +42,12 @@ impl File {
                 .try_or_log(serde_json::from_str(&decrypted), |e| {
                     NosqliteError::DeserializationError(e.to_string())
                 })
-                .or_else(|_| {
+                .map_err(|_| {
                     let err = NosqliteError::InvalidDatabaseFormat(
                         "Failed to deserialize database".to_string(),
                     );
                     handler.log_error(err.clone());
-                    Err(err)
+                    err
                 })?;
             Ok(db)
         } else {

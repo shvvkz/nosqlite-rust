@@ -24,13 +24,10 @@ fn main() -> Result<(), NosqliteError> {
             "name": "Valentin",
             "email": "valentin@example.com"
         }),
-    )
-    .expect("Failed to insert document");
+    )?;
 
     // Étape 3 — Lister les utilisateurs
-    let docs = db
-        .get_all_documents("users")
-        .expect("Failed to fetch users");
+    let docs = db.get_all_documents("users")?;
     println!("\n👥 Utilisateurs:");
     for doc in docs {
         println!("{}", doc);
@@ -43,19 +40,15 @@ fn main() -> Result<(), NosqliteError> {
         "20996851-bc00-4b44-9ee3-6918c59c7766",
         "email",
         json!("valentin.new@example.com"),
-    )
-    .expect("Failed to update user");
+    )?;
 
     // Étape 5 — Vérifier la modification
-    let updated = db
-        .get_document_by_id("users", "20996851-bc00-4b44-9ee3-6918c59c7766")
-        .expect("Document not found");
+    let updated = db.get_document_by_id("users", "20996851-bc00-4b44-9ee3-6918c59c7766")?;
     println!("\n📝 Document mis à jour:");
     println!("{}", updated);
 
     // Étape 6 — Supprimer l'utilisateur
-    db.delete_document("users", "20996851-bc00-4b44-9ee3-6918c59c7766")
-        .expect("Failed to delete user");
+    db.delete_document("users", "20996851-bc00-4b44-9ee3-6918c59c7766")?;
 
     println!("\n🗑️ Utilisateur supprimé !");
     Ok(())

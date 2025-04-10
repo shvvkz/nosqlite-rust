@@ -1,5 +1,6 @@
-use nosqlite_rust::engine::models::Collection;
+use nosqlite_rust::engine::{error::NosqliteErrorHandler, models::Collection};
 use serde_json::json;
+use tempfile::NamedTempFile;
 
 fn sample_doc() -> serde_json::Value {
     json!({ "field": "val" })
@@ -7,6 +8,16 @@ fn sample_doc() -> serde_json::Value {
 
 fn make_collection() -> Collection {
     Collection::new("test".into(), json!({ "field": "string" }))
+}
+
+fn make_error_handler() -> NosqliteErrorHandler {
+    let tmp_log = NamedTempFile::new().unwrap();
+    let path = tmp_log
+        .path()
+        .with_extension("nosqlite")
+        .to_string_lossy()
+        .to_string();
+    NosqliteErrorHandler::new(path)
 }
 
 fn make_collection_nested() -> Collection {
@@ -40,7 +51,8 @@ fn create_collection_nested_should_have_fields_filled() {
 #[test]
 fn get_document_should_return_correct_doc() {
     let mut col = make_collection();
-    col.add_document(sample_doc()).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(sample_doc(), &mut handler).unwrap();
 
     let id = col.documents[0].id.clone();
     let result = col.get_document(&id);
@@ -52,8 +64,12 @@ fn get_document_should_return_correct_doc() {
 #[test]
 fn get_document_nested_return_correct_doc() {
     let mut col = make_collection_nested();
-    col.add_document(json!({"field": "val", "nested": {"field": "nested_val"}}))
-        .unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(
+        json!({"field": "val", "nested": {"field": "nested_val"}}),
+        &mut handler,
+    )
+    .unwrap();
 
     let id = col.documents[0].id.clone();
     let result = col.get_document(&id);
@@ -72,8 +88,10 @@ fn get_document_should_return_none_if_not_found() {
 #[test]
 fn all_documents_should_return_all_docs() {
     let mut col = make_collection();
-    col.add_document(sample_doc()).unwrap();
-    col.add_document(json!({ "field": "second" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(sample_doc(), &mut handler).unwrap();
+    col.add_document(json!({ "field": "second" }), &mut handler)
+        .unwrap();
 
     let docs = col.all_documents();
     assert_eq!(docs.len(), 2);
@@ -89,8 +107,10 @@ fn all_documents_should_return_empty_if_none() {
 #[test]
 fn document_count_should_return_correct_number() {
     let mut col = make_collection();
-    col.add_document(sample_doc()).unwrap();
-    col.add_document(json!({ "field": "yo" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(sample_doc(), &mut handler).unwrap();
+    col.add_document(json!({ "field": "yo" }), &mut handler)
+        .unwrap();
 
     assert_eq!(col.document_count(), 2);
 }
@@ -103,68 +123,89 @@ fn document_count_should_return_zero_if_none() {
 
 #[test]
 fn add_valid_document_should_succeed() {
+    let mut handler = make_error_handler();
     let mut col = make_collection();
-    let result = col.add_document(json!({ "field": "hello" }));
+    let result = col.add_document(json!({ "field": "hello" }), &mut handler);
     assert!(result.is_ok());
 }
 
 #[test]
 fn add_document_with_missing_field_should_fail() {
     let mut col = make_collection();
-    let result = col.add_document(json!({ "not_field": "value" }));
+    let mut handler = make_error_handler();
+    let result = col.add_document(json!({ "not_field": "value" }), &mut handler);
     assert!(result.is_err());
 }
 
 #[test]
 fn add_document_with_wrong_type_should_fail() {
     let mut col = make_collection();
-    let result = col.add_document(json!({ "field": 123 })); // int au lieu de string
+    let mut handler = make_error_handler();
+    let result = col.add_document(json!({ "field": 123 }), &mut handler); // int au lieu de string
     assert!(result.is_err());
 }
 
 #[test]
 fn add_document_with_extra_fields_should_succeed() {
     let mut col = make_collection();
-    let result = col.add_document(json!({ "field": "val", "extra": 123 }));
+    let mut handler = make_error_handler();
+    let result = col.add_document(json!({ "field": "val", "extra": 123 }), &mut handler);
     assert!(result.is_ok()); // Extra field toléré
 }
 
 #[test]
 fn add_valid_document_nested_should_succeed() {
     let mut col = make_collection_nested();
-    let result = col.add_document(json!({"field": "hello", "nested": {"field": "nested_val"}}));
+    let mut handler = make_error_handler();
+    let result = col.add_document(
+        json!({"field": "hello", "nested": {"field": "nested_val"}}),
+        &mut handler,
+    );
     assert!(result.is_ok());
 }
 
 #[test]
 fn add_document_with_missing_nested_field_should_fail() {
     let mut col = make_collection_nested();
-    let result = col.add_document(json!({"field": "value", "nested": {"not_field": "nested_val"}}));
+    let mut handler = make_error_handler();
+    let result = col.add_document(
+        json!({"field": "value", "nested": {"not_field": "nested_val"}}),
+        &mut handler,
+    );
     assert!(result.is_err());
 }
 
 #[test]
 fn add_document_with_wrong_nested_type_should_fail() {
     let mut col = make_collection_nested();
-    let result = col.add_document(json!({"field": 123, "nested": {"field": 123}}));
+    let mut handler = make_error_handler();
+    let result = col.add_document(
+        json!({"field": 123, "nested": {"field": 123}}),
+        &mut handler,
+    );
     assert!(result.is_err());
 }
 
 #[test]
 fn add_document_with_extra_nested_fields_should_succeed() {
     let mut col = make_collection_nested();
-    let result =
-        col.add_document(json!({"field": "val", "nested": {"field": "nested_val", "extra": 123}}));
+    let mut handler = make_error_handler();
+    let result = col.add_document(
+        json!({"field": "val", "nested": {"field": "nested_val", "extra": 123}}),
+        &mut handler,
+    );
     assert!(result.is_ok());
 }
 
 #[test]
 fn update_existing_document_should_work() {
     let mut col = make_collection();
-    col.add_document(json!({ "field": "before" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(json!({ "field": "before" }), &mut handler)
+        .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "field": "after" }));
+    let res = col.update_document(id, json!({ "field": "after" }), &mut handler);
     assert!(res.is_ok());
     assert_eq!(col.documents[0].data["field"], "after");
 }
@@ -172,20 +213,24 @@ fn update_existing_document_should_work() {
 #[test]
 fn update_document_with_invalid_structure_should_fail() {
     let mut col = make_collection();
-    col.add_document(json!({ "field": "original" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(json!({ "field": "original" }), &mut handler)
+        .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "wrong_field": "nope" }));
+    let res = col.update_document(id, json!({ "wrong_field": "nope" }), &mut handler);
     assert!(res.is_err());
 }
 
 #[test]
 fn update_document_field_should_work() {
     let mut col = make_collection();
-    col.add_document(json!({ "field": "init" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(json!({ "field": "init" }), &mut handler)
+        .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_field_document(id, "field", json!("changed"));
+    let res = col.update_field_document(id, "field", json!("changed"), &mut handler);
     assert!(res.is_ok());
     assert_eq!(col.documents[0].data["field"], "changed");
 }
@@ -193,17 +238,20 @@ fn update_document_field_should_work() {
 #[test]
 fn update_field_on_nonexistent_document_should_fail() {
     let mut col = make_collection();
-    let res = col.update_field_document("wrong-id", "field", json!("new"));
+    let mut handler = make_error_handler();
+    let res = col.update_field_document("wrong-id", "field", json!("new"), &mut handler);
     assert!(res.is_err());
 }
 
 #[test]
 fn delete_existing_document_should_succeed() {
     let mut col = make_collection();
-    col.add_document(json!({ "field": "ok" })).unwrap();
+    let mut handler = make_error_handler();
+    col.add_document(json!({ "field": "ok" }), &mut handler)
+        .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.delete_document(id);
+    let res = col.delete_document(id, &mut handler);
     assert!(res.is_ok());
     assert!(col.documents.is_empty());
 }
@@ -211,6 +259,7 @@ fn delete_existing_document_should_succeed() {
 #[test]
 fn delete_nonexistent_document_should_fail() {
     let mut col = make_collection();
-    let res = col.delete_document("not-found-id");
+    let mut handler = make_error_handler();
+    let res = col.delete_document("not-found-id", &mut handler);
     assert!(res.is_err());
 }

@@ -20,8 +20,8 @@ pub struct Nosqlite {
 impl Nosqlite {
     /// Opens or creates a new NoSQLite database using the given path.
     pub fn open(path: &str) -> Result<Self, NosqliteError> {
-        let db = File::load_or_create(path, &mut NosqliteErrorHandler::new(path.to_string()))?;
-        let error_handler = NosqliteErrorHandler::new(path.to_string());
+        let mut error_handler = NosqliteErrorHandler::new(path.to_string());
+        let db = File::load_or_create(path, &mut error_handler)?;
 
         Ok(Self {
             db,
