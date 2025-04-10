@@ -14,3 +14,4 @@ hex = "*"
 anyhow = "*"
 uuid = { version = "*", features = ["v4"] }
 tempfile = "*"
+chrono = "*"
