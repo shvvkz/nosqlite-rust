@@ -1,3 +1,4 @@
+/// 🦀
 /// Provides an interface for file-level operations in the NoSQLite engine.
 ///
 /// The [`File`] struct is responsible for handling database persistence, including:

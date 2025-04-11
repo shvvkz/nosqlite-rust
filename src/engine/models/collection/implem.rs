@@ -6,6 +6,7 @@ use serde_json::Value;
 use std::fmt::Display;
 
 impl Collection {
+    /// 🦀
     /// Constructs a new, empty [`Collection`] with a specified name and document structure.
     ///
     /// This function initializes a new [`Collection`] instance, which is a container designed to
@@ -31,7 +32,9 @@ impl Collection {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::models::Collection;
     /// use serde_json::json;
+    ///
     /// let schema = json!({
     ///     "id": "number",
     ///     "name": "string",
@@ -45,22 +48,10 @@ impl Collection {
     /// # See Also
     /// - [`Collection`]: The main struct representing a collection of structured documents.
     /// - [`now()`]: A utility function to retrieve the current system timestamp.
-    ///
-    /// # Panics
-    ///
-    /// This function will not panic under normal circumstances.
-    ///
     /// # Notes
     ///
     /// This constructor does **not** perform any schema validation. It is the caller's responsibility
     /// to ensure the `structure` provided is consistent with the intended document format.
-    ///
-    /// ---
-    ///
-    /// Designed for use cases such as in-memory document stores, schema-aware data pipelines,
-    /// or embedded JSON-like databases.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn new(name: String, structure: Value) -> Self {
         Collection {
             name,
@@ -70,6 +61,7 @@ impl Collection {
         }
     }
 
+    /// 🦀
     /// Attempts to insert a new document into the collection after validating its structure.
     ///
     /// This method ensures that the incoming document (`data`) conforms to the collection’s
@@ -106,12 +98,14 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "title": "string" });
     /// let mut collection = Collection::new("posts".to_string(), schema);
     ///
     /// let valid_doc = json!({ "id": 1, "title": "Hello, world!" });
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data30.nosqlite".to_string());
     ///
     /// assert!(collection.add_document(valid_doc, &mut handler).is_ok());
     ///
@@ -130,16 +124,6 @@ impl Collection {
     /// - [`validate_against_structure`] - Ensures the document matches the schema.
     /// - [`NosqliteErrorHandler`] - Logs and manages structured errors.
     /// - [`NosqliteError`] - Enum defining possible error cases for document operations.
-    ///
-    /// # Panics
-    ///
-    /// This method does **not panic** under normal usage. All validation failures return gracefully as `Err`.
-    ///
-    /// ---
-    ///
-    /// 📦 Structured JSON insertions made safe, schema-aware, and smooth as Rust.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn add_document(
         &mut self,
         data: Value,
@@ -172,6 +156,7 @@ impl Collection {
         Ok(())
     }
 
+    /// 🦀
     /// Replaces the contents of a document in the collection, given its ID.
     ///
     /// This method performs a **full update** of an existing document, overwriting its entire
@@ -208,11 +193,13 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "name": "string" });
     /// let mut collection = Collection::new("users".to_string(), schema);
     ///
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data31.nosqlite".to_string());
     /// let original = json!({ "id": 1, "name": "Alice" });
     /// collection.add_document(original, &mut handler).unwrap();
     ///
@@ -224,19 +211,9 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`add_document`]: For inserting new documents into the collection.
+    /// - [`Collection::add_document`]: For inserting new documents into the collection.
     /// - [`validate_against_structure`]: Validates structural conformance.
     /// - [`NosqliteError`], [`NosqliteErrorHandler`], [`Document`]
-    ///
-    /// # Panics
-    ///
-    /// This method does **not panic**. All operational failures are handled via `Result`.
-    ///
-    /// ---
-    ///
-    /// 📁 Use this when it's time to give an old document a fresh new life — but only if it follows the rules.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn update_document(
         &mut self,
         id: &str,
@@ -273,6 +250,7 @@ impl Collection {
         Ok(())
     }
 
+    /// 🦀
     /// Updates a single field within a document, identified by its unique ID.
     ///
     /// This method performs a **partial update** by setting the value of a specified field
@@ -302,11 +280,13 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    /// use nosqlite_rust::engine::models::Collection;
     ///
     /// let schema = json!({ "id": "number", "name": "string", "age": "number" });
     /// let mut collection = Collection::new("users".to_string(), schema);
     ///
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data32.nosqlite".to_string());
     /// collection.add_document(json!({ "id": 1, "name": "Alice", "age": 30 }), &mut handler).unwrap();
     ///
     /// let doc_id = collection.documents[0].id.clone();
@@ -328,18 +308,8 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`update_document`] for replacing an entire document
+    /// - [`Collection::update_document`] for replacing an entire document
     /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
-    ///
-    /// # Panics
-    ///
-    /// This method does **not panic**. All errors are returned via `Result`.
-    ///
-    /// ---
-    ///
-    /// 🛠️ Ideal for quick, targeted tweaks to documents without full replacement.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn update_field_document(
         &mut self,
         id: &str,
@@ -369,6 +339,7 @@ impl Collection {
         Ok(())
     }
 
+    /// 🦀
     /// Removes a document from the collection by its unique identifier.
     ///
     /// This method searches for a document by its `id` and removes it from the collection if found.
@@ -392,11 +363,13 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "title": "string" });
     /// let mut collection = Collection::new("notes".to_string(), schema);
     ///
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data33.nosqlite".to_string());
     /// collection.add_document(json!({ "id": 1, "title": "First note" }), &mut handler).unwrap();
     ///
     /// let doc_id = collection.documents[0].id.clone();
@@ -413,19 +386,9 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`add_document`] for inserting documents
-    /// - [`update_document`] for replacing document content
+    /// - [`Collection::add_document`] for inserting documents
+    /// - [`Collection::update_document`] for replacing document content
     /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
-    ///
-    /// # Panics
-    ///
-    /// This method does **not panic**. It handles missing entries gracefully via `Result::Err`.
-    ///
-    /// ---
-    ///
-    /// 🗑️ Safe, schema-aware deletion for your embedded NoSQL documents.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn delete_document(
         &mut self,
         id: &str,
@@ -445,6 +408,7 @@ impl Collection {
         Ok(())
     }
 
+    /// 🦀
     /// Retrieves a reference to a document from the collection by its unique identifier.
     ///
     /// This method performs a non-mutating lookup in the collection’s document list, searching
@@ -464,10 +428,12 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "title": "string" });
     /// let mut collection = Collection::new("articles".to_string(), schema);
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data34.nosqlite".to_string());
     ///
     /// let doc = json!({ "id": 1, "title": "Intro to Rust" });
     /// collection.add_document(doc, &mut handler).unwrap();
@@ -485,23 +451,14 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`add_document`] for inserting new documents
-    /// - [`delete_document`] for removing documents
+    /// - [`Collection::add_document`] for inserting new documents
+    /// - [`Collection::delete_document`] for removing documents
     /// - [`Document`] for the structure being returned
-    ///
-    /// # Panics
-    ///
-    /// This method does **not panic**. It is safe and read-only.
-    ///
-    /// ---
-    ///
-    /// 🔎 Simple and efficient reference-based retrieval.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_document(&self, id: &str) -> Option<&Document> {
         self.documents.iter().find(|d| d.id == id)
     }
 
+    /// 🦀
     /// Returns a reference to all documents currently stored in the collection.
     ///
     /// This method provides read-only access to the internal list of documents held by the
@@ -509,17 +466,19 @@ impl Collection {
     ///
     /// # Returns
     ///
-    /// A reference to the internal vector of [`Document`] instances:  
+    /// A reference to the internal vector of [`Document`] instances:
     /// `&Vec<Document>`
     ///
     /// # Example
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "name": "string" });
     /// let mut collection = Collection::new("people".to_string(), schema);
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data35.nosqlite".to_string());
     ///
     /// collection.add_document(json!({ "id": 1, "name": "Alice" }), &mut handler).unwrap();
     /// collection.add_document(json!({ "id": 2, "name": "Bob" }), &mut handler).unwrap();
@@ -534,7 +493,7 @@ impl Collection {
     /// # Notes
     ///
     /// - The returned reference is read-only. To modify document contents, use methods like
-    ///   [`update_document`], [`update_field_document`], or create a mutable variant.
+    ///   [`Collection::update_document`], [`Collection::update_field_document`], or create a mutable variant.
     /// - The order of documents in the vector reflects the order of insertion, unless modified.
     ///
     /// # Performance
@@ -543,19 +502,14 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`get_document`] — for retrieving a single document by ID
-    /// - [`add_document`] — for inserting documents
+    /// - [`Collection::get_document`] — for retrieving a single document by ID
+    /// - [`Collection::add_document`] — for inserting documents
     /// - [`Document`] — the structure returned by this method
-    ///
-    /// ---
-    ///
-    /// 📚 Snapshot of everything your collection knows — clean and immutable.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn all_documents(&self) -> &Vec<Document> {
         &self.documents
     }
 
+    /// 🦀
     /// Returns the total number of documents stored in the collection.
     ///
     /// This method provides a quick way to determine the size of the collection. It simply
@@ -569,10 +523,12 @@ impl Collection {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Collection;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
     /// let schema = json!({ "id": "number", "name": "string" });
     /// let mut collection = Collection::new("users".to_string(), schema);
-    /// let mut handler = NosqliteErrorHandler::new();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data36.nosqlite".to_string());
     ///
     /// collection.add_document(json!({ "id": 1, "name": "Alice" }), &mut handler).unwrap();
     /// collection.add_document(json!({ "id": 2, "name": "Bob" }), &mut handler).unwrap();
@@ -586,21 +542,16 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`all_documents`] — for retrieving a reference to all stored documents
-    /// - [`add_document`] — for inserting new documents
-    /// - [`delete_document`] — for removing documents
-    ///
-    /// ---
-    ///
-    /// 📏 Perfect for summaries, analytics, and pagination logic.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
+    /// - [`Collection::all_documents`] — for retrieving a reference to all stored documents
+    /// - [`Collection::add_document`] — for inserting new documents
+    /// - [`Collection::delete_document`] — for removing documents
     pub fn document_count(&self) -> usize {
         self.documents.len()
     }
 }
 
 impl Display for Collection {
+    /// 🦀
     /// Formats the [`Collection`] for human-readable display.
     ///
     /// This implementation provides a clean, structured textual representation of the collection,
@@ -611,7 +562,7 @@ impl Display for Collection {
     ///
     /// # Example Output
     ///
-    /// ```
+    /// ```text
     /// Collection 'users'
     ///   Required Structure: {"id":"number","name":"string"}
     ///   2 document(s):
@@ -634,12 +585,6 @@ impl Display for Collection {
     ///
     /// - [`std::fmt::Display`] — the Rust trait being implemented here
     /// - [`Collection`] — the data structure being formatted
-    ///
-    /// ---  
-    ///
-    /// 🖨️ Clean textual output for JSON-powered collections.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Collection '{}'", self.name)?;
         writeln!(f, "  Required Structure: {}", self.structure)?;
@@ -652,6 +597,7 @@ impl Display for Collection {
 }
 
 impl Default for Collection {
+    /// 🦀
     /// Creates a default [`Collection`] instance with the name `"default"` and an empty structure.
     ///
     /// This implementation is useful for initializing a placeholder or fallback collection.
@@ -671,6 +617,8 @@ impl Default for Collection {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::models::Collection;
+    ///
     /// let default_collection = Collection::default();
     /// assert_eq!(default_collection.name, "default");
     /// assert!(default_collection.structure.is_object());
@@ -687,12 +635,6 @@ impl Default for Collection {
     ///
     /// - [`Collection::new`] — for custom initialization
     /// - [`serde_json::Value::Object`] — for creating JSON structures
-    ///
-    /// ---  
-    ///
-    /// 🧱 Your zero-config starting point for schema-driven documents.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn default() -> Self {
         Collection::new("default".to_string(), Value::Object(serde_json::Map::new()))
     }

@@ -4,6 +4,7 @@ use crate::engine::models::file::model::File;
 use std::fs;
 use std::path::Path;
 
+/// 🦀
 /// Loads a [`Database`] instance from disk, or creates a new one if the file doesn't exist.
 ///
 /// This high-level helper wraps the internal [`File::load_or_create`] function, providing a convenient
@@ -31,10 +32,14 @@ use std::path::Path;
 /// # Example
 ///
 /// ```rust
-/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
-/// let db = load_or_create_database("db.nosqlite", &mut handler)
-///     .expect("Failed to initialize database");
+/// use nosqlite_rust::engine::models::database::model::Database;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::services::database_service::load_or_create_database;
+///
+/// let mut handler = NosqliteErrorHandler::new("temp/data20.nosqlite".to_string());
+/// let db = load_or_create_database("temp/data20.nosqlite", &mut handler)?;
 /// println!("{}", db);
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -47,12 +52,6 @@ use std::path::Path;
 /// - [`save_database`] — for persisting the database back to disk
 /// - [`File::load_or_create`] — internal loader implementation
 /// - [`NosqliteError`] — structured error type
-///
-/// ---  
-///
-/// 📂 Seamless load-or-create interface for your encrypted NoSQL database.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn load_or_create_database(
     path: &str,
     error_handler: &mut NosqliteErrorHandler,
@@ -66,6 +65,7 @@ pub fn load_or_create_database(
     }
 }
 
+/// 🦀
 /// Saves the current state of the database to disk at the specified path.
 ///
 /// This function wraps [`File::save`] to serialize and securely encrypt the [`Database`] contents,
@@ -86,9 +86,15 @@ pub fn load_or_create_database(
 /// # Example
 ///
 /// ```rust
-/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
-/// let db = Database::default();
-/// save_database("db.nosqlite", &db, &mut handler).expect("Failed to save database");
+/// use nosqlite_rust::engine::models::database::model::Database;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::services::database_service::save_database;
+///
+/// let db = Database::new("temp/data21.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("temp/data21.nosqlite".to_string());
+/// save_database("temp/data21.nosqlite", &db, &mut handler)?;
+/// println!("Database saved successfully.");
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -101,13 +107,6 @@ pub fn load_or_create_database(
 /// - [`load_or_create_database`] — for the reverse operation
 /// - [`File::save`] — internal save logic
 /// - [`NosqliteError`] — error enum
-///
-/// ---  
-///
-/// 💾 Secure, structured persistence for your database — encrypted and logged.
-///
-/// 🔐✨  
-/// 🔨🤖🔧 Powered by Rust
 pub fn save_database(
     path: &str,
     db: &Database,

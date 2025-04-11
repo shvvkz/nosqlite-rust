@@ -3,9 +3,10 @@ use crate::engine::models::collection::model::Collection;
 use crate::engine::models::database::model::Database;
 use serde_json::Value;
 
+/// 🦀
 /// Creates a new collection in the database with a specified schema.
 ///
-/// This function wraps the database's internal [`add_collection`] call, adding a layer of
+/// This function wraps the database's internal [`Database::add_collection`] call, adding a layer of
 /// centralized control and error logging. It validates that the collection name is unique
 /// and that the provided structure is a valid JSON object (i.e., the schema).
 ///
@@ -29,6 +30,10 @@ use serde_json::Value;
 ///
 /// ```rust
 /// use serde_json::json;
+/// use nosqlite_rust::engine::models::Database;
+/// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+/// use nosqlite_rust::engine::services::collection_service::create_collection;
+///
 /// let schema = json!({ "title": "string", "views": "number" });
 /// let mut db = Database::default();
 /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
@@ -46,12 +51,6 @@ use serde_json::Value;
 /// - [`delete_collection`] — to remove a collection
 /// - [`Collection`] — the structure being created
 /// - [`Database::add_collection`] — the core insertion logic
-///
-/// ---
-///
-/// 🆕 Define a new schema-aware document store inside your NoSQL database.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn create_collection(
     db: &mut Database,
     name: &str,
@@ -62,6 +61,7 @@ pub fn create_collection(
     Ok(())
 }
 
+/// 🦀
 /// Removes a collection from the database by its name.
 ///
 /// This function deletes the entire collection, including all documents and its structure.
@@ -83,10 +83,16 @@ pub fn create_collection(
 /// # Example
 ///
 /// ```rust
-/// let mut db = Database::default();
-/// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
-/// create_collection(&mut db, "logs", json!({}), &mut handler).unwrap();
-/// delete_collection(&mut db, "logs", &mut handler).unwrap();
+/// use serde_json::json;
+/// use nosqlite_rust::engine::models::Database;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::services::collection_service::{create_collection, delete_collection};
+///
+/// let mut db = Database::new("temp/data16.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("temp/data16.nosqlite".to_string());
+/// create_collection(&mut db, "logs", json!({}), &mut handler)?;
+/// delete_collection(&mut db, "logs", &mut handler)?;
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -98,12 +104,6 @@ pub fn create_collection(
 ///
 /// - [`create_collection`] — for adding collections
 /// - [`NosqliteError`] — error enum including `CollectionNotFound`
-///
-/// ---
-///
-/// 🗑️ Complete collection teardown — structure and contents.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn delete_collection(
     db: &mut Database,
     name: &str,
@@ -113,6 +113,7 @@ pub fn delete_collection(
     Ok(())
 }
 
+/// 🦀
 /// Retrieves an immutable reference to a collection by name from the database.
 ///
 /// This function is used to fetch a collection when you need to read its documents or schema
@@ -134,8 +135,17 @@ pub fn delete_collection(
 /// # Example
 ///
 /// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::models::Database;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::services::collection_service::{get_collection, create_collection};
+///
+/// let mut db = Database::new("temp/data17.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("temp/data17.nosqlite".to_string());
+/// create_collection(&mut db, "users", json!({}), &mut handler)?;
 /// let collection = get_collection(&db, "users", &mut handler)?;
 /// println!("Schema: {}", collection.structure);
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -147,12 +157,6 @@ pub fn delete_collection(
 ///
 /// - [`get_collection_mut`] — for mutable access
 /// - [`Collection`] — the return type
-///
-/// ---
-///
-/// 🔎 Safe, read-only access to a named collection.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn get_collection<'a>(
     db: &'a Database,
     name: &str,
@@ -165,6 +169,7 @@ pub fn get_collection<'a>(
     })
 }
 
+/// 🦀
 /// Retrieves a mutable reference to a collection by name from the database.
 ///
 /// This function grants write access to a collection — allowing you to insert, update, or
@@ -184,8 +189,17 @@ pub fn get_collection<'a>(
 /// # Example
 ///
 /// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::models::Database;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::services::collection_service::{get_collection_mut, create_collection};
+///
+/// let mut db = Database::new("temp/data18.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("temp/data18.nosqlite".to_string());
+/// create_collection(&mut db, "users", json!({}), &mut handler)?;
 /// let collection = get_collection_mut(&mut db, "users", &mut handler)?;
 /// collection.add_document(json!({ "id": 1, "name": "Jane" }), &mut handler)?;
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -197,12 +211,6 @@ pub fn get_collection<'a>(
 ///
 /// - [`get_collection`] — for immutable access
 /// - [`Collection`] — the structure being mutated
-///
-/// ---
-///
-/// ✍️ Direct access to collection internals for data manipulation.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn get_collection_mut<'a>(
     db: &'a mut Database,
     name: &str,
@@ -215,6 +223,7 @@ pub fn get_collection_mut<'a>(
     })
 }
 
+/// 🦀
 /// Lists all collections currently registered in the database.
 ///
 /// This method returns an immutable reference to every [`Collection`] in the database,
@@ -231,9 +240,19 @@ pub fn get_collection_mut<'a>(
 /// # Example
 ///
 /// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+/// use nosqlite_rust::engine::models::Database;
+/// use nosqlite_rust::engine::services::collection_service::{list_collections, create_collection};
+///
+/// let mut db = Database::new("temp/data19.nosqlite");
+/// let mut handler = NosqliteErrorHandler::new("temp/data19.nosqlite".to_string());
+/// create_collection(&mut db, "users", json!({}), &mut handler)?;
+/// create_collection(&mut db, "posts", json!({}), &mut handler)?;
 /// for col in list_collections(&db) {
 ///     println!("📁 {} ({} docs)", col.name, col.document_count());
 /// }
+/// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
@@ -245,12 +264,6 @@ pub fn get_collection_mut<'a>(
 ///
 /// - [`Collection`] — the unit being returned
 /// - [`Database::collections`] — the underlying data source
-///
-/// ---
-///
-/// 📋 Overview of all schema-defined collections in your NoSQL instance.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn list_collections(db: &Database) -> Vec<&Collection> {
     db.collections.iter().collect()
 }
