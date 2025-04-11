@@ -87,10 +87,14 @@ pub fn insert_document(
 ///
 /// let mut db = Database::new("temp/data23.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data23.nosqlite".to_string());
-/// db.add_collection("users", json!({}) ,&mut handler)?;
-/// let col = db.get_collection_mut("users").unwrap();
-/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-/// update_document(&mut db, "users", "abc123", json!({ "id": 1, "name": "Alice Updated" }), &mut handler)?;
+/// db.add_collection("users", json!({}), &mut handler)?;
+/// let docs = {
+///     let col = db.get_collection_mut("users").unwrap();
+///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
+///     col.all_documents().clone()
+/// };
+/// let mut db_clone = db.clone();
+/// update_document(&mut db_clone, "users", &docs[0].id, json!({ "id": "xyz", "name": "Alice Updated" }), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
@@ -146,10 +150,14 @@ pub fn update_document(
 ///
 /// let mut db = Database::new("temp/data24.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data24.nosqlite".to_string());
-/// db.add_collection("users", json!({}) ,&mut handler)?;
-/// let col = db.get_collection_mut("users").unwrap();
-/// col.add_document(json!({ "id": "abc123", "name": "Alice", "email": "foo@example.com" }), &mut handler)?;
-/// update_document_field(&mut db, "users", "abc123", "email", json!("alice@example.com"), &mut handler)?;
+/// db.add_collection("users", json!({}), &mut handler)?;
+/// let docs = {
+///     let col = db.get_collection_mut("users").unwrap();
+///     col.add_document(json!({ "id": "abc123", "name": "Alice", "email": "test@example.com" }), &mut handler)?;
+///     col.all_documents().clone()
+/// };
+/// let mut db_clone = db.clone();
+/// update_document_field(&mut db_clone, "users", &docs[0].id, "email", json!("alice@example.com"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
@@ -198,16 +206,19 @@ pub fn update_document_field(
 ///
 /// ```rust
 /// use serde_json::json;
-/// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Collection, Database, Document}};
+/// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Collection, Database, Document, File}};
 /// use nosqlite_rust::engine::services::document_service::delete_document;
 ///
 /// let mut db = Database::new("temp/data25.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data25.nosqlite".to_string());
-/// db.add_collection("users", json!({}) ,&mut handler)?;
+/// db.add_collection("users", json!({}), &mut handler)?;
+/// let docs = {
+///     let col = db.get_collection_mut("users").unwrap();
+///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
+///     col.all_documents().clone()
+/// };
+/// 
 /// let mut db_clone = db.clone();
-/// let col = db.get_collection_mut("users").unwrap();
-/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-/// let docs = col.all_documents();
 /// delete_document(&mut db_clone, "users", &docs[0].id, &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
@@ -253,14 +264,18 @@ pub fn delete_document(
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
 /// use nosqlite_rust::engine::services::document_service::get_document_by_id;
-///
+/// 
 /// let mut db = Database::new("temp/data26.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data26.nosqlite".to_string());
-/// db.add_collection("users", json!({}) ,&mut handler)?;
-/// let col = db.get_collection_mut("users").unwrap();
-/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-/// let doc = get_document_by_id(&db, "users", "abc123", &mut handler)?;
-/// println!("Doc: {}", doc);
+/// db.add_collection("users", json!({}), &mut handler)?;
+/// let docs = {
+///     let col = db.get_collection_mut("users").unwrap();
+///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
+///     col.all_documents().clone()
+/// };
+/// 
+/// let db_clone = db.clone();
+/// get_document_by_id(&db_clone, "users", &docs[0].id, &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
