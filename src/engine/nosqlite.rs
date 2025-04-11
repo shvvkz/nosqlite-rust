@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use super::error::{NosqliteError, NosqliteErrorHandler};
 
-/// Public API for interacting with the NoSQLite engine.
+#[derive(Debug, Clone)]
 pub struct Nosqlite {
     path: String,
     error_handler: NosqliteErrorHandler,
@@ -18,6 +18,7 @@ pub struct Nosqlite {
 }
 
 impl Nosqlite {
+    /// 🦀
     /// Opens or initializes a new NoSQLite database from the given file path.
     ///
     /// This method performs a secure load operation from an encrypted `.nosqlite` file.
@@ -37,7 +38,11 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
-    /// let db = Nosqlite::open("mydata.nosqlite")?;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let db = Nosqlite::open("temp/data1.nosqlite")?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Notes
@@ -50,12 +55,6 @@ impl Nosqlite {
     ///
     /// - [`File::load_or_create`] — underlying logic
     /// - [`NosqliteErrorHandler`] — error handling system used
-    ///
-    /// ---  
-    ///
-    /// 📂 Securely open or initialize a NoSQL database from disk.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn open(path: &str) -> Result<Self, NosqliteError> {
         let mut error_handler = NosqliteErrorHandler::new(path.to_string());
         let db = File::load_or_create(path, &mut error_handler)?;
@@ -67,6 +66,7 @@ impl Nosqlite {
         })
     }
 
+    /// 🦀
     /// Creates a new collection within the current NoSQLite database.
     ///
     /// The collection will use the provided structure (schema) to validate all future documents.
@@ -89,7 +89,13 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data2.nosqlite")?;
     /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Side Effects
@@ -100,12 +106,6 @@ impl Nosqlite {
     ///
     /// - [`delete_collection`] — for removing collections
     /// - [`insert_document`] — to begin populating the collection
-    ///
-    /// ---  
-    ///
-    /// 🆕 Register a new, schema-aware collection in your NoSQL file.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn create_collection(&mut self, name: &str, structure: Value) -> Result<(), NosqliteError> {
         let result = create_collection(&mut self.db, name, structure, &mut self.error_handler);
         if result.is_ok() {
@@ -114,6 +114,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Deletes a collection from the current NoSQLite database.
     ///
     /// This operation removes the collection and all of its documents from memory.
@@ -133,7 +134,14 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data3.nosqlite")?;
+    /// db.create_collection("logs", json!({ "level": "string", "message": "string" }))?;
     /// db.delete_collection("logs")?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Side Effects
@@ -145,12 +153,6 @@ impl Nosqlite {
     ///
     /// - [`create_collection`] — for schema creation
     /// - [`list_collections`] — to inspect what exists
-    ///
-    /// ---  
-    ///
-    /// 🗑️ Full teardown of a collection and its documents.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn delete_collection(&mut self, name: &str) -> Result<(), NosqliteError> {
         let result = delete_collection(&mut self.db, name, &mut self.error_handler);
         if result.is_ok() {
@@ -159,6 +161,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Inserts a new document into a specified collection in the database.
     ///
     /// The document will be validated against the collection's structure (schema).
@@ -179,19 +182,20 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data4.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": 1, "name": "Alice" }))?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`update_document`] — for replacing an existing document
     /// - [`delete_document`] — for removing one by ID
-    ///
-    /// ---  
-    ///
-    /// 📥 Schema-safe insertion with UUID + timestamp support.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), NosqliteError> {
         let result = insert_document(&mut self.db, collection, data, &mut self.error_handler);
         if result.is_ok() {
@@ -200,6 +204,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Replaces an entire document in a collection by its ID.
     ///
     /// This method fully overwrites the existing document’s content, while preserving its
@@ -222,19 +227,23 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
-    /// db.update_document("users", "abc123", json!({ "id": 1, "name": "Updated" }))?;
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data5.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
+    /// db.insert_document("users", json!({ "id": 1, "name": "Alice" }))?;
+    /// let mut db_clone = db.clone();
+    /// let docs = db_clone.get_all_documents("users")?;
+    /// db.update_document("users", &docs[0].id, json!({ "id": 1, "name": "Updated" }))?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`update_document_field`] — for partial updates
     /// - [`insert_document`] — for adding new documents
-    ///
-    /// ---  
-    ///
-    /// 🔁 Full document replacement with structure validation and audit timestamps.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn update_document(
         &mut self,
         collection: &str,
@@ -254,6 +263,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Updates a single field within a document in a given collection.
     ///
     /// This is a partial update operation. It updates only the specified field,
@@ -278,7 +288,17 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
-    /// db.update_document_field("users", "abc123", "email", json!("new@email.com"))?;
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data6.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
+    /// db.insert_document("users", json!({ "id": 1, "name": "Alice" }))?;
+    /// let mut db_clone = db.clone();
+    /// let docs = db_clone.get_all_documents("users")?;
+    /// db.update_document_field("users", &docs[0].id, "email", json!("new@email.com"))?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Notes
@@ -290,12 +310,6 @@ impl Nosqlite {
     ///
     /// - [`get_document_by_id`] — for inspecting before or after
     /// - [`delete_document`] — for removing by ID
-    ///
-    /// ---  
-    ///
-    /// ✏️ Lightweight patching of document fields — fast and flexible.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn update_document_field(
         &mut self,
         collection: &str,
@@ -317,6 +331,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Deletes a document from a specified collection by its ID.
     ///
     /// This operation removes the document from memory if it exists, and updates the database file
@@ -335,19 +350,23 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
-    /// db.delete_document("users", "doc-123")?;
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data7.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
+    /// db.insert_document("users", json!({ "id": "doc-123", "name": "Alice" }))?;
+    /// let mut db_clone = db.clone();
+    /// let docs = db_clone.get_all_documents("users")?;
+    /// db.delete_document("users", &docs[0].id)?;
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`insert_document`] — to add new documents
     /// - [`get_document_by_id`] — for checking if a document exists before deletion
-    ///
-    /// ---  
-    ///
-    /// ❌ Remove a document and persist the change automatically.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn delete_document(&mut self, collection: &str, id: &str) -> Result<(), NosqliteError> {
         let result = delete_document(&mut self.db, collection, id, &mut self.error_handler);
         if result.is_ok() {
@@ -356,6 +375,7 @@ impl Nosqlite {
         result
     }
 
+    /// 🦀
     /// Retrieves a document from a collection by its unique ID.
     ///
     /// If the collection and document exist, this returns an immutable reference to the document.
@@ -374,20 +394,24 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
-    /// let doc = db.get_document_by_id("users", "abc123")?;
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data8.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
+    /// db.insert_document("users", json!({ "id": "abc123", "name": "Alice" }))?;
+    /// let mut db_clone = db.clone();
+    /// let docs = db_clone.get_all_documents("users")?;
+    /// let doc = db.get_document_by_id("users", &docs[0].id)?;
     /// println!("Found doc: {}", doc);
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`get_all_documents`] — for bulk access
     /// - [`update_document`] — for full mutation
-    ///
-    /// ---  
-    ///
-    /// 🔍 Fetch a document by ID with full validation and error logging.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_document_by_id(
         &mut self,
         collection: &str,
@@ -396,6 +420,7 @@ impl Nosqlite {
         get_document_by_id(&self.db, collection, id, &mut self.error_handler)
     }
 
+    /// 🦀
     /// Retrieves all documents stored in a specified collection.
     ///
     /// This function returns a reference to the entire in-memory vector of documents
@@ -413,24 +438,29 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data9.nosqlite")?;
+    /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
+    /// db.insert_document("users", json!({ "id": "abc123", "name": "Alice" }))?;
+    /// db.insert_document("users", json!({ "id": "xyz789", "name": "Bob" }))?;
+    ///
     /// for doc in db.get_all_documents("users")? {
     ///     println!("{}", doc);
     /// }
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`get_documents_by_field`] — for filtering based on field values
-    ///
-    /// ---  
-    ///
-    /// 📄 Access all documents in a collection at once.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_all_documents(&mut self, collection: &str) -> Result<&Vec<Document>, NosqliteError> {
         get_all_documents(&self.db, collection, &mut self.error_handler)
     }
 
+    /// 🦀
     /// Retrieves all documents in a collection where a specific field equals a given value.
     ///
     /// This function performs a linear scan of the collection and returns all documents
@@ -450,10 +480,20 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use serde_json::json;
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data10.nosqlite")?;
+    /// db.create_collection("posts", json!({ "id": "string", "author": "string" }))?;
+    /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
+    /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
+    ///
     /// let results = db.get_documents_by_field("posts", "author", "alice")?;
     /// for post in results {
     ///     println!("{}", post);
     /// }
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Notes
@@ -464,12 +504,6 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for manual filtering
-    ///
-    /// ---  
-    ///
-    /// 🔍 Lightweight field-based filtering — fast and expressive.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_documents_by_field(
         &mut self,
         collection: &str,
@@ -479,6 +513,7 @@ impl Nosqlite {
         get_documents_by_field(&self.db, collection, field, value, &mut self.error_handler)
     }
 
+    /// 🦀
     /// Lists all collections currently stored in the database.
     ///
     /// Returns an immutable reference to all [`Collection`]s registered in the system.
@@ -491,25 +526,25 @@ impl Nosqlite {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::Nosqlite;
+    /// use nosqlite_rust::engine::error::NosqliteError;
+    ///
+    /// let mut db = Nosqlite::open("temp/data11.nosqlite")?;
     /// for col in db.list_collections() {
     ///     println!("Collection: {}", col.name);
     /// }
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # See Also
     ///
     /// - [`create_collection`] — to define a new collection
     /// - [`delete_collection`] — to remove one
-    ///
-    /// ---  
-    ///
-    /// 📚 Full view of all registered collections.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn list_collections(&self) -> Vec<&Collection> {
         list_collections(&self.db)
     }
 
+    /// 🦀
     /// Persists the current in-memory database state to disk.
     ///
     /// This internal utility is automatically invoked after successful mutations
@@ -530,13 +565,6 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`save_database`] — internal implementation
-    ///
-    /// ---  
-    ///
-    /// 💾 Transparent, automatic persistence after every mutation.
-    ///
-    /// 🔐  
-    /// 🔨🤖🔧 Powered by Rust
     fn auto_save(&mut self) -> Result<(), NosqliteError> {
         save_database(&self.path, &self.db, &mut self.error_handler)?;
         Ok(())

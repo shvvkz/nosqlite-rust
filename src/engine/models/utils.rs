@@ -1,6 +1,8 @@
+use crate::engine::models::Document;
 use serde_json::Value;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// 🦀
 /// Returns the current Unix timestamp in seconds.
 ///
 /// This utility function is used throughout the system to timestamp entities such as:
@@ -18,6 +20,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// # Example
 ///
 /// ```rust
+/// use nosqlite_rust::engine::models::utils::now;
+///
 /// let timestamp = now();
 /// println!("Current UNIX timestamp: {}", timestamp);
 /// ```
@@ -37,12 +41,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// - [`SystemTime::now`] — standard library source of time
 /// - [`UNIX_EPOCH`] — constant used for offset
 /// - [`Document::new`] — sets both `created_at` and `updated_at` using this
-///
-/// ---  
-///
-/// ⏲️ Simple, reliable time tracking for your NoSQL data.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn now() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -50,6 +48,7 @@ pub fn now() -> u64 {
         .as_secs()
 }
 
+/// 🦀
 /// Validates a JSON document against a given schema definition.
 ///
 /// This function performs recursive structural validation of a document based on a JSON schema.
@@ -111,18 +110,11 @@ pub fn now() -> u64 {
 ///
 /// - The function performs **recursive** validation for nested objects.
 /// - Only fields present in the schema are checked; extra fields in the document are ignored.
-/// - Type matching is handled internally by [`type_matches`] helper function.
+/// - Type matching is handled internally by `type_matches` helper function.
 ///
 /// # See Also
 ///
-/// - [`type_matches`] — used internally to compare schema type names with actual values
 /// - [`serde_json::Value`] — JSON representation used in both document and schema
-///
-/// ---  
-///
-/// 🧪 Lightweight schema enforcement for fast, in-memory JSON validation.
-///
-/// 🔨🤖🔧 Powered by Rust
 pub fn validate_against_structure(
     doc: &serde_json::Map<String, Value>,
     schema: &serde_json::Map<String, Value>,
@@ -148,6 +140,7 @@ pub fn validate_against_structure(
     true
 }
 
+/// 🦀
 /// Checks if a JSON value matches the expected type (case-insensitive).
 ///
 /// This helper function performs a basic type check between a user-defined type string
@@ -172,17 +165,6 @@ pub fn validate_against_structure(
 /// - `true` if the value matches the expected type
 /// - `false` if the types are incompatible or the type string is unrecognized
 ///
-/// # Example
-///
-/// ```rust
-/// use serde_json::json;
-/// use nosqlite_rust::engine::models::utils::type_matches;
-///
-/// assert!(type_matches("string", &json!("hello")));
-/// assert!(type_matches("number", &json!(42)));
-/// assert!(!type_matches("boolean", &json!("true")));
-/// ```
-///
 /// # Notes
 ///
 /// - Type names are matched case-insensitively (`"String"` and `"string"` are equivalent)
@@ -192,12 +174,6 @@ pub fn validate_against_structure(
 ///
 /// - [`validate_against_structure`] — uses this function for document schema enforcement
 /// - [`serde_json::Value`] — the dynamic JSON type used for validation
-///
-/// ---  
-///
-/// ⚙️ Fast, flexible JSON type matching — the core of schema validation.
-///
-/// 🔨🤖🔧 Powered by Rust
 fn type_matches(expected: &str, val: &Value) -> bool {
     match expected.to_lowercase().as_str() {
         "string" => val.is_string(),

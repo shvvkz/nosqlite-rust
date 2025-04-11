@@ -1,15 +1,17 @@
 use super::model::Document;
+use crate::engine::models::collection::Collection;
 use crate::engine::models::utils::now;
 use serde_json::Value;
 use std::fmt::Display;
 use uuid::Uuid;
 
 impl Document {
+    /// 🦀
     /// Creates a new [`Document`] with a unique ID and timestamped metadata.
     ///
     /// This constructor wraps the provided JSON `data` into a fully-initialized document.
     /// Each document is assigned:
-    /// - A unique [`UUID`] as its `id`
+    /// - A unique [`uuid::Uuid`] as its `id`
     /// - The current timestamp for both `created_at` and `updated_at`
     ///
     /// # Parameters
@@ -29,6 +31,7 @@ impl Document {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::models::Document;
     ///
     /// let raw = json!({ "id": 1, "title": "Intro to Rust" });
     /// let doc = Document::new(raw);
@@ -48,12 +51,6 @@ impl Document {
     /// - [`Collection::add_document`] — inserts a `Document` into a collection
     /// - [`Uuid::new_v4`] — used to generate the document ID
     /// - [`now()`] — returns the current UTC timestamp
-    ///
-    /// ---  
-    ///
-    /// 📄 Raw JSON → fully tracked, uniquely identified document object.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn new(data: Value) -> Document {
         let now = now();
         Document {
@@ -66,6 +63,7 @@ impl Document {
 }
 
 impl Display for Document {
+    /// 🦀
     /// Formats the [`Document`] for human-readable output.
     ///
     /// This implementation displays:
@@ -88,6 +86,7 @@ impl Display for Document {
     /// # Usage
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::models::Document;
     /// let doc = Document::new(serde_json::json!({ "id": 1, "name": "Alice" }));
     /// println!("{}", doc);
     /// ```
@@ -96,12 +95,6 @@ impl Display for Document {
     ///
     /// - [`Document::new`] — for creating a document instance
     /// - [`std::fmt::Display`] — trait being implemented
-    ///
-    /// ---  
-    ///
-    /// 🖨️ Easy inspection of document metadata and content.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Document: '{}'", self.id)?;
         writeln!(f, "  Data: {}", self.data)?;
@@ -112,6 +105,7 @@ impl Display for Document {
 }
 
 impl Default for Document {
+    /// 🦀
     /// Creates a default [`Document`] with a unique ID and current timestamps.
     ///
     /// This constructor generates a placeholder document with:
@@ -129,6 +123,8 @@ impl Default for Document {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::models::Document;
+    ///
     /// let doc = Document::default();
     /// assert!(doc.data.is_null());
     /// println!("{}", doc); // Uses Display to show ID, timestamps, and empty content
@@ -138,7 +134,9 @@ impl Default for Document {
     ///
     /// - This method is equivalent to:
     ///   ```rust
-    ///   Document::new(serde_json::Value::Null)
+    ///   use nosqlite_rust::engine::models::Document;
+    ///
+    ///   Document::new(serde_json::Value::Null);
     ///   ```
     /// - The UUID ensures uniqueness even in placeholder mode.
     ///
@@ -146,12 +144,6 @@ impl Default for Document {
     ///
     /// - [`Document::new`] — for creating documents with actual content
     /// - [`Default`] — the trait being implemented
-    ///
-    /// ---  
-    ///
-    /// 🧪 Perfect for mocks, tests, and lazy initializations.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn default() -> Self {
         Document {
             id: Uuid::new_v4().to_string(),

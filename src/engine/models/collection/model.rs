@@ -2,6 +2,7 @@ use crate::engine::models::document::model::Document;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+/// 🦀
 /// Represents a collection of documents within a NoSQL database.
 ///
 /// A `Collection` is a logical grouping of `Document` items,

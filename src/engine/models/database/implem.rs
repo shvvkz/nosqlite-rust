@@ -5,6 +5,7 @@ use serde_json::Value;
 use std::fmt::Display;
 
 impl Database {
+    /// 🦀
     /// Creates a new, empty [`Database`] instance with no collections.
     ///
     /// This constructor initializes an in-memory database structure, prepared to store
@@ -24,7 +25,9 @@ impl Database {
     /// # Example
     ///
     /// ```rust
-    /// let db = Database::new("mydb.nosqlite");
+    /// use nosqlite_rust::engine::models::Database;
+    ///
+    /// let db = Database::new("temp/data29.nosqlite");
     /// assert!(db.collections.is_empty());
     /// ```
     ///
@@ -36,18 +39,13 @@ impl Database {
     /// # See Also
     ///
     /// - [`Collection`] — the primary unit of storage inside the database
-    ///
-    /// ---  
-    ///
-    /// 🧠 Your zero-cost gateway to NoSQL-style collection management.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn new(db_path: &str) -> Self {
         Database {
             collections: Vec::new(),
         }
     }
 
+    /// 🦀
     /// Adds a new collection to the database with a given name and structure.
     ///
     /// This method performs the following:
@@ -78,9 +76,11 @@ impl Database {
     ///
     /// ```rust
     /// use serde_json::json;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    /// use nosqlite_rust::engine::models::Database;
     ///
-    /// let mut db = Database::new("mydb.nosqlite");
-    /// let mut handler = NosqliteErrorHandler::new("mydb.nosqlite".to_string());
+    /// let mut db = Database::new("temp/data37.nosqlite");
+    /// let mut handler = NosqliteErrorHandler::new("temp/data37.nosqlite".to_string());
     ///
     /// let schema = json!({ "id": "number", "name": "string" });
     /// db.add_collection("users", schema, &mut handler).unwrap();
@@ -93,12 +93,6 @@ impl Database {
     /// - [`Collection::new`] — initializes a new collection
     /// - [`NosqliteError`] — for error types
     /// - [`NosqliteErrorHandler`] — for structured error logging
-    ///
-    /// ---  
-    ///
-    /// 🧱 Safely bootstraps a new document store, with schema validation and name protection built in.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn add_collection(
         &mut self,
         name: &str,
@@ -123,6 +117,7 @@ impl Database {
         Ok(())
     }
 
+    /// 🦀
     /// Removes a collection from the database by its name.
     ///
     /// This method searches for a collection by its name and, if found, removes it from the
@@ -146,8 +141,11 @@ impl Database {
     /// # Example
     ///
     /// ```rust
-    /// let mut db = Database::new("db.nosqlite");
-    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+    /// use nosqlite_rust::engine::models::Database;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    ///
+    /// let mut db = Database::new("temp/data38.nosqlite");
+    /// let mut handler = NosqliteErrorHandler::new("temp/data38.nosqlite".to_string());
     ///
     /// db.add_collection("logs", serde_json::json!({}), &mut handler).unwrap();
     /// assert_eq!(db.collections.len(), 1);
@@ -163,15 +161,9 @@ impl Database {
     ///
     /// # See Also
     ///
-    /// - [`add_collection`] — for creating new collections
+    /// - [`Database::add_collection`] — for creating new collections
     /// - [`NosqliteError`] — for all possible errors
     /// - [`NosqliteErrorHandler`] — for structured logging of collection-level issues
-    ///
-    /// ---  
-    ///
-    /// 🧹 Full schema removal with traceable fallback.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn remove_collection(
         &mut self,
         name: &str,
@@ -191,6 +183,7 @@ impl Database {
         Ok(())
     }
 
+    /// 🦀
     /// Retrieves a reference to a collection by its name.
     ///
     /// This method performs a read-only search within the database's collections. If a collection
@@ -208,8 +201,11 @@ impl Database {
     /// # Example
     ///
     /// ```rust
-    /// let mut db = Database::new("mydb.nosqlite");
-    /// let mut handler = NosqliteErrorHandler::new("mydb.nosqlite".to_string());
+    /// use nosqlite_rust::engine::models::Database;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    ///
+    /// let mut db = Database::new("temp/data39.nosqlite");
+    /// let mut handler = NosqliteErrorHandler::new("temp/data39.nosqlite".to_string());
     ///
     /// db.add_collection("users", serde_json::json!({ "id": "number" }), &mut handler).unwrap();
     ///
@@ -233,19 +229,14 @@ impl Database {
     ///
     /// # See Also
     ///
-    /// - [`add_collection`] — to create a new collection
-    /// - [`remove_collection`] — to delete a collection
+    /// - [`Database::add_collection`] — to create a new collection
+    /// - [`Database::remove_collection`] — to delete a collection
     /// - [`Collection`] — the structure returned by this method
-    ///
-    /// ---  
-    ///
-    /// 🧭 Your path to structured document access.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_collection(&self, name: &str) -> Option<&Collection> {
         self.collections.iter().find(|c| c.name == name)
     }
 
+    /// 🦀
     /// Retrieves a **mutable** reference to a collection by its name.
     ///
     /// This method searches the internal list of collections and returns a mutable reference
@@ -266,8 +257,11 @@ impl Database {
     /// # Example
     ///
     /// ```rust
-    /// let mut db = Database::new("inventory.nosqlite");
-    /// let mut handler = NosqliteErrorHandler::new("inventory.nosqlite".to_string());
+    /// use nosqlite_rust::engine::models::Database;
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    ///
+    /// let mut db = Database::new("temp/data40.nosqlite");
+    /// let mut handler = NosqliteErrorHandler::new("temp/data40.nosqlite".to_string());
     ///
     /// db.add_collection("products", serde_json::json!({ "id": "number", "name": "string" }), &mut handler).unwrap();
     ///
@@ -280,7 +274,7 @@ impl Database {
     /// # Notes
     ///
     /// - This method grants direct mutable access. Use cautiously in multi-threaded contexts or shared references.
-    /// - If you only need read access, use [`get_collection`] instead.
+    /// - If you only need read access, use [`Database::get_collection`] instead.
     ///
     /// # Use Cases
     ///
@@ -290,20 +284,15 @@ impl Database {
     ///
     /// # See Also
     ///
-    /// - [`get_collection`] — immutable variant
+    /// - [`Database::get_collection`] — immutable variant
     /// - [`Collection`] — the structure being returned
-    ///
-    /// ---  
-    ///
-    /// 🧬 Mutation enabled. Your database just got writable.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn get_collection_mut(&mut self, name: &str) -> Option<&mut Collection> {
         self.collections.iter_mut().find(|c| c.name == name)
     }
 }
 
 impl Display for Database {
+    /// 🦀
     /// Formats the [`Database`] for display in a human-readable format.
     ///
     /// The output includes:
@@ -314,7 +303,7 @@ impl Display for Database {
     ///
     /// # Example Output
     ///
-    /// ```
+    /// ```text
     /// Database (3 collections):
     ///   - users
     ///   - products
@@ -329,7 +318,9 @@ impl Display for Database {
     /// # Usage Example
     ///
     /// ```rust
-    /// let db = Database::new("mydb.nosqlite");
+    /// use nosqlite_rust::engine::models::Database;
+    ///
+    /// let db = Database::new("temp/data41.nosqlite");
     /// println!("{}", db); // Triggers this Display implementation
     /// ```
     ///
@@ -337,12 +328,6 @@ impl Display for Database {
     ///
     /// - [`Collection`] — individual items being listed
     /// - [`std::fmt::Display`] — the trait being implemented
-    ///
-    /// ---  
-    ///
-    /// 🖨️ Clean terminal display for your in-memory database.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Database ({} collections):", self.collections.len())?;
         for collection in &self.collections {
@@ -353,6 +338,7 @@ impl Display for Database {
 }
 
 impl Default for Database {
+    /// 🦀
     /// Creates a new default [`Database`] instance with no collections.
     ///
     /// This method provides a zero-configuration entry point to create an empty database,
@@ -370,6 +356,8 @@ impl Default for Database {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::models::Database;
+    ///
     /// let db = Database::default();
     /// assert!(db.collections.is_empty());
     /// println!("{}", db); // Database (0 collections)
@@ -385,12 +373,6 @@ impl Default for Database {
     ///
     /// - [`Database::new`] — for creating a database with a custom path
     /// - [`Default`] — the trait being implemented
-    ///
-    /// ---  
-    ///
-    /// 🧪 One-liner database creation — ready for tests, REPLs, and quick starts.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn default() -> Self {
         Database::new("db.nosqlite")
     }

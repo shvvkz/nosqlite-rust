@@ -4,13 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use super::NosqliteError;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct NosqliteErrorHandler {
     errors: Vec<NosqliteError>,
     db_path: String,
 }
 
 impl NosqliteErrorHandler {
+    /// 🦀
     /// Creates a new [`NosqliteErrorHandler`] instance with an empty error log and associated database path.
     ///
     /// This handler is responsible for collecting, storing, and optionally reporting structured errors
@@ -30,8 +31,10 @@ impl NosqliteErrorHandler {
     /// # Example
     ///
     /// ```rust
-    /// let handler = NosqliteErrorHandler::new("memory-db".to_string());
-    /// assert!(handler.errors.is_empty());
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
+    ///
+    /// let handler = NosqliteErrorHandler::new("temp/data12.nosqlite".to_string());
+    /// assert!(handler.all_errors().is_empty());
     /// ```
     ///
     /// # Use Cases
@@ -43,19 +46,15 @@ impl NosqliteErrorHandler {
     /// # See Also
     ///
     /// - [`NosqliteError`] — the error enum used by this handler
-    /// - [`log_error`] — method for appending errors to the handler
-    ///
-    /// ---  
-    ///
-    /// ⚠️ Centralized, structured error tracking — one handler to catch them all.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
+    /// - [`NosqliteErrorHandler::log_error`] — method for appending errors to the handler
     pub fn new(db_path: String) -> Self {
         Self {
             errors: Vec::new(),
             db_path,
         }
     }
+
+    /// 🦀
     /// Logs an error into the handler, optionally persisting it for later retrieval or storage.
     ///
     /// This method performs two actions:
@@ -74,9 +73,10 @@ impl NosqliteErrorHandler {
     /// # Example
     ///
     /// ```rust
-    /// let mut handler = NosqliteErrorHandler::new("my-db".to_string());
+    /// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+    /// let mut handler = NosqliteErrorHandler::new("temp/data13.nosqlite".to_string());
     /// handler.log_error(NosqliteError::DocumentNotFound("abc123".to_string()));
-    /// assert_eq!(handler.errors.len(), 1);
+    /// assert_eq!(handler.all_errors().len(), 1);
     /// ```
     ///
     /// # Side Effects
@@ -86,20 +86,13 @@ impl NosqliteErrorHandler {
     /// # See Also
     ///
     /// - [`NosqliteError`] — the error type being logged
-    /// - [`NosqliteErrorHandler::errors`] — internal list where errors are stored
-    /// - [`NosqliteErrorHandler::persist_error`] — handles external persistence logic
-    ///
-    /// ---  
-    ///
-    /// 🧠 Tracks the past. Preps for the future.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn log_error(&mut self, error: NosqliteError) {
         let timestamp = chrono::Utc::now();
         self.persist_error(&error);
         self.errors.push(error);
     }
 
+    /// 🦀
     /// Persists a given [`NosqliteError`] to a log file associated with the database.
     ///
     /// This method appends the error, along with a UTC timestamp, to a `.log` file whose name
@@ -131,29 +124,15 @@ impl NosqliteErrorHandler {
     /// - Appends a log entry to the target `.log` file
     /// - Performs file I/O operations
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let handler = NosqliteErrorHandler::new("data/users.nosqlite".to_string());
-    /// handler.persist_error(&NosqliteError::DocumentNotFound("abc123".to_string()));
-    /// // Appends to: data/users.log
-    /// ```
-    ///
     /// # Notes
     ///
-    /// - This method is intended to be used internally by [`log_error`].
+    /// - This method is intended to be used internally by [`NosqliteErrorHandler::log_error`].
     /// - Consider adding more robust error handling instead of a hard `expect()` in production environments.
     ///
     /// # See Also
     ///
-    /// - [`log_error`] — logs and persists errors together
+    /// - [`NosqliteErrorHandler::log_error`] — logs and persists errors together
     /// - [`NosqliteError`] — the structured error type
-    ///
-    /// ---  
-    ///
-    /// 📝 Persistent, timestamped error logging — for when you want your DB to leave a paper trail.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn persist_error(&self, error: &NosqliteError) {
         let log_path = self.db_path.replace(".nosqlite", ".log");
 
@@ -169,6 +148,7 @@ impl NosqliteErrorHandler {
         let _ = file.write_all(entry.as_bytes());
     }
 
+    /// 🦀
     /// Returns a reference to all errors logged by the handler so far.
     ///
     /// This method provides immutable access to the internal list of errors collected
@@ -177,12 +157,14 @@ impl NosqliteErrorHandler {
     ///
     /// # Returns
     ///
-    /// - A slice (`&[NosqliteError]`) containing all previously logged errors in insertion order.
+    /// - A slice (&[`NosqliteError`]) containing all previously logged errors in insertion order.
     ///
     /// # Example
     ///
     /// ```rust
-    /// let mut handler = NosqliteErrorHandler::new("test-db.nosqlite".to_string());
+    /// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};;
+    ///
+    /// let mut handler = NosqliteErrorHandler::new("temp/data14.nosqlite".to_string());
     /// handler.log_error(NosqliteError::DocumentNotFound("missing-id".to_string()));
     ///
     /// let errors = handler.all_errors();
@@ -193,7 +175,8 @@ impl NosqliteErrorHandler {
     /// # Behavior
     ///
     /// - Errors are returned in the order they were logged (FIFO).
-    /// - The returned slice is immutable — use [`log_error`] to add new entries.
+    /// - This method replaces direct access to the private `errors` field.
+    /// - The returned slice is immutable — use [`NosqliteErrorHandler::log_error`] to add new entries.
     ///
     /// # Use Cases
     ///
@@ -203,24 +186,19 @@ impl NosqliteErrorHandler {
     ///
     /// # See Also
     ///
-    /// - [`log_error`] — for inserting new errors
+    /// - [`NosqliteErrorHandler::log_error`] — for inserting new errors
     /// - [`NosqliteError`] — the error type stored and returned
-    ///
-    /// ---  
-    ///
-    /// 📋 Because good systems don’t just fail — they *explain why*.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn all_errors(&self) -> &[NosqliteError] {
         &self.errors
     }
 
+    /// 🦀
     /// Wraps a fallible operation, logs any error using the handler, and returns a unified [`NosqliteError`].
     ///
     /// This utility method transforms a `Result<T, E>` into `Result<T, NosqliteError>`, using a provided closure
     /// to convert the original error type `E` into a [`NosqliteError`]. If the result is an error, it will be:
     /// - Transformed via the `wrap` closure
-    /// - Logged using [`log_error`]
+    /// - Logged using [`NosqliteErrorHandler::log_error`]
     /// - Returned to the caller as a `Result::Err`
     ///
     /// This method is especially useful for composing fallible operations in I/O, parsing, or collection logic,
@@ -244,10 +222,12 @@ impl NosqliteErrorHandler {
     /// # Example
     ///
     /// ```rust
+    /// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+    ///
     /// let result: Result<i32, std::io::Error> = Err(std::io::Error::new(std::io::ErrorKind::Other, "fail"));
     ///
-    /// let mut handler = NosqliteErrorHandler::new("my-db.nosqlite".to_string());
-    /// let mapped = handler.try_or_log(result, |e| NosqliteError::Io(format!("IO failed: {}", e)));
+    /// let mut handler = NosqliteErrorHandler::new("temp/data15.nosqlite".to_string());
+    /// let mapped = handler.try_or_log(result, |e| NosqliteError::IoError(format!("IO failed: {}", e)));
     ///
     /// assert!(mapped.is_err());
     /// assert_eq!(handler.all_errors().len(), 1);
@@ -255,19 +235,8 @@ impl NosqliteErrorHandler {
     ///
     /// # See Also
     ///
-    /// - [`log_error`] — used internally to record the error
+    /// - [`NosqliteErrorHandler::log_error`] — used internally to record the error
     /// - [`NosqliteError`] — the target error type
-    ///
-    /// # Notes
-    ///
-    /// - This method allows generic interop with any external or library errors by mapping them
-    ///   into your internal domain-specific error format.
-    ///
-    /// ---  
-    ///
-    /// ♻️ Elegant error flow: transform, log, continue.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn try_or_log<T, E>(
         &mut self,
         result: Result<T, E>,
