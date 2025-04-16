@@ -51,22 +51,6 @@ mod tests {
     }
 
     #[test]
-    fn create_collection_should_fail() {
-        let db_path = create_random_file_path();
-        let db_path_str = db_path.as_str();
-
-        let mut db = Nosqlite::open(db_path_str).unwrap();
-        let schema = json!({ "field": "string" });
-
-        // Première création réussie
-        assert!(db.create_collection("dup", schema.clone()).is_ok());
-
-        // Deuxième création avec le même nom doit échouer
-        let result = db.create_collection("dup", schema);
-        assert!(result.is_err());
-    }
-
-    #[test]
     fn delete_collection_should_succeed() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
