@@ -11,7 +11,10 @@ fn temp_paths() -> (String, String) {
     if !std::path::Path::new("./temp").exists() {
         std::fs::create_dir_all("./temp").unwrap();
     }
-    let db_path = format!("./temp/test_db_{}.nosqlite", rand::random::<u64>().to_string());
+    let db_path = format!(
+        "./temp/test_db_{}.nosqlite",
+        rand::random::<u64>()
+    );
     let log_path = db_path.clone();
     (db_path, log_path)
 }

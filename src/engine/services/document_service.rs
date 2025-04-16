@@ -217,7 +217,7 @@ pub fn update_document_field(
 ///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
 ///     col.all_documents().clone()
 /// };
-/// 
+///
 /// let mut db_clone = db.clone();
 /// delete_document(&mut db_clone, "users", &docs[0].id, &mut handler)?;
 /// Ok::<(), NosqliteError>(())
@@ -264,7 +264,7 @@ pub fn delete_document(
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
 /// use nosqlite_rust::engine::services::document_service::get_document_by_id;
-/// 
+///
 /// let mut db = Database::new("temp/data26.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data26.nosqlite".to_string());
 /// db.add_collection("users", json!({}), &mut handler)?;
@@ -273,7 +273,7 @@ pub fn delete_document(
 ///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
 ///     col.all_documents().clone()
 /// };
-/// 
+///
 /// let db_clone = db.clone();
 /// get_document_by_id(&db_clone, "users", &docs[0].id, &mut handler)?;
 /// Ok::<(), NosqliteError>(())
