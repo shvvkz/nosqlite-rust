@@ -10,12 +10,7 @@ fn make_handler() -> NosqliteErrorHandler {
     if !std::path::Path::new("./temp").exists() {
         std::fs::create_dir_all("./temp").unwrap();
     }
-    NosqliteErrorHandler::new(
-        format!(
-            "./temp/test_db_{}.nosqlite",
-            rand::random::<u64>()
-        )
-    )
+    NosqliteErrorHandler::new(format!("./temp/test_db_{}.nosqlite", rand::random::<u64>()))
 }
 
 /// Crée une base de données de test
@@ -23,10 +18,7 @@ fn make_db() -> Database {
     if !std::path::Path::new("./temp").exists() {
         std::fs::create_dir_all("./temp").unwrap();
     }
-    let db_path = format!(
-        "./temp/test_db_{}.nosqlite",
-        rand::random::<u64>()
-    );
+    let db_path = format!("./temp/test_db_{}.nosqlite", rand::random::<u64>());
     Database::new(db_path.as_str())
 }
 

@@ -7,10 +7,7 @@ fn create_db_and_collection() -> (Database, NosqliteErrorHandler) {
     if !std::path::Path::new("./temp").exists() {
         std::fs::create_dir_all("./temp").unwrap();
     }
-    let path = format!(
-        "./temp/test_db_{}.nosqlite",
-        rand::random::<u64>()
-    );
+    let path = format!("./temp/test_db_{}.nosqlite", rand::random::<u64>());
     let mut db = Database::new(path.as_str());
     let mut handler = NosqliteErrorHandler::new(path);
     db.add_collection("users", json!({ "name": "string" }), &mut handler)
