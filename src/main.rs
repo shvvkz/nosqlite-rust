@@ -1,11 +1,12 @@
 mod engine;
 
+use engine::{error::NosqliteErrorHandler, models::{Database, File}};
 use nosqlite_rust::engine::{error::NosqliteError, Nosqlite};
 use serde_json::json;
+use tempfile::NamedTempFile;
 
 fn main() -> Result<(), NosqliteError> {
-    let mut db = Nosqlite::open("mydb.nosqlite")?;
-
+    let mut  db = Nosqlite::open("test_db.nosqlite")?;
     // Étape 1 — Créer la collection "users" (si pas encore présente)
     db.create_collection(
         "users",

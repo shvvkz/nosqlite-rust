@@ -3,11 +3,19 @@ mod tests {
     use nosqlite_rust::engine::Nosqlite;
     use serde_json::json;
 
+    fn create_random_file_path() -> String {
+        if !std::path::Path::new("./temp").exists() {
+            std::fs::create_dir_all("./temp").unwrap();
+        }
+        let random_string = rand::random::<u64>().to_string();
+        let tmp_file_path = format!("./temp/test_db_{}.nosqlite", random_string);
+        tmp_file_path
+    }
+
     #[test]
     fn open_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("db_open_test.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         // Should create a new Nosqlite instance (and file) without error
         let result = Nosqlite::open(db_path_str);
@@ -16,9 +24,8 @@ mod tests {
 
     #[test]
     fn open_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("corrupted.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         // On écrit un contenu totalement invalide (ni base64 ni JSON)
         std::fs::write(&db_path, "invalid-encrypted-content").unwrap();
@@ -29,9 +36,8 @@ mod tests {
 
     #[test]
     fn create_collection_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("test_create.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut nosqlite = Nosqlite::open(db_path_str).unwrap();
         let schema = json!({ "username": "string", "age": "number" });
@@ -46,9 +52,8 @@ mod tests {
 
     #[test]
     fn create_collection_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("fail_create.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         let schema = json!({ "field": "string" });
@@ -63,9 +68,8 @@ mod tests {
 
     #[test]
     fn delete_collection_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("delete_success.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("temp", json!({ "key": "string" }))
@@ -80,9 +84,8 @@ mod tests {
 
     #[test]
     fn delete_collection_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("delete_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
@@ -92,9 +95,8 @@ mod tests {
 
     #[test]
     fn insert_document_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("insert_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -110,9 +112,8 @@ mod tests {
 
     #[test]
     fn insert_document_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("insert_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
@@ -123,9 +124,8 @@ mod tests {
 
     #[test]
     fn update_document_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("update_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -143,9 +143,8 @@ mod tests {
 
     #[test]
     fn update_document_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("update_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -158,9 +157,8 @@ mod tests {
 
     #[test]
     fn update_document_field_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("update_field_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -178,9 +176,8 @@ mod tests {
 
     #[test]
     fn update_document_field_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("update_field_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -192,9 +189,8 @@ mod tests {
 
     #[test]
     fn delete_document_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("delete_doc_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -212,9 +208,8 @@ mod tests {
 
     #[test]
     fn delete_document_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("delete_doc_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -227,9 +222,8 @@ mod tests {
 
     #[test]
     fn get_document_by_id_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_doc_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -246,9 +240,8 @@ mod tests {
 
     #[test]
     fn get_document_by_id_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_doc_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -260,9 +253,8 @@ mod tests {
 
     #[test]
     fn get_all_documents_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_all_docs_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("users", json!({ "name": "string" }))
@@ -279,9 +271,8 @@ mod tests {
 
     #[test]
     fn get_all_documents_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_all_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
@@ -292,9 +283,8 @@ mod tests {
 
     #[test]
     fn get_documents_by_field_should_succeed() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_by_field_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
         db.create_collection("posts", json!({ "author": "string" }))
@@ -315,9 +305,8 @@ mod tests {
 
     #[test]
     fn get_documents_by_field_should_fail() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("get_by_field_fail.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
@@ -328,9 +317,8 @@ mod tests {
 
     #[test]
     fn list_collections_should_return_all() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("list_collections_ok.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
@@ -349,9 +337,8 @@ mod tests {
 
     #[test]
     fn auto_save_is_called_on_successful_mutation() {
-        let tmp_dir = tempfile::tempdir().unwrap();
-        let db_path = tmp_dir.path().join("autosave_test.nosqlite");
-        let db_path_str = db_path.to_str().unwrap();
+        let db_path = create_random_file_path();
+        let db_path_str = db_path.as_str();
 
         {
             let mut db = Nosqlite::open(db_path_str).unwrap();
