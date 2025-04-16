@@ -7,12 +7,19 @@ use serde_json::json;
 
 /// Crée un handler de test temporaire
 fn make_handler() -> NosqliteErrorHandler {
-    NosqliteErrorHandler::new("/tmp/test_db.nosqlite".into())
+    if !std::path::Path::new("./temp").exists() {
+        std::fs::create_dir_all("./temp").unwrap();
+    }
+    NosqliteErrorHandler::new(format!("./temp/test_db_{}.nosqlite", rand::random::<u64>()))
 }
 
 /// Crée une base de données de test
 fn make_db() -> Database {
-    Database::new("test_db.nosqlite")
+    if !std::path::Path::new("./temp").exists() {
+        std::fs::create_dir_all("./temp").unwrap();
+    }
+    let db_path = format!("./temp/test_db_{}.nosqlite", rand::random::<u64>());
+    Database::new(db_path.as_str())
 }
 
 #[test]

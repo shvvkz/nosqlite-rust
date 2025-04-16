@@ -11,6 +11,7 @@ use std::{fs, path::Path};
 const DEFAULT_KEY_PATH: &str = "db.key";
 
 impl File {
+    /// 🦀
     /// Loads the database from disk, or creates a new one if the file does not exist.
     ///
     /// This function attempts to read, decrypt, and deserialize a database file into a [`Database`] instance.
@@ -48,30 +49,26 @@ impl File {
     /// # Example
     ///
     /// ```rust
-    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
-    /// let db = Database::load_or_create("db.nosqlite", &mut handler)
-    ///     .expect("Failed to load or create database");
+    /// use nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+    /// use nosqlite_rust::engine::models::File;
+    ///
+    /// let mut handler = NosqliteErrorHandler::new("temp/data42.nosqlite".to_string());
+    /// let db = File::load_or_create("temp/data42.nosqlite", &mut handler)?;
     /// println!("{}", db);
+    /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Security Notes
     ///
-    /// - Encryption is handled via [`Database::decrypt`]
-    /// - Keys are managed via [`Database::load_or_generate_key`] and stored at `DEFAULT_KEY_PATH`
+    /// - Encryption is handled via `File::decrypt`
+    /// - Keys are managed via `File::load_or_generate_key` and stored at `DEFAULT_KEY_PATH`
     /// - Ensure secure handling of key and file paths in production deployments
     ///
     /// # See Also
     ///
     /// - [`Database::new`] — creates a new empty database
-    /// - [`Database::decrypt`] — decrypts the database string
     /// - [`NosqliteErrorHandler`] — handles structured error logging
     /// - [`NosqliteError`] — error type used throughout the system
-    ///
-    /// ---  
-    ///
-    /// 🔐 Secure, resilient entrypoint for encrypted document databases.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     pub fn load_or_create(
         db_path: &str,
         handler: &mut NosqliteErrorHandler,
@@ -104,6 +101,7 @@ impl File {
         }
     }
 
+    /// 🦀
     /// Saves the [`Database`] to disk in encrypted form.
     ///
     /// This method serializes the entire database to pretty-printed JSON, encrypts it
@@ -124,7 +122,7 @@ impl File {
     ///
     /// # Pipeline Steps
     ///
-    /// 1. **Key management**: Loads or generates an AES encryption key via [`load_or_generate_key`]
+    /// 1. **Key management**: Loads or generates an AES encryption key via `load_or_generate_key`
     /// 2. **Serialization**: Converts the `Database` instance to pretty-printed JSON
     /// 3. **Encryption**: Encrypts the JSON payload with AES-256-GCM
     /// 4. **File write**: Saves the encrypted data to `db_path`
@@ -137,10 +135,13 @@ impl File {
     /// # Example
     ///
     /// ```rust
-    /// let db = Database::default();
-    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
+    /// use nosqlite_rust::engine::models::{Database, File};
+    /// use nosqlite_rust::engine::error::NosqliteErrorHandler;
     ///
-    /// Database::save("db.nosqlite", &db, &mut handler).expect("Failed to save database");
+    /// let db = Database::default();
+    /// let mut handler = NosqliteErrorHandler::new("temp/data43.nosqlite".to_string());
+    ///
+    /// File::save("temp/data43.nosqlite", &db, &mut handler).expect("Failed to save database");
     /// ```
     ///
     /// # Security Notes
@@ -151,16 +152,9 @@ impl File {
     ///
     /// # See Also
     ///
-    /// - [`Database::load_or_create`] — for loading the encrypted database back
+    /// - [`File::load_or_create`] — for loading the encrypted database back
     /// - [`NosqliteError`] — unified error type
     /// - [`NosqliteErrorHandler`] — used for logging any failures in the pipeline
-    ///
-    /// ---  
-    ///
-    /// 💾 Securely persists your in-memory database to disk — encrypted and audit-logged.
-    ///
-    /// 🔐🔒🔏  
-    /// 🔨🤖🔧 Powered by Rust
     pub fn save(
         db_path: &str,
         db: &Database,
@@ -180,6 +174,7 @@ impl File {
         Ok(())
     }
 
+    /// 🦀
     /// Encrypts a plaintext string using AES-256-GCM and returns a base64-encoded result.
     ///
     /// This method performs authenticated encryption using the AES-256-GCM algorithm. The resulting
@@ -207,17 +202,6 @@ impl File {
     /// The nonce is randomly generated per encryption and included in the output for
     /// later decryption.
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let plaintext = "my secret data";
-    /// let key = [0u8; 32]; // normally loaded from disk or a secure source
-    /// let mut handler = NosqliteErrorHandler::new("securedb.nosqlite".to_string());
-    ///
-    /// let encrypted = Database::encrypt(plaintext, &key, &mut handler).unwrap();
-    /// println!("Encrypted (base64): {}", encrypted);
-    /// ```
-    ///
     /// # Security Notes
     ///
     /// - A unique random nonce is generated for every call to `encrypt`
@@ -229,12 +213,6 @@ impl File {
     /// - [`Database::decrypt`] — decrypts output from this method
     /// - [`NosqliteError`] — error enum for encryption/decryption failures
     /// - [`Aes256Gcm`] — the underlying cipher
-    ///
-    /// ---  
-    ///
-    /// 🔐 AES-256-GCM with nonce-included base64 output — encrypted, authenticated, portable.
-    ///
-    /// 🔨🤖🔧 Powered by Rust
     fn encrypt(
         data: &str,
         key: &[u8; 32],
@@ -251,6 +229,7 @@ impl File {
         Ok(general_purpose::STANDARD.encode(&result))
     }
 
+    /// 🦀
     /// Decrypts a base64-encoded encrypted string using AES-256-GCM.
     ///
     /// This method reverses the process performed by [`encrypt`]. It:
@@ -278,18 +257,6 @@ impl File {
     /// base64([12-byte nonce][ciphertext])
     /// ```
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let key = [0u8; 32];
-    /// let plaintext = "secret data";
-    /// let mut handler = NosqliteErrorHandler::new("securedb.nosqlite".to_string());
-    ///
-    /// let encrypted = Database::encrypt(plaintext, &key, &mut handler).unwrap();
-    /// let decrypted = Database::decrypt(&encrypted, &key, &mut handler).unwrap();
-    /// assert_eq!(decrypted, plaintext);
-    /// ```
-    ///
     /// # Security Notes
     ///
     /// - Decryption is **authenticated** — tampering with the ciphertext or nonce will cause it to fail
@@ -301,13 +268,6 @@ impl File {
     /// - [`Database::encrypt`] — encrypts plaintext using AES-256-GCM
     /// - [`NosqliteError`] — contains possible decryption and decoding error variants
     /// - [`general_purpose::STANDARD`] — the base64 variant used
-    ///
-    /// ---  
-    ///
-    /// 🔓 Reversible, safe, authenticated decryption — ready for any NoSQL payload.
-    ///
-    /// 🔐💬  
-    /// 🔨🤖🔧 Powered by Rust
     fn decrypt(
         data: &str,
         key: &[u8; 32],
@@ -329,6 +289,7 @@ impl File {
         Ok(decrypt)
     }
 
+    /// 🦀
     /// Loads a 256-bit AES encryption key from a file, or generates and stores a new one if it doesn’t exist.
     ///
     /// This method ensures that a valid 32-byte key is always available for encryption and decryption.
@@ -353,15 +314,6 @@ impl File {
     /// - `Ok([u8; 32])` — a 256-bit AES key loaded or generated successfully
     /// - `Err(NosqliteError)` — if any step (file I/O, decoding, or writing) fails
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let mut handler = NosqliteErrorHandler::new("db.nosqlite".to_string());
-    /// let key = Database::load_or_generate_key("key.nosqlite", &mut handler)
-    ///     .expect("Failed to initialize encryption key");
-    /// assert_eq!(key.len(), 32);
-    /// ```
-    ///
     /// # Behavior
     ///
     /// - The generated key is encoded in lowercase hexadecimal (64 characters) before being written to disk.
@@ -384,13 +336,6 @@ impl File {
     /// - [`Database::encrypt`] / [`Database::decrypt`] — uses this key
     /// - [`NosqliteErrorHandler`] — for persistent error logging
     /// - [`rand::rng`] — used to generate secure random bytes
-    ///
-    /// ---  
-    ///
-    /// 🗝️ Guaranteed access to a strong AES-256 key — loaded if present, generated if not.
-    ///
-    /// 🔐✨  
-    /// 🔨🤖🔧 Powered by Rust
     fn load_or_generate_key(
         path: &str,
         handler: &mut NosqliteErrorHandler,

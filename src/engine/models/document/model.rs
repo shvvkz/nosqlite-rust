@@ -1,6 +1,8 @@
+use crate::engine::models::Collection;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+/// 🦀
 /// Represents a single document stored in a collection.
 ///
 /// A `Document` is a structured JSON object that includes metadata such as a unique ID

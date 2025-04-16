@@ -8,7 +8,10 @@ use std::fs;
 use std::path::Path;
 
 fn temp_paths() -> (String, String) {
-    let db_path = "/tmp/test_db_service.nosqlite".to_string();
+    if !std::path::Path::new("./temp").exists() {
+        std::fs::create_dir_all("./temp").unwrap();
+    }
+    let db_path = format!("./temp/test_db_{}.nosqlite", rand::random::<u64>());
     let log_path = db_path.clone();
     (db_path, log_path)
 }
