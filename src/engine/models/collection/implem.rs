@@ -1,7 +1,7 @@
 use super::model::Collection;
 use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::document::model::Document;
-use crate::engine::models::utils::{now, validate_against_structure};
+use crate::engine::models::utils::{get_nested_value, now, validate_against_structure};
 use serde_json::Value;
 use std::fmt::Display;
 
@@ -156,39 +156,37 @@ impl Collection {
         Ok(())
     }
 
-    /// 🦀
-    /// Replaces the contents of a document in the collection, given its ID.
+    /// Replaces the contents of all documents in the collection that match a specific field value.
     ///
-    /// This method performs a **full update** of an existing document, overwriting its entire
-    /// data payload with `new_data`, after verifying that the structure of the new content
-    /// conforms to the collection’s schema.
+    /// This method performs a **full update** for each matching document, overwriting their entire
+    /// content with `new_data`, after verifying that the structure conforms to the collection's schema.
     ///
     /// # Parameters
     ///
-    /// - `id`: A string slice (`&str`) that uniquely identifies the target document.
-    /// - `new_data`: A [`serde_json::Value`] representing the new content for the document. This must be a
-    ///   JSON object matching the expected structure of the collection.
-    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging any encountered errors.
+    /// - `field_name`: The name of the field to match (supports nested paths like `"profile.age"`).
+    /// - `field_value`: The target value to match against.
+    /// - `new_data`: A [`serde_json::Value`] representing the new content for each matching document. Must be a valid JSON object.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging validation or lookup errors.
     ///
     /// # Returns
     ///
-    /// - `Ok(())` if the document was found, validated, and updated successfully.
+    /// - `Ok(())` if at least one document was found and successfully updated.
     /// - `Err(NosqliteError)` if:
-    ///   - No document with the given ID exists
-    ///   - The new document data is invalid or mismatches the expected structure
-    ///
+    ///   - No document matched the criteria,
+    ///   - The new data does not conform to the collection schema,
+    ///   - The data is not a JSON object.
+    /// 
     /// # Errors
-    ///
-    /// - [`NosqliteError::DocumentNotFound`]: Returned if no document in the collection matches the provided ID.
-    /// - [`NosqliteError::DocumentInvalid`]: Returned if the new data does not match the schema.
-    /// - [`NosqliteError::InvalidCollectionStructure`]: Would apply if the collection's structure was malformed (guarded elsewhere).
+    /// 
+    /// - [`NosqliteError::DocumentNotFound`] is returned if no document matches the criteria.
+    /// - [`NosqliteError::DocumentInvalid`] is returned if the new data is not a JSON object or does not match the collection's structure.
+    /// - [`NosqliteError::InvalidCollectionStructure`] is returned if the collection's structure is not a JSON object.
     ///
     /// # Behavior
     ///
-    /// - Updates the document's `data` field with `new_data`.
-    /// - Updates the document’s `updated_at` field with the current timestamp via [`now()`].
-    /// - The document is fully replaced — **partial updates are not supported** by this method.
-    ///
+    /// - All documents where `field_name == field_value` will be fully overwritten.
+    /// - Each updated document receives a fresh `updated_at` timestamp.
+    /// - Partial updates are not supported by this method.
     /// # Example
     ///
     /// ```rust
@@ -206,7 +204,7 @@ impl Collection {
     /// let updated = json!({ "id": 1, "name": "Alice Updated" });
     /// let doc_id = collection.documents[0].id.clone();
     ///
-    /// collection.update_document(&doc_id, updated, &mut handler).unwrap();
+    /// collection.update_documents("id", &json!(1), updated, &mut handler).unwrap();
     /// ```
     ///
     /// # See Also
@@ -214,41 +212,66 @@ impl Collection {
     /// - [`Collection::add_document`]: For inserting new documents into the collection.
     /// - [`validate_against_structure`]: Validates structural conformance.
     /// - [`NosqliteError`], [`NosqliteErrorHandler`], [`Document`]
-    pub fn update_document(
+    pub fn update_documents(
         &mut self,
-        id: &str,
+        field_name: &str,
+        field_value: &Value,
         new_data: Value,
         handler: &mut NosqliteErrorHandler,
     ) -> Result<(), NosqliteError> {
-        let position = self
-            .documents
-            .iter()
-            .position(|d| d.id == id)
-            .ok_or_else(|| {
-                let error = NosqliteError::DocumentNotFound(id.to_string());
+        // Vérifie que new_data est bien un objet JSON
+        let doc_map = if let Value::Object(ref doc_map) = new_data {
+            doc_map
+        } else {
+            let error = NosqliteError::DocumentInvalid("New data must be a JSON object".into());
+            handler.log_error(error.clone());
+            return Err(error);
+        };
+    
+        // Vérifie que la structure correspond à celle de la collection
+        if let Value::Object(expected_structure) = &self.structure {
+            if !validate_against_structure(doc_map, expected_structure) {
+                let error = NosqliteError::DocumentInvalid(
+                    "New data does not match the collection's structure".into(),
+                );
                 handler.log_error(error.clone());
-                error
-            })?;
-
-        if let Value::Object(ref doc_map) = new_data {
-            if let Value::Object(expected_structure) = &self.structure {
-                if !validate_against_structure(doc_map, expected_structure) {
-                    let error = NosqliteError::DocumentInvalid(
-                        "New data does not match the collection's structure".into(),
-                    );
-                    handler.log_error(error.clone());
-                    return Err(error);
-                }
+                return Err(error);
             }
         }
-
-        let mut document = self.documents[position].clone();
-        document.data = new_data;
-        document.updated_at = now();
-        self.documents[position] = document;
-
+    
+        // Trouve tous les documents correspondants
+        let matching_indices: Vec<usize> = self
+            .documents
+            .iter()
+            .enumerate()
+            .filter_map(|(i, doc)| {
+                if get_nested_value(&doc.data, field_name) == Some(field_value) {
+                    Some(i)
+                } else {
+                    None
+                }
+            })
+            .collect();
+    
+        if matching_indices.is_empty() {
+            let error = NosqliteError::DocumentNotFound(format!(
+                "No document found where '{}' == '{}'", field_name, field_value
+            ));
+            handler.log_error(error.clone());
+            return Err(error);
+        }
+    
+        // Met à jour tous les documents trouvés
+        for index in matching_indices {
+            let mut document = self.documents[index].clone();
+            document.data = new_data.clone(); // Cloner car on modifie plusieurs documents
+            document.updated_at = now();
+            self.documents[index] = document;
+        }
+    
         Ok(())
     }
+    
 
     /// 🦀
     /// Updates a single field within a document, identified by its unique ID.

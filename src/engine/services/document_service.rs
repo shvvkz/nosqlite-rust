@@ -60,30 +60,32 @@ pub fn insert_document(
 }
 
 /// 🦀
-/// Replaces an existing document’s entire content by its ID.
+/// Updates all documents in a given collection that match a specified field and value.
 ///
-/// This method validates the new content against the collection schema,
-/// and if successful, replaces the existing document's data and updates the timestamp.
+/// This service-level function locates the collection within the database,
+/// then delegates the update operation to the collection logic. Each document
+/// that matches `field_name == field_value` will be entirely replaced by `data` after validation.
 ///
 /// # Parameters
 ///
 /// - `db`: A mutable reference to the [`Database`] instance.
-/// - `collection_name`: The name of the collection.
-/// - `id`: The ID of the document to update.
-/// - `data`: The new content (must be a valid JSON object).
-/// - `handler`: Error handler for logging validation and lookup issues.
+/// - `collection_name`: The name of the collection to target.
+/// - `field_name`: The field name used for matching (e.g., `"email"` or `"profile.name"`).
+/// - `field_value`: The target value to match.
+/// - `data`: The new document content to apply to all matches (must be a valid JSON object).
+/// - `handler`: The error handler for logging schema violations and collection/document lookup failures.
 ///
 /// # Returns
 ///
-/// - `Ok(())` if the update is successful
-/// - `Err(NosqliteError)` if the document or collection is missing or invalid
+/// - `Ok(())` if matching documents were found and successfully updated.
+/// - `Err(NosqliteError)` if the collection does not exist, no documents match, or the new data is invalid.
 ///
 /// # Example
 ///
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database, Collection}};
-/// use nosqlite_rust::engine::services::document_service::update_document;
+/// use nosqlite_rust::engine::services::document_service::update_documents;
 ///
 /// let mut db = Database::new("temp/data23.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data23.nosqlite".to_string());
@@ -94,7 +96,7 @@ pub fn insert_document(
 ///     col.all_documents().clone()
 /// };
 /// let mut db_clone = db.clone();
-/// update_document(&mut db_clone, "users", &docs[0].id, json!({ "id": "xyz", "name": "Alice Updated" }), &mut handler)?;
+/// update_documents(&mut db_clone, "users", "id", &json!("abc123"), json!({ "id": "xyz", "name": "Alice Updated" }), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
@@ -102,10 +104,11 @@ pub fn insert_document(
 ///
 /// - [`update_document_field`] — partial updates
 /// - [`get_document_by_id`] — read after update
-pub fn update_document(
+pub fn update_documents(
     db: &mut Database,
     collection_name: &str,
-    id: &str,
+    field_name: &str,
+    field_value: &Value,
     data: Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<(), NosqliteError> {
@@ -118,8 +121,9 @@ pub fn update_document(
         error
     })?;
 
-    collection.update_document(id, data, handler)
+    collection.update_documents(field_name, field_value, data, handler)
 }
+
 
 /// 🦀
 /// Updates a single field in an existing document by its ID.

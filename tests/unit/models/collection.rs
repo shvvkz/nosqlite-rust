@@ -205,7 +205,7 @@ fn update_existing_document_should_work() {
         .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "field": "after" }), &mut handler);
+    let res = col.update_documents("field", &json!("before"), json!({ "field": "after" }), &mut handler);
     assert!(res.is_ok());
     assert_eq!(col.documents[0].data["field"], "after");
 }
@@ -218,7 +218,7 @@ fn update_document_with_invalid_structure_should_fail() {
         .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "wrong_field": "nope" }), &mut handler);
+    let res = col.update_documents("field", &json!("original"), json!({ "wrong_field": "nope" }), &mut handler);
     assert!(res.is_err());
 }
 

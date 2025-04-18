@@ -118,7 +118,7 @@ mod tests {
             .unwrap();
 
         let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.update_document("users", &doc_id, json!({ "name": "Updated" }));
+        let result = db.update_documents("users", "name", &json!("Original"), json!({ "name": "Updated" }));
 
         assert!(result.is_ok());
         let doc = db.get_document_by_id("users", &doc_id).unwrap();
@@ -135,7 +135,7 @@ mod tests {
             .unwrap();
 
         // ID invalide
-        let result = db.update_document("users", "invalid-id", json!({ "name": "Updated" }));
+        let result = db.update_documents("users", "name", &json!("invalid-id"), json!({ "name": "Updated" }));
         assert!(result.is_err());
     }
 

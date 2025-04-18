@@ -205,27 +205,26 @@ impl Nosqlite {
     }
 
     /// 🦀
-    /// Replaces an entire document in a collection by its ID.
+    /// Updates all documents in a collection where a given field matches a specified value.
     ///
-    /// This method fully overwrites the existing document’s content, while preserving its
-    /// original `id`, and updating the `updated_at` timestamp.
-    ///
-    /// The new data is validated against the collection schema before the update is applied.
-    /// After a successful update, the database is automatically saved to disk.
+    /// This method is part of the public-facing API and delegates the logic to internal services.
+    /// It performs a full replacement of each matching document's content and triggers an automatic save
+    /// if the update is successful.
     ///
     /// # Parameters
     ///
     /// - `collection`: The name of the collection.
-    /// - `id`: The unique identifier of the document to update.
-    /// - `new_data`: A complete JSON object to replace the existing document data.
+    /// - `field_name`: The field to match (nested paths supported, e.g., `"profile.birthdate"`).
+    /// - `field_value`: The value to match.
+    /// - `new_data`: A complete JSON object to overwrite the content of matching documents.
     ///
     /// # Returns
     ///
-    /// - `Ok(())` if the document exists and the update passes validation.
-    /// - `Err(NosqliteError)` if the document or collection is missing, or validation fails.
-    ///
+    /// - `Ok(())` if at least one document matched and was successfully updated.
+    /// - `Err(NosqliteError)` if the collection is missing, no document matched, or the new data is invalid.
+    /// 
     /// # Example
-    ///
+    /// 
     /// ```rust
     /// use serde_json::json;
     /// use nosqlite_rust::engine::Nosqlite;
@@ -235,8 +234,7 @@ impl Nosqlite {
     /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": 1, "name": "Alice" }))?;
     /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// db.update_document("users", &docs[0].id, json!({ "id": 1, "name": "Updated" }))?;
+    /// db.update_documents("users", "id", &json!(1), json!({ "id": 1, "name": "Updated" }))?;
     /// Ok::<(), NosqliteError>(())
     /// ```
     ///
@@ -244,16 +242,18 @@ impl Nosqlite {
     ///
     /// - [`update_document_field`] — for partial updates
     /// - [`insert_document`] — for adding new documents
-    pub fn update_document(
+    pub fn update_documents(
         &mut self,
         collection: &str,
-        id: &str,
+        field_name: &str,
+        field_value: &Value,
         new_data: Value,
     ) -> Result<(), NosqliteError> {
-        let result = update_document(
+        let result = update_documents(
             &mut self.db,
             collection,
-            id,
+            field_name,
+            field_value,
             new_data,
             &mut self.error_handler,
         );
@@ -262,6 +262,7 @@ impl Nosqlite {
         }
         result
     }
+    
 
     /// 🦀
     /// Updates a single field within a document in a given collection.

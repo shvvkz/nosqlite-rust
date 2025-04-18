@@ -35,10 +35,11 @@ fn update_document_should_replace_correctly() {
     insert_document(&mut db, "users", json!({ "name": "Carol" }), &mut handler).unwrap();
     let id = db.get_collection("users").unwrap().documents[0].id.clone();
 
-    let res = update_document(
+    let res = update_documents(
         &mut db,
         "users",
-        &id,
+        "name",
+        &json!("Carol"),
         json!({ "name": "New Carol" }),
         &mut handler,
     );
@@ -113,10 +114,11 @@ fn insert_into_nonexistent_collection_should_fail() {
 #[test]
 fn update_nonexistent_document_should_fail() {
     let (mut db, mut handler) = create_db_and_collection();
-    let res = update_document(
+    let res = update_documents(
         &mut db,
         "users",
-        "fake_id",
+        "name",
+        &json!("invalid-id"),
         json!({ "name": "Doesn't matter" }),
         &mut handler,
     );
