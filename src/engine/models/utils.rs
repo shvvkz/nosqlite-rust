@@ -184,3 +184,49 @@ fn type_matches(expected: &str, val: &Value) -> bool {
         _ => false,
     }
 }
+
+/// 🦀
+/// Retrieves a nested value from a JSON object using dot-separated path syntax.
+///
+/// This utility function traverses a [`serde_json::Value`] using a field path such as `"user.profile.name"`
+/// and returns the corresponding nested value, if it exists.
+///
+/// # Parameters
+///
+/// - `value`: A reference to a [`serde_json::Value`], typically a JSON object or sub-object.
+/// - `path`: A string slice representing the dot-separated path to the desired field (e.g., `"address.city"`).
+///
+/// # Returns
+///
+/// - `Some(&Value)` if the full path exists and points to a valid value.
+/// - `None` if any part of the path is missing or not an object.
+///
+/// # Example
+///
+/// ```rust
+/// use serde_json::json;
+/// use nosqlite_rust::engine::models::utils::get_nested_value;
+///
+/// let data = json!({
+///     "user": {
+///         "profile": {
+///             "name": "Alice"
+///         }
+///     }
+/// });
+///
+/// assert_eq!(
+///     get_nested_value(&data, "user.profile.name"),
+///     Some(&json!("Alice"))
+/// );
+///
+/// assert_eq!(get_nested_value(&data, "user.profile.age"), None);
+/// ```
+///
+/// # Notes
+///
+/// - This function does not support array indexing (e.g., `"items[0].name"` is not valid).
+/// - Useful for filtering or querying deeply nested document fields.
+pub fn get_nested_value<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
+    path.split('.').try_fold(value, |val, key| val.get(key))
+}

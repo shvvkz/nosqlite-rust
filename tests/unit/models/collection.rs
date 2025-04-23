@@ -205,7 +205,12 @@ fn update_existing_document_should_work() {
         .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "field": "after" }), &mut handler);
+    let res = col.update_documents(
+        "field",
+        &json!("before"),
+        json!({ "field": "after" }),
+        &mut handler,
+    );
     assert!(res.is_ok());
     assert_eq!(col.documents[0].data["field"], "after");
 }
@@ -218,7 +223,12 @@ fn update_document_with_invalid_structure_should_fail() {
         .unwrap();
     let id = &col.documents[0].id.clone();
 
-    let res = col.update_document(id, json!({ "wrong_field": "nope" }), &mut handler);
+    let res = col.update_documents(
+        "field",
+        &json!("original"),
+        json!({ "wrong_field": "nope" }),
+        &mut handler,
+    );
     assert!(res.is_err());
 }
 
@@ -228,9 +238,13 @@ fn update_document_field_should_work() {
     let mut handler = make_error_handler();
     col.add_document(json!({ "field": "init" }), &mut handler)
         .unwrap();
-    let id = &col.documents[0].id.clone();
-
-    let res = col.update_field_document(id, "field", json!("changed"), &mut handler);
+    let res = col.update_documents_field(
+        "field",
+        &json!("init"),
+        "field",
+        json!("changed"),
+        &mut handler,
+    );
     assert!(res.is_ok());
     assert_eq!(col.documents[0].data["field"], "changed");
 }
@@ -239,7 +253,13 @@ fn update_document_field_should_work() {
 fn update_field_on_nonexistent_document_should_fail() {
     let mut col = make_collection();
     let mut handler = make_error_handler();
-    let res = col.update_field_document("wrong-id", "field", json!("new"), &mut handler);
+    let res = col.update_documents_field(
+        "wrong-id",
+        &json!("wrong"),
+        "field",
+        json!("new"),
+        &mut handler,
+    );
     assert!(res.is_err());
 }
 

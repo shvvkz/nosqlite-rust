@@ -35,10 +35,11 @@ fn update_document_should_replace_correctly() {
     insert_document(&mut db, "users", json!({ "name": "Carol" }), &mut handler).unwrap();
     let id = db.get_collection("users").unwrap().documents[0].id.clone();
 
-    let res = update_document(
+    let res = update_documents(
         &mut db,
         "users",
-        &id,
+        "name",
+        &json!("Carol"),
         json!({ "name": "New Carol" }),
         &mut handler,
     );
@@ -52,8 +53,15 @@ fn update_field_should_work() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "David" }), &mut handler).unwrap();
     let id = db.get_collection("users").unwrap().documents[0].id.clone();
-
-    let res = update_document_field(&mut db, "users", &id, "name", json!("Dave"), &mut handler);
+    let res = update_documents_field(
+        &mut db,
+        "users",
+        "name",
+        &json!("David"),
+        "name",
+        json!("Dave"),
+        &mut handler,
+    );
     assert!(res.is_ok());
     let doc = get_document_by_id(&db, "users", &id, &mut handler).unwrap();
     assert_eq!(doc.data["name"], "Dave");
@@ -113,10 +121,11 @@ fn insert_into_nonexistent_collection_should_fail() {
 #[test]
 fn update_nonexistent_document_should_fail() {
     let (mut db, mut handler) = create_db_and_collection();
-    let res = update_document(
+    let res = update_documents(
         &mut db,
         "users",
-        "fake_id",
+        "name",
+        &json!("invalid-id"),
         json!({ "name": "Doesn't matter" }),
         &mut handler,
     );
