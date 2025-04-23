@@ -222,9 +222,9 @@ impl Nosqlite {
     ///
     /// - `Ok(())` if at least one document matched and was successfully updated.
     /// - `Err(NosqliteError)` if the collection is missing, no document matched, or the new data is invalid.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// use serde_json::json;
     /// use nosqlite_rust::engine::Nosqlite;
@@ -262,29 +262,38 @@ impl Nosqlite {
         }
         result
     }
-    
 
     /// 🦀
-    /// Updates a single field within a document in a given collection.
+    /// Updates a specific field in all documents of a collection that match a field condition.
     ///
-    /// This is a partial update operation. It updates only the specified field,
-    /// leaving the rest of the document unchanged. Timestamps (`updated_at`) are refreshed automatically.
+    /// This method performs a **partial update** by locating all documents where `field_name == field_value`
+    /// and setting or inserting the `target_field` with the provided `value`.
     ///
-    /// No structure revalidation is performed on partial updates, so use with care.
-    ///
-    /// After a successful change, the database is auto-saved to disk.
+    /// It does **not** revalidate the document structure against the collection schema,
+    /// and the rest of the document content remains unchanged. After a successful update,
+    /// the database is automatically saved to disk.
     ///
     /// # Parameters
     ///
-    /// - `collection`: The name of the collection.
-    /// - `id`: The ID of the document to update.
-    /// - `field`: The field key to set or replace.
-    /// - `value`: The new value to assign to the field.
+    /// - `collection`: The name of the collection to modify.
+    /// - `field_name`: The field used to filter documents (supports dot notation, e.g., `"profile.id"`).
+    /// - `field_value`: The value to match against `field_name`.
+    /// - `target_field`: The field key to update or insert in the matched documents.
+    /// - `value`: The new value to assign to `target_field`.
     ///
     /// # Returns
     ///
-    /// - `Ok(())` if the update is successful.
-    /// - `Err(NosqliteError)` if the document or collection is missing, or if the document data is not a JSON object.
+    /// - `Ok(())` if one or more documents were successfully updated.
+    /// - `Err(NosqliteError)` if:
+    ///   - The collection does not exist,
+    ///   - No document matched the filter condition,
+    ///   - Or if a document's data is not a valid JSON object.
+    ///
+    /// # Behavior
+    ///
+    /// - Matching documents are updated in place.
+    /// - `updated_at` timestamps are refreshed for each modified document.
+    /// - This method does **not** validate the result against the collection's schema.
     ///
     /// # Example
     ///
@@ -294,35 +303,42 @@ impl Nosqlite {
     /// use nosqlite_rust::engine::error::NosqliteError;
     ///
     /// let mut db = Nosqlite::open("temp/data6.nosqlite")?;
-    /// db.create_collection("users", json!({ "id": "number", "name": "string" }))?;
-    /// db.insert_document("users", json!({ "id": 1, "name": "Alice" }))?;
-    /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// db.update_document_field("users", &docs[0].id, "email", json!("new@email.com"))?;
+    /// db.create_collection("users", json!({
+    ///     "_id": "string",
+    ///     "name": "string",
+    ///     "email": "string"
+    /// }))?;
+    ///
+    /// db.insert_document("users", json!({ "_id": "u1", "name": "Alice", "email": "a@old.com" }))?;
+    /// db.insert_document("users", json!({ "_id": "u2", "name": "Alice", "email": "a2@old.com" }))?;
+    ///
+    /// db.update_documents_field("users", "name", &json!("Alice"), "email", json!("a@new.com"))?;
     /// Ok::<(), NosqliteError>(())
     /// ```
     ///
     /// # Notes
     ///
-    /// - This does not validate the updated document against the schema after mutation.
-    /// - Use [`update_document`] for strict schema-validated replacement.
+    /// - If you need to enforce strict schema validation, use [`update_document`] or [`update_documents`] instead.
+    /// - Useful for batch updates by query.
     ///
     /// # See Also
     ///
     /// - [`get_document_by_id`] — for inspecting before or after
     /// - [`delete_document`] — for removing by ID
-    pub fn update_document_field(
+    pub fn update_documents_field(
         &mut self,
         collection: &str,
-        id: &str,
-        field: &str,
+        field_name: &str,
+        field_value: &Value,
+        target_field: &str,
         value: Value,
     ) -> Result<(), NosqliteError> {
-        let result = update_document_field(
+        let result = update_documents_field(
             &mut self.db,
             collection,
-            id,
-            field,
+            field_name,
+            field_value,
+            target_field,
             value,
             &mut self.error_handler,
         );

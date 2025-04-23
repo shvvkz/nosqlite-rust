@@ -118,7 +118,12 @@ mod tests {
             .unwrap();
 
         let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.update_documents("users", "name", &json!("Original"), json!({ "name": "Updated" }));
+        let result = db.update_documents(
+            "users",
+            "name",
+            &json!("Original"),
+            json!({ "name": "Updated" }),
+        );
 
         assert!(result.is_ok());
         let doc = db.get_document_by_id("users", &doc_id).unwrap();
@@ -135,7 +140,12 @@ mod tests {
             .unwrap();
 
         // ID invalide
-        let result = db.update_documents("users", "name", &json!("invalid-id"), json!({ "name": "Updated" }));
+        let result = db.update_documents(
+            "users",
+            "name",
+            &json!("invalid-id"),
+            json!({ "name": "Updated" }),
+        );
         assert!(result.is_err());
     }
 
@@ -151,7 +161,8 @@ mod tests {
             .unwrap();
 
         let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.update_document_field("users", &doc_id, "name", json!("New"));
+        let result =
+            db.update_documents_field("users", "name", &json!("Old"), "name", json!("New"));
 
         assert!(result.is_ok());
         let updated = db.get_document_by_id("users", &doc_id).unwrap();
@@ -167,7 +178,13 @@ mod tests {
         db.create_collection("users", json!({ "name": "string" }))
             .unwrap();
 
-        let result = db.update_document_field("users", "nonexistent-id", "name", json!("fail"));
+        let result = db.update_documents_field(
+            "users",
+            "nonexistent-id",
+            &json!("nonexistent"),
+            "name",
+            json!("fail"),
+        );
         assert!(result.is_err());
     }
 

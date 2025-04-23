@@ -102,7 +102,7 @@ pub fn insert_document(
 ///
 /// # See Also
 ///
-/// - [`update_document_field`] — partial updates
+/// - [`update_documents_field`] — partial updates
 /// - [`get_document_by_id`] — read after update
 pub fn update_documents(
     db: &mut Database,
@@ -124,55 +124,71 @@ pub fn update_documents(
     collection.update_documents(field_name, field_value, data, handler)
 }
 
-
 /// 🦀
-/// Updates a single field in an existing document by its ID.
+/// Updates a specific field in all documents that match a given field and value.
 ///
-/// This function performs a partial update on a document by setting a specific field
-/// to a new value. It does **not** revalidate the document against the schema.
+/// This function performs a **partial update** by locating every document in the collection
+/// where the specified `field_name` equals `field_value`, and setting or inserting
+/// the `target_field` with the provided `value`.
 ///
 /// # Parameters
 ///
 /// - `db`: A mutable reference to the [`Database`] instance.
-/// - `collection_name`: The name of the target collection.
-/// - `id`: The ID of the document to modify.
-/// - `field`: The field name to change.
-/// - `value`: The new value for that field.
-/// - `handler`: For logging document or collection errors.
+/// - `collection_name`: The name of the collection to target.
+/// - `field_name`: The field name used to search documents (supports nested paths like `"profile.name"`).
+/// - `field_value`: The value to match within `field_name`.
+/// - `target_field`: The name of the field to modify or insert in matching documents.
+/// - `value`: The new value to assign to `target_field`.
+/// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging lookup or structure issues.
 ///
 /// # Returns
 ///
-/// - `Ok(())` if the field is updated
-/// - `Err(NosqliteError)` if the document is not found or not an object
+/// - `Ok(())` if at least one document matched and was updated successfully.
+/// - `Err(NosqliteError)` if:
+///   - The collection does not exist,
+///   - No document matched the search criteria,
+///   - The matched document’s data is not a JSON object.
+///
+/// # Behavior
+///
+/// - If `target_field` exists in a matching document, it is overwritten with `value`.
+/// - If `target_field` does not exist, it is created.
+/// - All modified documents will have their `updated_at` timestamp refreshed.
+/// - This function does **not** revalidate the updated documents against the collection schema.
 ///
 /// # Example
 ///
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database, Collection}};
-/// use nosqlite_rust::engine::services::document_service::update_document_field;
+/// use nosqlite_rust::engine::services::document_service::update_documents_field;
 ///
 /// let mut db = Database::new("temp/data24.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data24.nosqlite".to_string());
-/// db.add_collection("users", json!({}), &mut handler)?;
-/// let docs = {
-///     let col = db.get_collection_mut("users").unwrap();
-///     col.add_document(json!({ "id": "abc123", "name": "Alice", "email": "test@example.com" }), &mut handler)?;
-///     col.all_documents().clone()
-/// };
-/// let mut db_clone = db.clone();
-/// update_document_field(&mut db_clone, "users", &docs[0].id, "email", json!("alice@example.com"), &mut handler)?;
+/// db.add_collection("users", json!({
+///     "id": "number",
+///     "name": "string",
+///     "email": "string"
+/// }), &mut handler)?;
+///
+/// let col = db.get_collection_mut("users").unwrap();
+/// col.add_document(json!({ "id": 1, "name": "Alice", "email": "old@example.com" }), &mut handler)?;
+/// col.add_document(json!({ "id": 2, "name": "Alice", "email": "old2@example.com" }), &mut handler)?;
+///
+/// update_documents_field(&mut db, "users", "name", &json!("Alice"), "email", json!("new@example.com"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # See Also
 ///
-/// - [`update_document`] — full document replacement
-pub fn update_document_field(
+/// - [`update_documents`] — for full document replacement
+/// - [`get_document_by_id`] — read after update
+pub fn update_documents_field(
     db: &mut Database,
     collection_name: &str,
-    id: &str,
-    field: &str,
+    field_name: &str,
+    field_value: &Value,
+    target_field: &str,
     value: Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<(), NosqliteError> {
@@ -185,7 +201,7 @@ pub fn update_document_field(
         error
     })?;
 
-    collection.update_field_document(id, field, value, handler)
+    collection.update_documents_field(field_name, field_value, target_field, value, handler)
 }
 
 /// 🦀

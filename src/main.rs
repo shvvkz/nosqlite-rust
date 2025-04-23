@@ -9,8 +9,10 @@ use serde_json::json;
 use tempfile::NamedTempFile;
 
 fn main() -> Result<(), NosqliteError> {
+    // Étape 1 — Ouvrir ou créer une base NoSQLite
     let mut db = Nosqlite::open("test_db.nosqlite")?;
-    // Étape 1 — Créer la collection "users" (si pas encore présente)
+
+    // Étape 2 — Créer la collection "users"
     db.create_collection(
         "users",
         json!({
@@ -19,8 +21,9 @@ fn main() -> Result<(), NosqliteError> {
             "email": "string"
         }),
     )?;
+    println!("✅ Collection 'users' créée.");
 
-    // Étape 2 — Insérer un utilisateur
+    // Étape 3 — Insérer un utilisateur
     db.insert_document(
         "users",
         json!({
@@ -29,31 +32,31 @@ fn main() -> Result<(), NosqliteError> {
             "email": "valentin@example.com"
         }),
     )?;
+    println!("✅ Utilisateur 'Valentin' inséré.");
 
-    // Étape 3 — Lister les utilisateurs
+    // Étape 4 — Lister les utilisateurs
     let docs = db.get_all_documents("users")?;
-    println!("\n👥 Utilisateurs:");
+    println!("\n👥 Utilisateurs présents dans la base:");
     for doc in docs {
         println!("{}", doc);
-        println!("\n🗑️ Utilisateur supprimé !");
     }
 
-    // Étape 4 — Modifier un champ
-    db.update_document_field(
+    // Étape 5 — Mettre à jour un champ "email" dans tous les documents où _id == "u123"
+    db.update_documents_field(
         "users",
-        "20996851-bc00-4b44-9ee3-6918c59c7766",
+        "_id",
+        &json!("u123"),
         "email",
         json!("valentin.new@example.com"),
     )?;
+    println!("\n✏️ Email mis à jour pour tous les utilisateurs avec _id = \"u123\".");
 
-    // Étape 5 — Vérifier la modification
-    let updated = db.get_document_by_id("users", "20996851-bc00-4b44-9ee3-6918c59c7766")?;
-    println!("\n📝 Document mis à jour:");
-    println!("{}", updated);
+    // Étape 6 — Vérifier les documents après modification
+    let updated_docs = db.get_all_documents("users")?;
+    println!("\n📄 Documents après mise à jour :");
+    for doc in updated_docs {
+        println!("{}", doc);
+    }
 
-    // Étape 6 — Supprimer l'utilisateur
-    db.delete_document("users", "20996851-bc00-4b44-9ee3-6918c59c7766")?;
-
-    println!("\n🗑️ Utilisateur supprimé !");
     Ok(())
 }

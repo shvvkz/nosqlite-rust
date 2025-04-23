@@ -228,7 +228,5 @@ fn type_matches(expected: &str, val: &Value) -> bool {
 /// - This function does not support array indexing (e.g., `"items[0].name"` is not valid).
 /// - Useful for filtering or querying deeply nested document fields.
 pub fn get_nested_value<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
-    path.split('.').fold(Some(value), |acc, key| {
-        acc.and_then(|v| v.get(key))
-    })
+    path.split('.').try_fold(value, |val, key| val.get(key))
 }
