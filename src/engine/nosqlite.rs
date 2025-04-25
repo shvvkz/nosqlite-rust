@@ -410,7 +410,8 @@ impl Nosqlite {
     /// # Parameters
     ///
     /// - `collection`: The name of the collection.
-    /// - `id`: The ID of the document to retrieve.
+    /// - `field_name`: The field name to search by (e.g., `"id"`).
+    /// - `field_value`: The value to match against the field (e.g., `"abc123"`).
     ///
     /// # Returns
     ///
@@ -427,9 +428,7 @@ impl Nosqlite {
     /// let mut db = Nosqlite::open("temp/data8.nosqlite")?;
     /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": "abc123", "name": "Alice" }))?;
-    /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// let doc = db.get_document_by_id("users", &docs[0].id)?;
+    /// let doc = db.get_document("users", "id", &json!("abc123"))?;
     /// println!("Found doc: {}", doc);
     /// Ok::<(), NosqliteError>(())
     /// ```
@@ -437,13 +436,20 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for bulk access
-    /// - [`update_document`] — for full mutation
-    pub fn get_document_by_id(
+    /// - [`update_documents`] — for full mutation
+    pub fn get_document(
         &mut self,
         collection: &str,
-        id: &str,
+        field_name: &str,
+        field_value: &Value,
     ) -> Result<&Document, NosqliteError> {
-        get_document_by_id(&self.db, collection, id, &mut self.error_handler)
+        get_document(
+            &self.db,
+            collection,
+            field_name,
+            field_value,
+            &mut self.error_handler,
+        )
     }
 
     /// 🦀

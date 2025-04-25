@@ -268,7 +268,8 @@ pub fn delete_documents(
 ///
 /// - `db`: A reference to the [`Database`] instance.
 /// - `collection_name`: The name of the target collection.
-/// - `id`: The document's ID to locate.
+/// - `field_name`: The field name used to search for the document (e.g., `"id"`).
+/// - `field_value`: The value to match against `field_name`.
 /// - `handler`: Logs a lookup failure if not found.
 ///
 /// # Returns
@@ -281,29 +282,27 @@ pub fn delete_documents(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
-/// use nosqlite_rust::engine::services::document_service::get_document_by_id;
+/// use nosqlite_rust::engine::services::document_service::get_document;
 ///
 /// let mut db = Database::new("temp/data26.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data26.nosqlite".to_string());
 /// db.add_collection("users", json!({}), &mut handler)?;
-/// let docs = {
-///     let col = db.get_collection_mut("users").unwrap();
-///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-///     col.all_documents().clone()
-/// };
 ///
-/// let db_clone = db.clone();
-/// get_document_by_id(&db_clone, "users", &docs[0].id, &mut handler)?;
+/// let col = db.get_collection_mut("users").unwrap();
+/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
+///
+/// get_document(&db, "users", "id", &json!("abc123"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # See Also
 ///
 /// - [`get_all_documents`] — to inspect all documents
-pub fn get_document_by_id<'a>(
+pub fn get_document<'a>(
     db: &'a Database,
     collection_name: &str,
-    id: &str,
+    field_name: &str,
+    field_value: &Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<&'a Document, NosqliteError> {
     let collection = db.get_collection(collection_name).ok_or_else(|| {
@@ -315,11 +314,16 @@ pub fn get_document_by_id<'a>(
         error
     })?;
 
-    collection.get_document(id).ok_or_else(|| {
-        let error = NosqliteError::DocumentNotFound(format!("Document '{}' not found", id));
-        handler.log_error(error.clone());
-        error
-    })
+    collection
+        .get_document(field_name, field_value)
+        .ok_or_else(|| {
+            let error = NosqliteError::DocumentNotFound(format!(
+                "Document search by '{}': '{}' not found",
+                field_name, field_value
+            ));
+            handler.log_error(error.clone());
+            error
+        })
 }
 
 /// 🦀

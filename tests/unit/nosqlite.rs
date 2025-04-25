@@ -116,8 +116,6 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Original" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
         let result = db.update_documents(
             "users",
             "name",
@@ -126,7 +124,7 @@ mod tests {
         );
 
         assert!(result.is_ok());
-        let doc = db.get_document_by_id("users", &doc_id).unwrap();
+        let doc = db.get_document("users", "name", &json!("Updated")).unwrap();
         assert_eq!(doc.data["name"], "Updated");
     }
 
@@ -159,13 +157,11 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Old" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
         let result =
             db.update_documents_field("users", "name", &json!("Old"), "name", json!("New"));
 
         assert!(result.is_ok());
-        let updated = db.get_document_by_id("users", &doc_id).unwrap();
+        let updated = db.get_document("users", "name", &json!("New")).unwrap();
         assert_eq!(updated.data["name"], "New");
     }
 
@@ -220,7 +216,7 @@ mod tests {
     }
 
     #[test]
-    fn get_document_by_id_should_succeed() {
+    fn get_document_should_succeed() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -229,16 +225,14 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Alice" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.get_document_by_id("users", &doc_id);
+        let result = db.get_document("users", "name", &json!("Alice"));
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap().data["name"], "Alice");
     }
 
     #[test]
-    fn get_document_by_id_should_fail() {
+    fn get_document_should_fail() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -246,7 +240,7 @@ mod tests {
         db.create_collection("users", json!({ "name": "string" }))
             .unwrap();
 
-        let result = db.get_document_by_id("users", "nonexistent-id");
+        let result = db.get_document("users", "nonexistent-id", &json!("nonexistent"));
         assert!(result.is_err());
     }
 

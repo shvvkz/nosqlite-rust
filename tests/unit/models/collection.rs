@@ -54,8 +54,7 @@ fn get_document_should_return_correct_doc() {
     let mut handler = make_error_handler();
     col.add_document(sample_doc(), &mut handler).unwrap();
 
-    let id = col.documents[0].id.clone();
-    let result = col.get_document(&id);
+    let result = col.get_document("field", &json!("val"));
 
     assert!(result.is_some());
     assert_eq!(result.unwrap().data["field"], "val");
@@ -70,9 +69,7 @@ fn get_document_nested_return_correct_doc() {
         &mut handler,
     )
     .unwrap();
-
-    let id = col.documents[0].id.clone();
-    let result = col.get_document(&id);
+    let result = col.get_document("field", &json!("val"));
 
     assert!(result.is_some());
     assert_eq!(result.unwrap().data["nested"]["field"], "nested_val");
@@ -81,7 +78,7 @@ fn get_document_nested_return_correct_doc() {
 #[test]
 fn get_document_should_return_none_if_not_found() {
     let col = make_collection();
-    let result = col.get_document("does-not-exist");
+    let result = col.get_document("does-not-exist", &json!("does-not-exist"));
     assert!(result.is_none());
 }
 

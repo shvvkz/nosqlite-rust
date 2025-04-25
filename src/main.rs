@@ -52,11 +52,9 @@ fn main() -> Result<(), NosqliteError> {
     println!("\n✏️ Email mis à jour pour tous les utilisateurs avec _id = \"u123\".");
 
     // Étape 6 — Vérifier les documents après modification
-    let updated_docs = db.get_all_documents("users")?;
-    println!("\n📄 Documents après mise à jour :");
-    for doc in updated_docs {
-        println!("{}", doc);
-    }
+    let updated_doc = db.get_document("users", "_id", &json!("u123"))?;
+    println!("\n📄 Document mis à jour :");
+    println!("{}", updated_doc);
 
     db.delete_documents("users", "_id", &json!("u123"))?;
     println!("\n🗑️ Document avec _id = \"u123\" supprimé.");

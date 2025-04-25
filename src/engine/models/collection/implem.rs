@@ -451,20 +451,22 @@ impl Collection {
     }
 
     /// 🦀
-    /// Retrieves a reference to a document from the collection by its unique identifier.
+    /// Retrieves the first document from the collection where a specific field matches a given value.
     ///
-    /// This method performs a non-mutating lookup in the collection’s document list, searching
-    /// for a document with the specified `id`. If found, a reference to the [`Document`] is returned.
-    /// If no match is found, `None` is returned.
+    /// This method performs a non-mutating search through the collection's documents and
+    /// returns a reference to the first [`Document`] where the field value matches the given input.
+    ///
+    /// Supports dot-notation for nested fields (e.g., `"profile.username"`).
     ///
     /// # Parameters
     ///
-    /// - `id`: A string slice (`&str`) representing the unique ID of the document to retrieve.
+    /// - `field_name`: The name of the field to query (e.g., `"name"` or `"profile.email"`).
+    /// - `field_value`: The value to match against.
     ///
     /// # Returns
     ///
-    /// - `Some(&Document)` if a document with the given ID exists in the collection.
-    /// - `None` if no document matches the given ID.
+    /// - `Some(&Document)` if a document with the given field/value pair is found.
+    /// - `None` if no such document exists.
     ///
     /// # Example
     ///
@@ -477,27 +479,27 @@ impl Collection {
     /// let mut collection = Collection::new("articles".to_string(), schema);
     /// let mut handler = NosqliteErrorHandler::new("temp/data34.nosqlite".to_string());
     ///
-    /// let doc = json!({ "id": 1, "title": "Intro to Rust" });
-    /// collection.add_document(doc, &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 1, "title": "Intro to Rust" }), &mut handler).unwrap();
     ///
-    /// let doc_id = collection.documents[0].id.clone();
-    /// let result = collection.get_document(&doc_id);
+    /// let result = collection.get_document("title", &json!("Intro to Rust"));
     /// assert!(result.is_some());
-    /// assert_eq!(result.unwrap().data["title"], json!("Intro to Rust"));
+    /// assert_eq!(result.unwrap().data["id"], json!(1));
     /// ```
     ///
     /// # Performance
     ///
-    /// - Performs a linear scan through the collection's internal document vector.
-    /// - For large collections, consider indexing for more efficient lookups.
+    /// - Performs a linear scan over the internal document list.
+    /// - Stops at the **first match**. Use another method if you expect multiple matches.
     ///
     /// # See Also
     ///
-    /// - [`Collection::add_document`] for inserting new documents
-    /// - [`Collection::delete_documents`] for removing documents
-    /// - [`Document`] for the structure being returned
-    pub fn get_document(&self, id: &str) -> Option<&Document> {
-        self.documents.iter().find(|d| d.id == id)
+    /// - [`Collection::all_documents`] — to retrieve all documents
+    /// - [`Collection::delete_documents`] — for deletion using a field filter
+    /// - [`get_nested_value`] — for resolving field paths
+    pub fn get_document(&self, field_name: &str, field_value: &Value) -> Option<&Document> {
+        self.documents
+            .iter()
+            .find(|doc| get_nested_value(&doc.data, field_name) == Some(field_value))
     }
 
     /// 🦀
