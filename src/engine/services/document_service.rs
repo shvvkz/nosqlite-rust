@@ -39,8 +39,8 @@ use serde_json::Value;
 ///
 /// # See Also
 ///
-/// - [`update_document`] — full document replacement
-/// - [`get_document_by_id`] — lookup inserted document
+/// - [`update_documents`] — full document replacement
+/// - [`get_document`] — lookup inserted document
 pub fn insert_document(
     db: &mut Database,
     collection_name: &str,
@@ -103,7 +103,7 @@ pub fn insert_document(
 /// # See Also
 ///
 /// - [`update_documents_field`] — partial updates
-/// - [`get_document_by_id`] — read after update
+/// - [`get_document`] — read after update
 pub fn update_documents(
     db: &mut Database,
     collection_name: &str,
@@ -182,7 +182,7 @@ pub fn update_documents(
 /// # See Also
 ///
 /// - [`update_documents`] — for full document replacement
-/// - [`get_document_by_id`] — read after update
+/// - [`get_document`] — read after update
 pub fn update_documents_field(
     db: &mut Database,
     collection_name: &str,
@@ -363,7 +363,7 @@ pub fn get_document<'a>(
 ///
 /// # See Also
 ///
-/// - [`get_documents_by_field`] — for conditional filtering
+/// - [`get_documents`] — for conditional filtering
 pub fn get_all_documents<'a>(
     db: &'a Database,
     collection_name: &str,

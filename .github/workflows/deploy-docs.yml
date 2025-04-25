@@ -1,0 +1,54 @@
+name: Deploy Rust Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Check Rust code formatting
+      run: cargo fmt -- --check
+
+    - name: Generate documentation
+      run: cargo doc --no-deps
+      if: success()
+
+    - name: Disable Jekyll
+      run: echo "" > ./target/doc/.nojekyll
+      if: success()
+
+    - name: Create index.html
+      run: |
+        echo '<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=./nosqlite_rust/index.html">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Redirecting...</title>
+        </head>
+        <body>
+            <p>If you are not redirected automatically, follow this <a href="./nosqlite_rust/index.html">link</a>.</p>
+        </body>
+        </html>' > ./target/doc/index.html
+      if: success()
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./target/doc
+      if: success()
