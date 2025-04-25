@@ -1,3 +1,7 @@
+//! # File Model
+//!
+//! This module defines the structure and behavior of collections.
+
 pub mod implem;
 pub mod model;
 

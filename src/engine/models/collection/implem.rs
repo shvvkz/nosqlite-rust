@@ -325,8 +325,7 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`Collection::update_document`] for full replacements.
-    /// - [`Collection::update_field_document`] for single-ID field updates.
+    /// - [`Collection::update_documents`] for full replacements.
     pub fn update_documents_field(
         &mut self,
         field_name: &str,
@@ -420,7 +419,7 @@ impl Collection {
     /// # See Also
     ///
     /// - [`Collection::add_document`] for inserting documents
-    /// - [`Collection::update_document`] for replacing document content
+    /// - [`Collection::update_documents`] for replacing document content
     /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
     pub fn delete_document(
         &mut self,
@@ -526,7 +525,7 @@ impl Collection {
     /// # Notes
     ///
     /// - The returned reference is read-only. To modify document contents, use methods like
-    ///   [`Collection::update_document`], [`Collection::update_field_document`], or create a mutable variant.
+    ///   [`Collection::update_documents`] or create a mutable variant.
     /// - The order of documents in the vector reflects the order of insertion, unless modified.
     ///
     /// # Performance

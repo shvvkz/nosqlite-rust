@@ -1,3 +1,7 @@
+//! # Utility Functions for Document, Collection and Database Management
+//!
+//! This module defines the structure and behavior of collections.
+
 use crate::engine::models::Document;
 use serde_json::Value;
 use std::time::{SystemTime, UNIX_EPOCH};

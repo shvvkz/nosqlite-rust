@@ -1,3 +1,4 @@
+//! # Main engine interface
 use crate::engine::models::{Collection, Database, Document, File};
 
 use crate::engine::services::{
@@ -194,7 +195,7 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`update_document`] — for replacing an existing document
+    /// - [`update_documents`] — for replacing an existing document
     /// - [`delete_document`] — for removing one by ID
     pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), NosqliteError> {
         let result = insert_document(&mut self.db, collection, data, &mut self.error_handler);
@@ -240,7 +241,7 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`update_document_field`] — for partial updates
+    /// - [`update_documents_field`] — for partial updates
     /// - [`insert_document`] — for adding new documents
     pub fn update_documents(
         &mut self,
@@ -318,7 +319,7 @@ impl Nosqlite {
     ///
     /// # Notes
     ///
-    /// - If you need to enforce strict schema validation, use [`update_document`] or [`update_documents`] instead.
+    /// - If you need to enforce strict schema validation, use [`update_documents`] or [`update_documents`] instead.
     /// - Useful for batch updates by query.
     ///
     /// # See Also
@@ -428,7 +429,7 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for bulk access
-    /// - [`update_document`] — for full mutation
+    /// - [`update_documents`] — for full mutation
     pub fn get_document_by_id(
         &mut self,
         collection: &str,

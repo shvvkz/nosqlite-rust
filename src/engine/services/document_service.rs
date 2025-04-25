@@ -39,7 +39,7 @@ use serde_json::Value;
 ///
 /// # See Also
 ///
-/// - [`update_document`] — full document replacement
+/// - [`update_documents`] — full document replacement
 /// - [`get_document_by_id`] — lookup inserted document
 pub fn insert_document(
     db: &mut Database,
