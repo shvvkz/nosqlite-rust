@@ -405,7 +405,7 @@ pub fn get_all_documents<'a>(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
-/// use nosqlite_rust::engine::services::document_service::get_documents_by_field;
+/// use nosqlite_rust::engine::services::document_service::get_documents;
 ///
 /// let mut db = Database::new("temp/data28.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data28.nosqlite".to_string());
@@ -413,7 +413,7 @@ pub fn get_all_documents<'a>(
 /// let col = db.get_collection_mut("posts").unwrap();
 /// col.add_document(json!({ "id": "post1", "author": "alice" }), &mut handler)?;
 /// col.add_document(json!({ "id": "post2", "author": "bob" }), &mut handler)?;
-/// let results = get_documents_by_field(&db, "posts", "author", "alice", &mut handler)?;
+/// let results = get_documents(&db, "posts", "author", "alice", &mut handler)?;
 /// println!("Found {} posts by Alice", results.len());
 /// Ok::<(), NosqliteError>(())
 /// ```
@@ -426,7 +426,7 @@ pub fn get_all_documents<'a>(
 /// # See Also
 ///
 /// - [`get_all_documents`] — fetch all then filter manually
-pub fn get_documents_by_field<'a>(
+pub fn get_documents<'a>(
     db: &'a Database,
     collection_name: &str,
     field: &str,

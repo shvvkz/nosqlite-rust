@@ -101,7 +101,7 @@ fn get_documents_by_field_should_return_filtered() {
     insert_document(&mut db, "users", json!({ "name": "John" }), &mut handler).unwrap();
     insert_document(&mut db, "users", json!({ "name": "Ivy" }), &mut handler).unwrap();
 
-    let docs = get_documents_by_field(&db, "users", "name", "Ivy", &mut handler).unwrap();
+    let docs = get_documents(&db, "users", "name", "Ivy", &mut handler).unwrap();
     assert_eq!(docs.len(), 2);
 }
 

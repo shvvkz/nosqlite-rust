@@ -290,9 +290,7 @@ mod tests {
         db.insert_document("posts", json!({ "author": "alice" }))
             .unwrap();
 
-        let results = db
-            .get_documents_by_field("posts", "author", "alice")
-            .unwrap();
+        let results = db.get_documents("posts", "author", "alice").unwrap();
         assert_eq!(results.len(), 2);
     }
 
@@ -304,7 +302,7 @@ mod tests {
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
         // Aucune collection "not_there"
-        let result = db.get_documents_by_field("not_there", "field", "value");
+        let result = db.get_documents("not_there", "field", "value");
         assert!(result.is_err());
     }
 

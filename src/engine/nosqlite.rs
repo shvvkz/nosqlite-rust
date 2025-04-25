@@ -357,7 +357,8 @@ impl Nosqlite {
     /// # Parameters
     ///
     /// - `collection`: The name of the collection.
-    /// - `id`: The unique ID of the document to delete.
+    /// - `field_name`: The field name to search by (e.g., `"id"`).
+    /// - `field_value`: The value to match against the field (e.g., `"doc-123"`).
     ///
     /// # Returns
     ///
@@ -521,7 +522,7 @@ impl Nosqlite {
     /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
     /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
     ///
-    /// let results = db.get_documents_by_field("posts", "author", "alice")?;
+    /// let results = db.get_documents("posts", "author", "alice")?;
     /// for post in results {
     ///     println!("{}", post);
     /// }
@@ -536,13 +537,13 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for manual filtering
-    pub fn get_documents_by_field(
+    pub fn get_documents(
         &mut self,
         collection: &str,
         field: &str,
         value: &str,
     ) -> Result<Vec<&Document>, NosqliteError> {
-        get_documents_by_field(&self.db, collection, field, value, &mut self.error_handler)
+        get_documents(&self.db, collection, field, value, &mut self.error_handler)
     }
 
     /// 🦀
