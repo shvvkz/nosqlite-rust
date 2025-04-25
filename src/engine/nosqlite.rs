@@ -1,3 +1,5 @@
+//! # NoSQLite Engine Interface
+
 use crate::engine::models::{Collection, Database, Document, File};
 
 use crate::engine::services::{
@@ -240,7 +242,7 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`update_document_field`] — for partial updates
+    /// - [`update_documents_field`] — for partial updates
     /// - [`insert_document`] — for adding new documents
     pub fn update_documents(
         &mut self,
@@ -318,12 +320,12 @@ impl Nosqlite {
     ///
     /// # Notes
     ///
-    /// - If you need to enforce strict schema validation, use [`update_document`] or [`update_documents`] instead.
+    /// - If you need to enforce strict schema validation, use [`update_documents`] instead.
     /// - Useful for batch updates by query.
     ///
     /// # See Also
     ///
-    /// - [`get_document_by_id`] — for inspecting before or after
+    /// - [`get_document`] — for inspecting before or after
     /// - [`delete_documents`] — for removing by ID
     pub fn update_documents_field(
         &mut self,
@@ -382,7 +384,7 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`insert_document`] — to add new documents
-    /// - [`get_document_by_id`] — for checking if a document exists before deletion
+    /// - [`get_document`] — for checking if a document exists before deletion
     pub fn delete_documents(
         &mut self,
         collection: &str,
@@ -488,7 +490,7 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`get_documents_by_field`] — for filtering based on field values
+    /// - [`get_documents`] — for filtering based on field values
     pub fn get_all_documents(&mut self, collection: &str) -> Result<&Vec<Document>, NosqliteError> {
         get_all_documents(&self.db, collection, &mut self.error_handler)
     }

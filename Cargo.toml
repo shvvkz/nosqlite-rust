@@ -2,6 +2,8 @@
 name = "nosqlite-rust"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
+categories = ["database-implementations", "no-sql", "cryptography"]
 
 [dependencies]
 serde = { version = "*", features = ["derive"] }
