@@ -214,7 +214,8 @@ pub fn update_documents_field(
 ///
 /// - `db`: A mutable reference to the [`Database`] instance.
 /// - `collection_name`: The name of the target collection.
-/// - `id`: The ID of the document to delete.
+/// - `field_name`: The field name used to search for the document (e.g., `"id"`).
+/// - `field_value`: The value to match against `field_name`.
 /// - `handler`: Used to log document/collection errors.
 ///
 /// # Returns
@@ -227,25 +228,22 @@ pub fn update_documents_field(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Collection, Database, Document, File}};
-/// use nosqlite_rust::engine::services::document_service::delete_document;
+/// use nosqlite_rust::engine::services::document_service::delete_documents;
 ///
 /// let mut db = Database::new("temp/data25.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data25.nosqlite".to_string());
 /// db.add_collection("users", json!({}), &mut handler)?;
-/// let docs = {
-///     let col = db.get_collection_mut("users").unwrap();
-///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-///     col.all_documents().clone()
-/// };
+/// let col = db.get_collection_mut("users").unwrap();
+/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
 ///
-/// let mut db_clone = db.clone();
-/// delete_document(&mut db_clone, "users", &docs[0].id, &mut handler)?;
+/// delete_documents(&mut db, "users", "id", &json!("abc123"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
-pub fn delete_document(
+pub fn delete_documents(
     db: &mut Database,
     collection_name: &str,
-    id: &str,
+    field_name: &str,
+    field_value: &Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<(), NosqliteError> {
     let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
@@ -257,7 +255,7 @@ pub fn delete_document(
         error
     })?;
 
-    collection.delete_document(id, handler)
+    collection.delete_documents(field_name, field_value, handler)
 }
 
 /// 🦀
@@ -270,7 +268,8 @@ pub fn delete_document(
 ///
 /// - `db`: A reference to the [`Database`] instance.
 /// - `collection_name`: The name of the target collection.
-/// - `id`: The document's ID to locate.
+/// - `field_name`: The field name used to search for the document (e.g., `"id"`).
+/// - `field_value`: The value to match against `field_name`.
 /// - `handler`: Logs a lookup failure if not found.
 ///
 /// # Returns
@@ -283,29 +282,27 @@ pub fn delete_document(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
-/// use nosqlite_rust::engine::services::document_service::get_document_by_id;
+/// use nosqlite_rust::engine::services::document_service::get_document;
 ///
 /// let mut db = Database::new("temp/data26.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data26.nosqlite".to_string());
 /// db.add_collection("users", json!({}), &mut handler)?;
-/// let docs = {
-///     let col = db.get_collection_mut("users").unwrap();
-///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-///     col.all_documents().clone()
-/// };
 ///
-/// let db_clone = db.clone();
-/// get_document_by_id(&db_clone, "users", &docs[0].id, &mut handler)?;
+/// let col = db.get_collection_mut("users").unwrap();
+/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
+///
+/// get_document(&db, "users", "id", &json!("abc123"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # See Also
 ///
 /// - [`get_all_documents`] — to inspect all documents
-pub fn get_document_by_id<'a>(
+pub fn get_document<'a>(
     db: &'a Database,
     collection_name: &str,
-    id: &str,
+    field_name: &str,
+    field_value: &Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<&'a Document, NosqliteError> {
     let collection = db.get_collection(collection_name).ok_or_else(|| {
@@ -317,11 +314,16 @@ pub fn get_document_by_id<'a>(
         error
     })?;
 
-    collection.get_document(id).ok_or_else(|| {
-        let error = NosqliteError::DocumentNotFound(format!("Document '{}' not found", id));
-        handler.log_error(error.clone());
-        error
-    })
+    collection
+        .get_document(field_name, field_value)
+        .ok_or_else(|| {
+            let error = NosqliteError::DocumentNotFound(format!(
+                "Document search by '{}': '{}' not found",
+                field_name, field_value
+            ));
+            handler.log_error(error.clone());
+            error
+        })
 }
 
 /// 🦀
@@ -403,7 +405,7 @@ pub fn get_all_documents<'a>(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
-/// use nosqlite_rust::engine::services::document_service::get_documents_by_field;
+/// use nosqlite_rust::engine::services::document_service::get_documents;
 ///
 /// let mut db = Database::new("temp/data28.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data28.nosqlite".to_string());
@@ -411,7 +413,7 @@ pub fn get_all_documents<'a>(
 /// let col = db.get_collection_mut("posts").unwrap();
 /// col.add_document(json!({ "id": "post1", "author": "alice" }), &mut handler)?;
 /// col.add_document(json!({ "id": "post2", "author": "bob" }), &mut handler)?;
-/// let results = get_documents_by_field(&db, "posts", "author", "alice", &mut handler)?;
+/// let results = get_documents(&db, "posts", "author", "alice", &mut handler)?;
 /// println!("Found {} posts by Alice", results.len());
 /// Ok::<(), NosqliteError>(())
 /// ```
@@ -424,7 +426,7 @@ pub fn get_all_documents<'a>(
 /// # See Also
 ///
 /// - [`get_all_documents`] — fetch all then filter manually
-pub fn get_documents_by_field<'a>(
+pub fn get_documents<'a>(
     db: &'a Database,
     collection_name: &str,
     field: &str,

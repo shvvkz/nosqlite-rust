@@ -116,8 +116,6 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Original" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
         let result = db.update_documents(
             "users",
             "name",
@@ -126,7 +124,7 @@ mod tests {
         );
 
         assert!(result.is_ok());
-        let doc = db.get_document_by_id("users", &doc_id).unwrap();
+        let doc = db.get_document("users", "name", &json!("Updated")).unwrap();
         assert_eq!(doc.data["name"], "Updated");
     }
 
@@ -159,13 +157,11 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Old" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
         let result =
             db.update_documents_field("users", "name", &json!("Old"), "name", json!("New"));
 
         assert!(result.is_ok());
-        let updated = db.get_document_by_id("users", &doc_id).unwrap();
+        let updated = db.get_document("users", "name", &json!("New")).unwrap();
         assert_eq!(updated.data["name"], "New");
     }
 
@@ -189,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    fn delete_document_should_succeed() {
+    fn delete_documents_should_succeed() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -198,9 +194,7 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "ToDelete" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.delete_document("users", &doc_id);
+        let result = db.delete_documents("users", "name", &json!("ToDelete"));
         assert!(result.is_ok());
 
         let remaining = db.get_all_documents("users").unwrap();
@@ -208,7 +202,7 @@ mod tests {
     }
 
     #[test]
-    fn delete_document_should_fail() {
+    fn delete_documents_should_fail() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -217,12 +211,12 @@ mod tests {
             .unwrap();
 
         // Supprimer un document inexistant
-        let result = db.delete_document("users", "invalid-id");
+        let result = db.delete_documents("users", "invalid-id", &json!("nonexistent"));
         assert!(result.is_err());
     }
 
     #[test]
-    fn get_document_by_id_should_succeed() {
+    fn get_document_should_succeed() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -231,16 +225,14 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "Alice" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.get_document_by_id("users", &doc_id);
+        let result = db.get_document("users", "name", &json!("Alice"));
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap().data["name"], "Alice");
     }
 
     #[test]
-    fn get_document_by_id_should_fail() {
+    fn get_document_should_fail() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -248,7 +240,7 @@ mod tests {
         db.create_collection("users", json!({ "name": "string" }))
             .unwrap();
 
-        let result = db.get_document_by_id("users", "nonexistent-id");
+        let result = db.get_document("users", "nonexistent-id", &json!("nonexistent"));
         assert!(result.is_err());
     }
 
@@ -298,9 +290,7 @@ mod tests {
         db.insert_document("posts", json!({ "author": "alice" }))
             .unwrap();
 
-        let results = db
-            .get_documents_by_field("posts", "author", "alice")
-            .unwrap();
+        let results = db.get_documents("posts", "author", "alice").unwrap();
         assert_eq!(results.len(), 2);
     }
 
@@ -312,7 +302,7 @@ mod tests {
         let mut db = Nosqlite::open(db_path_str).unwrap();
 
         // Aucune collection "not_there"
-        let result = db.get_documents_by_field("not_there", "field", "value");
+        let result = db.get_documents("not_there", "field", "value");
         assert!(result.is_err());
     }
 
