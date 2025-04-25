@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="🦀 Updates a specific field in all documents that match a given field and value."><title>update_documents_field in nosqlite_rust::engine::services::document_service - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="nosqlite_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../nosqlite_rust/index.html">nosqlite_<wbr>rust</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">update_<wbr>documents_<wbr>field</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#parameters" title="Parameters">Parameters</a></li><li><a href="#returns" title="Returns">Returns</a></li><li><a href="#behavior" title="Behavior">Behavior</a></li><li><a href="#example" title="Example">Example</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In nosqlite_<wbr>rust::<wbr>engine::<wbr>services::<wbr>document_<wbr>service</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">nosqlite_rust</a>::<wbr><a href="../../index.html">engine</a>::<wbr><a href="../index.html">services</a>::<wbr><a href="index.html">document_service</a></div><h1>Function <span class="fn">update_documents_field</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/nosqlite_rust/engine/services/document_service.rs.html#186-205">Source</a> </span></div><pre class="rust item-decl"><code>pub fn update_documents_field(
+    db: &amp;mut <a class="struct" href="../../models/database/model/struct.Database.html" title="struct nosqlite_rust::engine::models::database::model::Database">Database</a>,
+    collection_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_value: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    target_field: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    value: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    handler: &amp;mut <a class="struct" href="../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>🦀
+Updates a specific field in all documents that match a given field and value.</p>
+<p>This function performs a <strong>partial update</strong> by locating every document in the collection
+where the specified <code>field_name</code> equals <code>field_value</code>, and setting or inserting
+the <code>target_field</code> with the provided <code>value</code>.</p>
+<h2 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h2>
+<ul>
+<li><code>db</code>: A mutable reference to the <a href="../../models/database/model/struct.Database.html" title="struct nosqlite_rust::engine::models::database::model::Database"><code>Database</code></a> instance.</li>
+<li><code>collection_name</code>: The name of the collection to target.</li>
+<li><code>field_name</code>: The field name used to search documents (supports nested paths like <code>"profile.name"</code>).</li>
+<li><code>field_value</code>: The value to match within <code>field_name</code>.</li>
+<li><code>target_field</code>: The name of the field to modify or insert in matching documents.</li>
+<li><code>value</code>: The new value to assign to <code>target_field</code>.</li>
+<li><code>handler</code>: A mutable reference to a <a href="../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> for logging lookup or structure issues.</li>
+</ul>
+<h2 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h2>
+<ul>
+<li><code>Ok(())</code> if at least one document matched and was updated successfully.</li>
+<li><code>Err(NosqliteError)</code> if:
+<ul>
+<li>The collection does not exist,</li>
+<li>No document matched the search criteria,</li>
+<li>The matched document’s data is not a JSON object.</li>
+</ul>
+</li>
+</ul>
+<h2 id="behavior"><a class="doc-anchor" href="#behavior">§</a>Behavior</h2>
+<ul>
+<li>If <code>target_field</code> exists in a matching document, it is overwritten with <code>value</code>.</li>
+<li>If <code>target_field</code> does not exist, it is created.</li>
+<li>All modified documents will have their <code>updated_at</code> timestamp refreshed.</li>
+<li>This function does <strong>not</strong> revalidate the updated documents against the collection schema.</li>
+</ul>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database, Collection}};
+<span class="kw">use </span>nosqlite_rust::engine::services::document_service::update_documents_field;
+
+<span class="kw">let </span><span class="kw-2">mut </span>db = Database::new(<span class="string">"temp/data24.nosqlite"</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data24.nosqlite"</span>.to_string());
+db.add_collection(<span class="string">"users"</span>, <span class="macro">json!</span>({
+    <span class="string">"id"</span>: <span class="string">"number"</span>,
+    <span class="string">"name"</span>: <span class="string">"string"</span>,
+    <span class="string">"email"</span>: <span class="string">"string"
+</span>}), <span class="kw-2">&amp;mut </span>handler)<span class="question-mark">?</span>;
+
+<span class="kw">let </span>col = db.get_collection_mut(<span class="string">"users"</span>).unwrap();
+col.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"email"</span>: <span class="string">"old@example.com" </span>}), <span class="kw-2">&amp;mut </span>handler)<span class="question-mark">?</span>;
+col.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">2</span>, <span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"email"</span>: <span class="string">"old2@example.com" </span>}), <span class="kw-2">&amp;mut </span>handler)<span class="question-mark">?</span>;
+
+update_documents_field(<span class="kw-2">&amp;mut </span>db, <span class="string">"users"</span>, <span class="string">"name"</span>, <span class="kw-2">&amp;</span><span class="macro">json!</span>(<span class="string">"Alice"</span>), <span class="string">"email"</span>, <span class="macro">json!</span>(<span class="string">"new@example.com"</span>), <span class="kw-2">&amp;mut </span>handler)<span class="question-mark">?</span>;
+<span class="prelude-val">Ok</span>::&lt;(), NosqliteError&gt;(())</code></pre></div>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="fn.update_documents.html" title="fn nosqlite_rust::engine::services::document_service::update_documents"><code>update_documents</code></a> — for full document replacement</li>
+<li><a href="fn.get_document.html" title="fn nosqlite_rust::engine::services::document_service::get_document"><code>get_document</code></a> — read after update</li>
+</ul>
+</div></details></section></div></main></body></html>

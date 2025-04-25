@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="🦀 Returns the current Unix timestamp in seconds."><title>now in nosqlite_rust::engine::models::utils - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="nosqlite_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../nosqlite_rust/index.html">nosqlite_<wbr>rust</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">now</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#returns" title="Returns">Returns</a></li><li><a href="#example" title="Example">Example</a></li><li><a href="#panics" title="Panics">Panics</a></li><li><a href="#notes" title="Notes">Notes</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In nosqlite_<wbr>rust::<wbr>engine::<wbr>models::<wbr>utils</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">nosqlite_rust</a>::<wbr><a href="../../index.html">engine</a>::<wbr><a href="../index.html">models</a>::<wbr><a href="index.html">utils</a></div><h1>Function <span class="fn">now</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/nosqlite_rust/engine/models/utils.rs.html#44-49">Source</a> </span></div><pre class="rust item-decl"><code>pub fn now() -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.u64.html">u64</a></code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>🦀
+Returns the current Unix timestamp in seconds.</p>
+<p>This utility function is used throughout the system to timestamp entities such as:</p>
+<ul>
+<li>Document creation (<code>created_at</code>)</li>
+<li>Document updates (<code>updated_at</code>)</li>
+<li>Collection initialization</li>
+</ul>
+<p>It calculates the number of seconds elapsed since the Unix epoch (<code>1970-01-01T00:00:00Z</code>)
+using the system clock.</p>
+<h2 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h2>
+<ul>
+<li>A <code>u64</code> representing the number of seconds since the Unix epoch.</li>
+</ul>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>nosqlite_rust::engine::models::utils::now;
+
+<span class="kw">let </span>timestamp = now();
+<span class="macro">println!</span>(<span class="string">"Current UNIX timestamp: {}"</span>, timestamp);</code></pre></div>
+<h2 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h2>
+<p>This function will <strong>panic</strong> if the system clock is set before the Unix epoch,
+which is highly unlikely on modern systems.</p>
+<h2 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h2>
+<ul>
+<li>This function is timezone-independent (always UTC)</li>
+<li>Consider formatting timestamps for human output using a library like <code>chrono</code></li>
+</ul>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/1.86.0/std/time/struct.SystemTime.html#method.now" title="associated function std::time::SystemTime::now"><code>SystemTime::now</code></a> — standard library source of time</li>
+<li><a href="https://doc.rust-lang.org/1.86.0/std/time/constant.UNIX_EPOCH.html" title="constant std::time::UNIX_EPOCH"><code>UNIX_EPOCH</code></a> — constant used for offset</li>
+<li><a href="../document/model/struct.Document.html#method.new" title="associated function nosqlite_rust::engine::models::document::model::Document::new"><code>Document::new</code></a> — sets both <code>created_at</code> and <code>updated_at</code> using this</li>
+</ul>
+</div></details></section></div></main></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_collection","delete_collection","get_collection","get_collection_mut","list_collections"]};

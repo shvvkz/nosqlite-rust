@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["nosqlite_rust",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.86.0/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"nosqlite_rust/engine/models/collection/model/struct.Collection.html\" title=\"struct nosqlite_rust::engine::models::collection::model::Collection\">Collection</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.86.0/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"nosqlite_rust/engine/models/database/model/struct.Database.html\" title=\"struct nosqlite_rust::engine::models::database::model::Database\">Database</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.86.0/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"nosqlite_rust/engine/models/document/model/struct.Document.html\" title=\"struct nosqlite_rust::engine::models::document::model::Document\">Document</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1040]}

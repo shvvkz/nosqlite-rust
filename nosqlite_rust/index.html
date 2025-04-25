@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="NoSQLite"><title>nosqlite_rust - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="nosqlite_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../static.files/storage-3a5871a4.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../nosqlite_rust/index.html">nosqlite_<wbr>rust</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#nosqlite" title="NoSQLite">NoSQLite</a><ul><li><a href="#-project-overview" title="🧠 Project Overview">🧠 Project Overview</a></li><li><a href="#-quickstart" title="🚀 Quickstart">🚀 Quickstart</a></li><li><a href="#-architecture" title="🔀 Architecture">🔀 Architecture</a></li><li><a href="#-modules" title="📆 Modules">📆 Modules</a></li><li><a href="#-security" title="🔐 Security">🔐 Security</a></li><li><a href="#-features" title="✨ Features">✨ Features</a></li><li><a href="#-roadmap" title="📊 Roadmap">📊 Roadmap</a></li><li><a href="#-credits" title="🙏 Credits">🙏 Credits</a></li></ul></li></ul><h3><a href="#modules">Crate Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>nosqlite_rust</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/nosqlite_rust/lib.rs.html#1-3">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="nosqlite"><a class="doc-anchor" href="#nosqlite">§</a>NoSQLite</h2>
+<blockquote>
+<p>A minimalist and encrypted NoSQL engine inspired by SQLite, written in Rust.</p>
+</blockquote>
+<h3 id="-project-overview"><a class="doc-anchor" href="#-project-overview">§</a>🧠 Project Overview</h3>
+<p><strong>NoSQLite</strong> is an experimental project that aims to build a NoSQL equivalent of SQLite.</p>
+<p>Unlike traditional relational engines, NoSQLite is designed around NoSQL paradigms, with the following long-term goals:</p>
+<ul>
+<li>✨ Create a <strong>modular and lightweight database engine</strong> that can be embedded anywhere.</li>
+<li>⌛ Provide a <strong>CLI tool</strong> to interact with the database easily from the command line.</li>
+<li>🧑‍💻 Develop an <strong>ORM layer</strong> to simplify data access from Rust applications.</li>
+</ul>
+<p>Currently, the engine supports only <strong>Document-based NoSQL</strong> storage.
+Future plans include support for:</p>
+<ul>
+<li>Key-Value stores,</li>
+<li>Graph databases,</li>
+<li>Column-family models.</li>
+</ul>
+<p>All data is securely persisted using <strong>AES-256-GCM encryption</strong>.</p>
+<hr />
+<h3 id="-quickstart"><a class="doc-anchor" href="#-quickstart">§</a>🚀 Quickstart</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>nosqlite_rust::engine::Nosqlite;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteError;
+
+<span class="kw">let </span>db = Nosqlite::open(<span class="string">"data/mydb.nosqlite"</span>)<span class="question-mark">?</span>;
+<span class="comment">// Use db to create collections, insert documents, query data, etc.
+</span><span class="prelude-val">Ok</span>::&lt;(), NosqliteError&gt;(())</code></pre></div>
+<hr />
+<h3 id="-architecture"><a class="doc-anchor" href="#-architecture">§</a>🔀 Architecture</h3>
+<ul>
+<li><code>engine/</code> - Core engine logic (models, services, encryption, I/O)
+<ul>
+<li><code>error/</code> - Error handling definitions and utilities</li>
+<li><code>models/</code> - Core data models (document, collection, database, file)</li>
+<li><code>services/</code> - Logic layer for operations on documents and collections</li>
+<li><code>nosqlite.rs</code> - Main engine interface</li>
+</ul>
+</li>
+<li><code>cli/</code> - (soon) Command-line interface to use NoSQLite as a shell</li>
+<li><code>orm/</code> - (planned) ORM layer to work with Rust structs</li>
+<li><code>tests/</code> - Unit tests for each component of the engine</li>
+</ul>
+<hr />
+<h3 id="-modules"><a class="doc-anchor" href="#-modules">§</a>📆 Modules</h3><div><table><thead><tr><th>Module</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>engine::nosqlite</code></td><td>Public interface (<code>Nosqlite</code> struct)</td></tr>
+<tr><td><code>engine::models::collection</code></td><td>Data model for collections</td></tr>
+<tr><td><code>engine::models::database</code></td><td>Data model for database metadata</td></tr>
+<tr><td><code>engine::models::document</code></td><td>Data model for documents</td></tr>
+<tr><td><code>engine::models::file</code></td><td>File-level storage and encryption logic</td></tr>
+<tr><td><code>engine::services</code></td><td>Service layer for operations</td></tr>
+<tr><td><code>engine::error</code></td><td>Centralized error definitions and handler</td></tr>
+</tbody></table>
+</div>
+<hr />
+<h3 id="-security"><a class="doc-anchor" href="#-security">§</a>🔐 Security</h3>
+<ul>
+<li>Encrypted with <strong>AES-256-GCM</strong></li>
+<li>Error logs stored alongside the database file as <code>.log</code></li>
+</ul>
+<hr />
+<h3 id="-features"><a class="doc-anchor" href="#-features">§</a>✨ Features</h3>
+<ul>
+<li>AES-256 encrypted storage</li>
+<li>Document-based NoSQL database</li>
+<li>Modular and testable engine components</li>
+<li>Centralized error management</li>
+<li>Planned CLI and ORM interfaces</li>
+</ul>
+<hr />
+<h3 id="-roadmap"><a class="doc-anchor" href="#-roadmap">§</a>📊 Roadmap</h3>
+<ul>
+<li>☑️ Document-based NoSQL engine</li>
+<li>◻️ CLI interface</li>
+<li>◻️ ORM layer</li>
+<li>◻️ Key-Value support</li>
+<li>◻️ Graph model support</li>
+<li>◻️ Column-family support</li>
+</ul>
+<hr />
+<h3 id="-credits"><a class="doc-anchor" href="#-credits">§</a>🙏 Credits</h3>
+<p>Made with ❤️ by shvvkz.</p>
+<p>Open to contributions, ideas, and feedback!</p>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="engine/index.html" title="mod nosqlite_rust::engine">engine</a></dt><dd>Engine</dd></dl></section></div></main></body></html>

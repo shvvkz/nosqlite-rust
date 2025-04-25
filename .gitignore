@@ -1,7 +1,0 @@
-/target
-test_db.nosqlite
-/.dist
-*.log
-*.nosqlite
-*.key
-/temp

@@ -1,0 +1,496 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="🦀 Represents a collection of documents within a NoSQL database."><title>Collection in nosqlite_rust::engine::models::collection::model - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="nosqlite_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../../nosqlite_rust/index.html">nosqlite_<wbr>rust</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Collection</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#fields-1" title="Fields">Fields</a></li><li><a href="#example" title="Example">Example</a></li></ul><h3><a href="#fields">Fields</a></h3><ul class="block structfield"><li><a href="#structfield.created_at" title="created_at">created_at</a></li><li><a href="#structfield.documents" title="documents">documents</a></li><li><a href="#structfield.name" title="name">name</a></li><li><a href="#structfield.structure" title="structure">structure</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.add_document" title="add_document">add_document</a></li><li><a href="#method.all_documents" title="all_documents">all_documents</a></li><li><a href="#method.delete_documents" title="delete_documents">delete_documents</a></li><li><a href="#method.document_count" title="document_count">document_count</a></li><li><a href="#method.get_document" title="get_document">get_document</a></li><li><a href="#method.new" title="new">new</a></li><li><a href="#method.update_documents" title="update_documents">update_documents</a></li><li><a href="#method.update_documents_field" title="update_documents_field">update_documents_field</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-Collection" title="Clone">Clone</a></li><li><a href="#impl-Debug-for-Collection" title="Debug">Debug</a></li><li><a href="#impl-Default-for-Collection" title="Default">Default</a></li><li><a href="#impl-Deserialize%3C'de%3E-for-Collection" title="Deserialize&#60;&#39;de&#62;">Deserialize&#60;&#39;de&#62;</a></li><li><a href="#impl-Display-for-Collection" title="Display">Display</a></li><li><a href="#impl-Serialize-for-Collection" title="Serialize">Serialize</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Collection" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Collection" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Collection" title="Send">Send</a></li><li><a href="#impl-Sync-for-Collection" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Collection" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-Collection" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-DeserializeOwned-for-T" title="DeserializeOwned">DeserializeOwned</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-Same-for-T" title="Same">Same</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-ToString-for-T" title="ToString">ToString</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-VZip%3CV%3E-for-T" title="VZip&#60;V&#62;">VZip&#60;V&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In nosqlite_<wbr>rust::<wbr>engine::<wbr>models::<wbr>collection::<wbr>model</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../../index.html">nosqlite_rust</a>::<wbr><a href="../../../index.html">engine</a>::<wbr><a href="../../index.html">models</a>::<wbr><a href="../index.html">collection</a>::<wbr><a href="index.html">model</a></div><h1>Struct <span class="struct">Collection</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#30-35">Source</a> </span></div><pre class="rust item-decl"><code>pub struct Collection {
+    pub name: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>,
+    pub documents: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document">Document</a>&gt;,
+    pub created_at: <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.u64.html">u64</a>,
+    pub structure: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>🦀
+Represents a collection of documents within a NoSQL database.</p>
+<p>A <code>Collection</code> is a logical grouping of <code>Document</code> items,
+defined by a name and a schema (<code>structure</code>). It tracks when it was created
+and contains all the documents that belong to it.</p>
+<h2 id="fields-1"><a class="doc-anchor" href="#fields-1">§</a>Fields</h2>
+<ul>
+<li><code>name</code>: The name of the collection.</li>
+<li><code>documents</code>: A vector containing all the documents in the collection.</li>
+<li><code>created_at</code>: The timestamp (in seconds since Unix epoch) when the collection was created.</li>
+<li><code>structure</code>: A JSON value defining the schema or structure of the documents within the collection.</li>
+</ul>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+
+<span class="kw">let </span>collection = Collection::new(<span class="string">"users"</span>.to_string(), <span class="macro">json!</span>({<span class="string">"name"</span>: <span class="string">"string"</span>, <span class="string">"age"</span>: <span class="string">"number"</span>}));
+<span class="macro">assert_eq!</span>(collection.name, <span class="string">"users"</span>);
+<span class="macro">assert_eq!</span>(collection.structure, <span class="macro">json!</span>({<span class="string">"name"</span>: <span class="string">"string"</span>, <span class="string">"age"</span>: <span class="string">"number"</span>}));</code></pre></div>
+</div></details><h2 id="fields" class="fields section-header">Fields<a href="#fields" class="anchor">§</a></h2><span id="structfield.name" class="structfield section-header"><a href="#structfield.name" class="anchor field">§</a><code>name: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></code></span><span id="structfield.documents" class="structfield section-header"><a href="#structfield.documents" class="anchor field">§</a><code>documents: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document">Document</a>&gt;</code></span><span id="structfield.created_at" class="structfield section-header"><a href="#structfield.created_at" class="anchor field">§</a><code>created_at: <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.u64.html">u64</a></code></span><span id="structfield.structure" class="structfield section-header"><a href="#structfield.structure" class="anchor field">§</a><code>structure: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a></code></span><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#8-595">Source</a><a href="#impl-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.new" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#55-62">Source</a><h4 class="code-header">pub fn <a href="#method.new" class="fn">new</a>(name: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, structure: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>🦀
+Constructs a new, empty <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> with a specified name and document structure.</p>
+<p>This function initializes a new <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> instance, which is a container designed to
+hold a set of structured documents. The <code>structure</code> parameter defines the expected
+schema of each document within the collection, typically represented as a JSON object.</p>
+<h5 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h5>
+<ul>
+<li><code>name</code>: A <code>String</code> specifying the name of the collection. This can be used for
+identification or indexing purposes.</li>
+<li><code>structure</code>: A <a href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value"><code>serde_json::Value</code></a> representing the schema or blueprint of the
+documents this collection will accept. While not enforced at runtime, this schema
+can be used for validation or schema-driven logic.</li>
+</ul>
+<h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
+<p>Returns a new instance of <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> with:</p>
+<ul>
+<li>An empty <code>documents</code> vector</li>
+<li>The provided <code>name</code></li>
+<li>The provided <code>structure</code></li>
+<li>A timestamp (<code>created_at</code>) set to the current time, retrieved via the <a href="../../utils/fn.now.html" title="fn nosqlite_rust::engine::models::utils::now"><code>now()</code></a> function.</li>
+</ul>
+<h5 id="example-1"><a class="doc-anchor" href="#example-1">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>serde_json::json;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({
+    <span class="string">"id"</span>: <span class="string">"number"</span>,
+    <span class="string">"name"</span>: <span class="string">"string"</span>,
+    <span class="string">"email"</span>: <span class="string">"string"
+</span>});
+<span class="kw">let </span>collection = Collection::new(<span class="string">"users"</span>.to_string(), schema);
+<span class="macro">assert_eq!</span>(collection.name, <span class="string">"users"</span>);
+<span class="macro">assert!</span>(collection.documents.is_empty());</code></pre></div>
+<h5 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a>: The main struct representing a collection of structured documents.</li>
+<li><a href="../../utils/fn.now.html" title="fn nosqlite_rust::engine::models::utils::now"><code>now()</code></a>: A utility function to retrieve the current system timestamp.</li>
+</ul>
+<h5 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h5>
+<p>This constructor does <strong>not</strong> perform any schema validation. It is the caller’s responsibility
+to ensure the <code>structure</code> provided is consistent with the intended document format.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.add_document" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#127-157">Source</a><h4 class="code-header">pub fn <a href="#method.add_document" class="fn">add_document</a>(
+    &amp;mut self,
+    data: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    handler: &amp;mut <a class="struct" href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Attempts to insert a new document into the collection after validating its structure.</p>
+<p>This method ensures that the incoming document (<code>data</code>) conforms to the collection’s
+predefined structure before adding it to the internal document list. It relies on a
+schema validation function to compare field types and structure consistency.</p>
+<h5 id="parameters-1"><a class="doc-anchor" href="#parameters-1">§</a>Parameters</h5>
+<ul>
+<li>
+<p><code>data</code>: A <a href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value"><code>serde_json::Value</code></a> representing the document to insert. This must be a
+JSON object (i.e., <code>serde_json::Value::Object</code>). Fields are expected to align with
+the schema defined in the collection’s <code>structure</code>.</p>
+</li>
+<li>
+<p><code>handler</code>: A mutable reference to a <a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> instance, which is used
+to log any encountered validation or structural errors.</p>
+</li>
+</ul>
+<h5 id="returns-1"><a class="doc-anchor" href="#returns-1">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> if the document is successfully validated and inserted.</li>
+<li><code>Err(NosqliteError)</code> if any of the following conditions are met:
+<ul>
+<li>The document is <strong>not</strong> a valid JSON object.</li>
+<li>The collection’s <code>structure</code> is <strong>not</strong> a valid JSON object.</li>
+<li>The document’s structure <strong>does not match</strong> the expected schema.</li>
+</ul>
+</li>
+</ul>
+<h5 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h5>
+<p>Returns <a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentInvalid" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentInvalid"><code>NosqliteError::DocumentInvalid</code></a> when:</p>
+<ul>
+<li>The input is not a JSON object</li>
+<li>The document’s fields/types do not match the collection’s expected structure</li>
+</ul>
+<p>Returns <a href="../../../error/error_type/enum.NosqliteError.html#variant.InvalidCollectionStructure" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::InvalidCollectionStructure"><code>NosqliteError::InvalidCollectionStructure</code></a> when:</p>
+<ul>
+<li>The collection’s internal <code>structure</code> is not a JSON object</li>
+</ul>
+<h5 id="example-2"><a class="doc-anchor" href="#example-2">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"title"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"posts"</span>.to_string(), schema);
+
+<span class="kw">let </span>valid_doc = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"title"</span>: <span class="string">"Hello, world!" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data30.nosqlite"</span>.to_string());
+
+<span class="macro">assert!</span>(collection.add_document(valid_doc, <span class="kw-2">&amp;mut </span>handler).is_ok());
+
+<span class="kw">let </span>invalid_doc = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"wrong_type"</span>, <span class="string">"title"</span>: <span class="string">"Oops" </span>});
+<span class="macro">assert!</span>(collection.add_document(invalid_doc, <span class="kw-2">&amp;mut </span>handler).is_err());</code></pre></div>
+<h5 id="implementation-notes"><a class="doc-anchor" href="#implementation-notes">§</a>Implementation Notes</h5>
+<ul>
+<li>Validation logic is delegated to <a href="../../utils/fn.validate_against_structure.html" title="fn nosqlite_rust::engine::models::utils::validate_against_structure"><code>validate_against_structure</code></a>, which checks field presence
+and type compatibility.</li>
+<li>Inserted documents are wrapped in the <a href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document"><code>Document</code></a> type before being pushed into <code>self.documents</code>.</li>
+</ul>
+<h5 id="see-also-1"><a class="doc-anchor" href="#see-also-1">§</a>See Also</h5>
+<ul>
+<li><a href="../../utils/fn.validate_against_structure.html" title="fn nosqlite_rust::engine::models::utils::validate_against_structure"><code>validate_against_structure</code></a> - Ensures the document matches the schema.</li>
+<li><a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> - Logs and manages structured errors.</li>
+<li><a href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError"><code>NosqliteError</code></a> - Enum defining possible error cases for document operations.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.update_documents" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#215-274">Source</a><h4 class="code-header">pub fn <a href="#method.update_documents" class="fn">update_documents</a>(
+    &amp;mut self,
+    field_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_value: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    new_data: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    handler: &amp;mut <a class="struct" href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>Replaces the contents of all documents in the collection that match a specific field value.</p>
+<p>This method performs a <strong>full update</strong> for each matching document, overwriting their entire
+content with <code>new_data</code>, after verifying that the structure conforms to the collection’s schema.</p>
+<h5 id="parameters-2"><a class="doc-anchor" href="#parameters-2">§</a>Parameters</h5>
+<ul>
+<li><code>field_name</code>: The name of the field to match (supports nested paths like <code>"profile.age"</code>).</li>
+<li><code>field_value</code>: The target value to match against.</li>
+<li><code>new_data</code>: A <a href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value"><code>serde_json::Value</code></a> representing the new content for each matching document. Must be a valid JSON object.</li>
+<li><code>handler</code>: A mutable reference to a <a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> for logging validation or lookup errors.</li>
+</ul>
+<h5 id="returns-2"><a class="doc-anchor" href="#returns-2">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> if at least one document was found and successfully updated.</li>
+<li><code>Err(NosqliteError)</code> if:
+<ul>
+<li>No document matched the criteria,</li>
+<li>The new data does not conform to the collection schema,</li>
+<li>The data is not a JSON object.</li>
+</ul>
+</li>
+</ul>
+<h5 id="errors-1"><a class="doc-anchor" href="#errors-1">§</a>Errors</h5>
+<ul>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentNotFound" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentNotFound"><code>NosqliteError::DocumentNotFound</code></a> is returned if no document matches the criteria.</li>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentInvalid" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentInvalid"><code>NosqliteError::DocumentInvalid</code></a> is returned if the new data is not a JSON object or does not match the collection’s structure.</li>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.InvalidCollectionStructure" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::InvalidCollectionStructure"><code>NosqliteError::InvalidCollectionStructure</code></a> is returned if the collection’s structure is not a JSON object.</li>
+</ul>
+<h5 id="behavior"><a class="doc-anchor" href="#behavior">§</a>Behavior</h5>
+<ul>
+<li>All documents where <code>field_name == field_value</code> will be fully overwritten.</li>
+<li>Each updated document receives a fresh <code>updated_at</code> timestamp.</li>
+<li>Partial updates are not supported by this method.</li>
+</ul>
+<h5 id="example-3"><a class="doc-anchor" href="#example-3">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"name"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"users"</span>.to_string(), schema);
+
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data31.nosqlite"</span>.to_string());
+<span class="kw">let </span>original = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice" </span>});
+collection.add_document(original, <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+<span class="kw">let </span>updated = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice Updated" </span>});
+<span class="kw">let </span>doc_id = collection.documents[<span class="number">0</span>].id.clone();
+
+collection.update_documents(<span class="string">"id"</span>, <span class="kw-2">&amp;</span><span class="macro">json!</span>(<span class="number">1</span>), updated, <span class="kw-2">&amp;mut </span>handler).unwrap();</code></pre></div>
+<h5 id="see-also-2"><a class="doc-anchor" href="#see-also-2">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.add_document" title="method nosqlite_rust::engine::models::collection::model::Collection::add_document"><code>Collection::add_document</code></a>: For inserting new documents into the collection.</li>
+<li><a href="../../utils/fn.validate_against_structure.html" title="fn nosqlite_rust::engine::models::utils::validate_against_structure"><code>validate_against_structure</code></a>: Validates structural conformance.</li>
+<li><a href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError"><code>NosqliteError</code></a>, <a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a>, <a href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document"><code>Document</code></a></li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.update_documents_field" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#330-373">Source</a><h4 class="code-header">pub fn <a href="#method.update_documents_field" class="fn">update_documents_field</a>(
+    &amp;mut self,
+    field_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_value: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    target_field: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    value: <a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    handler: &amp;mut <a class="struct" href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Updates a single field in all documents that match a given field path and value.</p>
+<p>This method performs a <strong>partial update</strong> by locating all documents where the provided <code>field_name</code>
+matches the specified <code>field_value</code>, and setting or inserting the field <code>target_field</code> with the new <code>value</code>.</p>
+<h5 id="parameters-3"><a class="doc-anchor" href="#parameters-3">§</a>Parameters</h5>
+<ul>
+<li><code>field_name</code>: The field to search in the document (e.g., <code>"username"</code> or <code>"profile.id"</code>).</li>
+<li><code>field_value</code>: The value to match within the specified field.</li>
+<li><code>target_field</code>: The name of the field to update or insert in the matching documents.</li>
+<li><code>value</code>: A <a href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value"><code>serde_json::Value</code></a> representing the new value for the <code>target_field</code>.</li>
+<li><code>handler</code>: A mutable reference to a <a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> for logging errors.</li>
+</ul>
+<h5 id="returns-3"><a class="doc-anchor" href="#returns-3">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> if at least one document was updated successfully.</li>
+<li><code>Err(NosqliteError)</code> if no documents matched the search or a document has invalid structure.</li>
+</ul>
+<h5 id="behavior-1"><a class="doc-anchor" href="#behavior-1">§</a>Behavior</h5>
+<ul>
+<li>If <code>target_field</code> exists in a matching document, its value is overwritten.</li>
+<li>If it does not exist, the field is inserted.</li>
+<li>All matching documents receive a fresh <code>updated_at</code> timestamp.</li>
+<li>This method does <strong>not</strong> perform schema validation for the updated field.</li>
+</ul>
+<h5 id="errors-2"><a class="doc-anchor" href="#errors-2">§</a>Errors</h5>
+<ul>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentNotFound" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentNotFound"><code>NosqliteError::DocumentNotFound</code></a> is returned if no document matched the criteria.</li>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentInvalid" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentInvalid"><code>NosqliteError::DocumentInvalid</code></a> is returned if a matching document’s data is not a JSON object.</li>
+</ul>
+<h5 id="example-4"><a class="doc-anchor" href="#example-4">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"name"</span>: <span class="string">"string"</span>, <span class="string">"age"</span>: <span class="string">"number" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"users"</span>.to_string(), schema);
+
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data32.nosqlite"</span>.to_string());
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"age"</span>: <span class="number">30 </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">2</span>, <span class="string">"name"</span>: <span class="string">"Alice"</span>, <span class="string">"age"</span>: <span class="number">28 </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+collection.update_documents_field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span><span class="macro">json!</span>(<span class="string">"Alice"</span>), <span class="string">"age"</span>, <span class="macro">json!</span>(<span class="number">31</span>), <span class="kw-2">&amp;mut </span>handler).unwrap();
+<span class="macro">assert_eq!</span>(collection.documents[<span class="number">0</span>].data[<span class="string">"age"</span>], <span class="macro">json!</span>(<span class="number">31</span>));
+<span class="macro">assert_eq!</span>(collection.documents[<span class="number">1</span>].data[<span class="string">"age"</span>], <span class="macro">json!</span>(<span class="number">31</span>));</code></pre></div>
+<h5 id="see-also-3"><a class="doc-anchor" href="#see-also-3">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.update_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::update_documents"><code>Collection::update_documents</code></a> for full replacements.</li>
+<li><a href="struct.Collection.html#method.update_documents_field" title="method nosqlite_rust::engine::models::collection::model::Collection::update_documents_field"><code>Collection::update_documents_field</code></a> for single-ID field updates.</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.delete_documents" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#425-451">Source</a><h4 class="code-header">pub fn <a href="#method.delete_documents" class="fn">delete_documents</a>(
+    &amp;mut self,
+    field_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_value: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    handler: &amp;mut <a class="struct" href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Removes all documents from the collection where a specific field matches a given value.</p>
+<p>This method performs a <strong>destructive delete</strong> by removing every document where
+<code>field_name == field_value</code>. The comparison supports nested fields using dot notation.</p>
+<h5 id="parameters-4"><a class="doc-anchor" href="#parameters-4">§</a>Parameters</h5>
+<ul>
+<li><code>field_name</code>: The name of the field to filter on (e.g., <code>"username"</code> or <code>"profile.id"</code>).</li>
+<li><code>field_value</code>: The value to match for deletion.</li>
+<li><code>handler</code>: A mutable reference to a <a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> for logging deletion errors.</li>
+</ul>
+<h5 id="returns-4"><a class="doc-anchor" href="#returns-4">§</a>Returns</h5>
+<ul>
+<li><code>Ok(())</code> if one or more documents were successfully deleted.</li>
+<li><code>Err(NosqliteError)</code> if no matching document is found.</li>
+</ul>
+<h5 id="behavior-2"><a class="doc-anchor" href="#behavior-2">§</a>Behavior</h5>
+<ul>
+<li>This is a destructive operation; matching documents are permanently removed from memory.</li>
+<li>All matches are deleted in one call.</li>
+<li>If no match is found, an error is returned and logged.</li>
+</ul>
+<h5 id="errors-3"><a class="doc-anchor" href="#errors-3">§</a>Errors</h5>
+<ul>
+<li><a href="../../../error/error_type/enum.NosqliteError.html#variant.DocumentNotFound" title="variant nosqlite_rust::engine::error::error_type::NosqliteError::DocumentNotFound"><code>NosqliteError::DocumentNotFound</code></a> is returned if no document matches the field/value condition.</li>
+</ul>
+<h5 id="example-5"><a class="doc-anchor" href="#example-5">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"title"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"notes"</span>.to_string(), schema);
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data33.nosqlite"</span>.to_string());
+
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"title"</span>: <span class="string">"First" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">2</span>, <span class="string">"title"</span>: <span class="string">"First" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+collection.delete_documents(<span class="string">"title"</span>, <span class="kw-2">&amp;</span><span class="macro">json!</span>(<span class="string">"First"</span>), <span class="kw-2">&amp;mut </span>handler).unwrap();
+<span class="macro">assert!</span>(collection.documents.is_empty());</code></pre></div>
+<h5 id="see-also-4"><a class="doc-anchor" href="#see-also-4">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.update_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::update_documents"><code>Collection::update_documents</code></a> — for replacing document content.</li>
+<li><a href="struct.Collection.html#method.add_document" title="method nosqlite_rust::engine::models::collection::model::Collection::add_document"><code>Collection::add_document</code></a> — for inserting new documents.</li>
+<li><a href="../../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_rust::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a>, <a href="../../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_rust::engine::error::error_type::NosqliteError"><code>NosqliteError</code></a>, <a href="../../utils/fn.get_nested_value.html" title="fn nosqlite_rust::engine::models::utils::get_nested_value"><code>get_nested_value</code></a></li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.get_document" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#499-503">Source</a><h4 class="code-header">pub fn <a href="#method.get_document" class="fn">get_document</a>(
+    &amp;self,
+    field_name: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    field_value: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document">Document</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Retrieves the first document from the collection where a specific field matches a given value.</p>
+<p>This method performs a non-mutating search through the collection’s documents and
+returns a reference to the first <a href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document"><code>Document</code></a> where the field value matches the given input.</p>
+<p>Supports dot-notation for nested fields (e.g., <code>"profile.username"</code>).</p>
+<h5 id="parameters-5"><a class="doc-anchor" href="#parameters-5">§</a>Parameters</h5>
+<ul>
+<li><code>field_name</code>: The name of the field to query (e.g., <code>"name"</code> or <code>"profile.email"</code>).</li>
+<li><code>field_value</code>: The value to match against.</li>
+</ul>
+<h5 id="returns-5"><a class="doc-anchor" href="#returns-5">§</a>Returns</h5>
+<ul>
+<li><code>Some(&amp;Document)</code> if a document with the given field/value pair is found.</li>
+<li><code>None</code> if no such document exists.</li>
+</ul>
+<h5 id="example-6"><a class="doc-anchor" href="#example-6">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"title"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"articles"</span>.to_string(), schema);
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data34.nosqlite"</span>.to_string());
+
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"title"</span>: <span class="string">"Intro to Rust" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+<span class="kw">let </span>result = collection.get_document(<span class="string">"title"</span>, <span class="kw-2">&amp;</span><span class="macro">json!</span>(<span class="string">"Intro to Rust"</span>));
+<span class="macro">assert!</span>(result.is_some());
+<span class="macro">assert_eq!</span>(result.unwrap().data[<span class="string">"id"</span>], <span class="macro">json!</span>(<span class="number">1</span>));</code></pre></div>
+<h5 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h5>
+<ul>
+<li>Performs a linear scan over the internal document list.</li>
+<li>Stops at the <strong>first match</strong>. Use another method if you expect multiple matches.</li>
+</ul>
+<h5 id="see-also-5"><a class="doc-anchor" href="#see-also-5">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.all_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::all_documents"><code>Collection::all_documents</code></a> — to retrieve all documents</li>
+<li><a href="struct.Collection.html#method.delete_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::delete_documents"><code>Collection::delete_documents</code></a> — for deletion using a field filter</li>
+<li><a href="../../utils/fn.get_nested_value.html" title="fn nosqlite_rust::engine::models::utils::get_nested_value"><code>get_nested_value</code></a> — for resolving field paths</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.all_documents" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#552-554">Source</a><h4 class="code-header">pub fn <a href="#method.all_documents" class="fn">all_documents</a>(&amp;self) -&gt; &amp;<a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document">Document</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Returns a reference to all documents currently stored in the collection.</p>
+<p>This method provides read-only access to the internal list of documents held by the
+collection. It is useful for inspection, iteration, exporting, or reporting purposes.</p>
+<h5 id="returns-6"><a class="doc-anchor" href="#returns-6">§</a>Returns</h5>
+<p>A reference to the internal vector of <a href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document"><code>Document</code></a> instances:
+<code>&amp;Vec&lt;Document&gt;</code></p>
+<h5 id="example-7"><a class="doc-anchor" href="#example-7">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"name"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"people"</span>.to_string(), schema);
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data35.nosqlite"</span>.to_string());
+
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">2</span>, <span class="string">"name"</span>: <span class="string">"Bob" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+<span class="kw">let </span>docs = collection.all_documents();
+<span class="macro">assert_eq!</span>(docs.len(), <span class="number">2</span>);
+<span class="kw">for </span>doc <span class="kw">in </span>docs {
+    <span class="macro">println!</span>(<span class="string">"Document ID: {}"</span>, doc.id);
+}</code></pre></div>
+<h5 id="notes-1"><a class="doc-anchor" href="#notes-1">§</a>Notes</h5>
+<ul>
+<li>The returned reference is read-only. To modify document contents, use methods like
+<a href="struct.Collection.html#method.update_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::update_documents"><code>Collection::update_documents</code></a>, <a href="struct.Collection.html#method.update_documents_field" title="method nosqlite_rust::engine::models::collection::model::Collection::update_documents_field"><code>Collection::update_documents_field</code></a>, or create a mutable variant.</li>
+<li>The order of documents in the vector reflects the order of insertion, unless modified.</li>
+</ul>
+<h5 id="performance-1"><a class="doc-anchor" href="#performance-1">§</a>Performance</h5>
+<ul>
+<li>This is a zero-cost accessor; no allocation or transformation is performed.</li>
+</ul>
+<h5 id="see-also-6"><a class="doc-anchor" href="#see-also-6">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.get_document" title="method nosqlite_rust::engine::models::collection::model::Collection::get_document"><code>Collection::get_document</code></a> — for retrieving a single document by ID</li>
+<li><a href="struct.Collection.html#method.add_document" title="method nosqlite_rust::engine::models::collection::model::Collection::add_document"><code>Collection::add_document</code></a> — for inserting documents</li>
+<li><a href="../../document/model/struct.Document.html" title="struct nosqlite_rust::engine::models::document::model::Document"><code>Document</code></a> — the structure returned by this method</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.document_count" class="method"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#592-594">Source</a><h4 class="code-header">pub fn <a href="#method.document_count" class="fn">document_count</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>🦀
+Returns the total number of documents stored in the collection.</p>
+<p>This method provides a quick way to determine the size of the collection. It simply
+returns the length of the internal documents vector.</p>
+<h5 id="returns-7"><a class="doc-anchor" href="#returns-7">§</a>Returns</h5>
+<ul>
+<li>A <code>usize</code> representing the number of documents currently in the collection.</li>
+</ul>
+<h5 id="example-8"><a class="doc-anchor" href="#example-8">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+<span class="kw">use </span>nosqlite_rust::engine::error::NosqliteErrorHandler;
+
+<span class="kw">let </span>schema = <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"number"</span>, <span class="string">"name"</span>: <span class="string">"string" </span>});
+<span class="kw">let </span><span class="kw-2">mut </span>collection = Collection::new(<span class="string">"users"</span>.to_string(), schema);
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data36.nosqlite"</span>.to_string());
+
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Alice" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+collection.add_document(<span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">2</span>, <span class="string">"name"</span>: <span class="string">"Bob" </span>}), <span class="kw-2">&amp;mut </span>handler).unwrap();
+
+<span class="macro">assert_eq!</span>(collection.document_count(), <span class="number">2</span>);</code></pre></div>
+<h5 id="performance-2"><a class="doc-anchor" href="#performance-2">§</a>Performance</h5>
+<ul>
+<li>Constant time (<code>O(1)</code>) operation; no iteration or allocation.</li>
+</ul>
+<h5 id="see-also-7"><a class="doc-anchor" href="#see-also-7">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.all_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::all_documents"><code>Collection::all_documents</code></a> — for retrieving a reference to all stored documents</li>
+<li><a href="struct.Collection.html#method.add_document" title="method nosqlite_rust::engine::models::collection::model::Collection::add_document"><code>Collection::add_document</code></a> — for inserting new documents</li>
+<li><a href="struct.Collection.html#method.delete_documents" title="method nosqlite_rust::engine::models::collection::model::Collection::delete_documents"><code>Collection::delete_documents</code></a> — for removing documents</li>
+</ul>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#impl-Clone-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h4></section></summary><div class='docblock'>Returns a copy of the value. <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.86.0/src/core/clone.rs.html#174">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#impl-Debug-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-1" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#method.fmt-1" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.86.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.86.0/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Default-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#643-685">Source</a><a href="#impl-Default-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.default" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#682-684">Source</a><a href="#method.default" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/default/trait.Default.html#tymethod.default" class="fn">default</a>() -&gt; Self</h4></section></summary><div class="docblock"><p>🦀
+Creates a default <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> instance with the name <code>"default"</code> and an empty structure.</p>
+<p>This implementation is useful for initializing a placeholder or fallback collection.
+The resulting collection:</p>
+<ul>
+<li>Has the name <code>"default"</code></li>
+<li>Expects an empty JSON object as its schema (<code>{}</code>)</li>
+<li>Contains no documents</li>
+</ul>
+<h5 id="returns-9"><a class="doc-anchor" href="#returns-9">§</a>Returns</h5>
+<p>A <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> initialized with default values:</p>
+<ul>
+<li><code>name</code>: <code>"default"</code></li>
+<li><code>structure</code>: <code>{}</code> (empty JSON object)</li>
+<li><code>documents</code>: empty vector</li>
+<li><code>created_at</code>: current system timestamp</li>
+</ul>
+<h5 id="example-9"><a class="doc-anchor" href="#example-9">§</a>Example</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>nosqlite_rust::engine::models::Collection;
+
+<span class="kw">let </span>default_collection = Collection::default();
+<span class="macro">assert_eq!</span>(default_collection.name, <span class="string">"default"</span>);
+<span class="macro">assert!</span>(default_collection.structure.is_object());
+<span class="macro">assert!</span>(default_collection.documents.is_empty());</code></pre></div>
+<h5 id="use-cases"><a class="doc-anchor" href="#use-cases">§</a>Use Cases</h5>
+<ul>
+<li>Fallback collections</li>
+<li>Simplified test setup</li>
+<li>Placeholder values when working with generics</li>
+</ul>
+<h5 id="see-also-9"><a class="doc-anchor" href="#see-also-9">§</a>See Also</h5>
+<ul>
+<li><a href="struct.Collection.html#method.new" title="associated function nosqlite_rust::engine::models::collection::model::Collection::new"><code>Collection::new</code></a> — for custom initialization</li>
+<li><a href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html#variant.Object" title="variant serde_json::value::Value::Object"><code>serde_json::Value::Object</code></a> — for creating JSON structures</li>
+</ul>
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Deserialize%3C'de%3E-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#impl-Deserialize%3C'de%3E-for-Collection" class="anchor">§</a><h3 class="code-header">impl&lt;'de&gt; <a class="trait" href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'de&gt; for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.deserialize" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#method.deserialize" class="anchor">§</a><h4 class="code-header">fn <a href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserialize.html#tymethod.deserialize" class="fn">deserialize</a>&lt;__D&gt;(__deserializer: __D) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, __D::<a class="associatedtype" href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserializer.html#associatedtype.Error" title="type serde::de::Deserializer::Error">Error</a>&gt;<div class="where">where
+    __D: <a class="trait" href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserializer.html" title="trait serde::de::Deserializer">Deserializer</a>&lt;'de&gt;,</div></h4></section></summary><div class='docblock'>Deserialize this value from the given Serde deserializer. <a href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserialize.html#tymethod.deserialize">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Display-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#597-641">Source</a><a href="#impl-Display-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/implem.rs.html#632-640">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Display.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.86.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.86.0/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class="docblock"><p>🦀
+Formats the <a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> for human-readable display.</p>
+<p>This implementation provides a clean, structured textual representation of the collection,
+including:</p>
+<ul>
+<li>The collection’s name</li>
+<li>The expected document structure (as a JSON value)</li>
+<li>A list of stored document IDs</li>
+</ul>
+<h5 id="example-output"><a class="doc-anchor" href="#example-output">§</a>Example Output</h5><div class="example-wrap"><pre class="language-text"><code>Collection &#39;users&#39;
+  Required Structure: {&quot;id&quot;:&quot;number&quot;,&quot;name&quot;:&quot;string&quot;}
+  2 document(s):
+    - a1f3c2d9
+    - b7e1d5f0</code></pre></div><h5 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h5>
+<p>This formatting is ideal for:</p>
+<ul>
+<li>CLI tools or REPLs displaying collections</li>
+<li>Debug logs and diagnostics</li>
+<li>Quick summaries in developer-facing tools</li>
+</ul>
+<h5 id="returns-8"><a class="doc-anchor" href="#returns-8">§</a>Returns</h5>
+<p>Returns a <a href="https://doc.rust-lang.org/1.86.0/core/fmt/type.Result.html" title="type core::fmt::Result"><code>std::fmt::Result</code></a> indicating success or formatting failure.</p>
+<h5 id="see-also-8"><a class="doc-anchor" href="#see-also-8">§</a>See Also</h5>
+<ul>
+<li><a href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Display.html" title="trait core::fmt::Display"><code>std::fmt::Display</code></a> — the Rust trait being implemented here</li>
+<li><a href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection"><code>Collection</code></a> — the data structure being formatted</li>
+</ul>
+</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Serialize-for-Collection" class="impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#impl-Serialize-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.serialize" class="method trait-impl"><a class="src rightside" href="../../../../../src/nosqlite_rust/engine/models/collection/model.rs.html#29">Source</a><a href="#method.serialize" class="anchor">§</a><h4 class="code-header">fn <a href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serialize.html#tymethod.serialize" class="fn">serialize</a>&lt;__S&gt;(&amp;self, __serializer: __S) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;__S::<a class="associatedtype" href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serializer.html#associatedtype.Ok" title="type serde::ser::Serializer::Ok">Ok</a>, __S::<a class="associatedtype" href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serializer.html#associatedtype.Error" title="type serde::ser::Serializer::Error">Error</a>&gt;<div class="where">where
+    __S: <a class="trait" href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serializer.html" title="trait serde::ser::Serializer">Serializer</a>,</div></h4></section></summary><div class='docblock'>Serialize this value into the given Serde serializer. <a href="https://docs.rs/serde/1.0.219/serde/ser/trait.Serialize.html#tymethod.serialize">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Collection" class="impl"><a href="#impl-Freeze-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section><section id="impl-RefUnwindSafe-for-Collection" class="impl"><a href="#impl-RefUnwindSafe-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section><section id="impl-Send-for-Collection" class="impl"><a href="#impl-Send-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section><section id="impl-Sync-for-Collection" class="impl"><a href="#impl-Sync-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section><section id="impl-Unpin-for-Collection" class="impl"><a href="#impl-Unpin-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section><section id="impl-UnwindSafe-for-Collection" class="impl"><a href="#impl-UnwindSafe-for-Collection" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.Collection.html" title="struct nosqlite_rust::engine::models::collection::model::Collection">Collection</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.86.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.86.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/clone.rs.html#273">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/clone.rs.html#275">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dst: <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dst</code>. <a href="https://doc.rust-lang.org/1.86.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#767">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#770">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#750-752">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#760">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Same-for-T" class="impl"><a class="src rightside" href="https://docs.rs/typenum/1.18.0/src/typenum/type_operators.rs.html#34">Source</a><a href="#impl-Same-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://docs.rs/typenum/1.18.0/typenum/type_operators/trait.Same.html" title="trait typenum::type_operators::Same">Same</a> for T</h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Output" class="associatedtype trait-impl"><a class="src rightside" href="https://docs.rs/typenum/1.18.0/src/typenum/type_operators.rs.html#35">Source</a><a href="#associatedtype.Output" class="anchor">§</a><h4 class="code-header">type <a href="https://docs.rs/typenum/1.18.0/typenum/type_operators/trait.Same.html#associatedtype.Output" class="associatedtype">Output</a> = T</h4></section></summary><div class='docblock'>Should always be <code>Self</code></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/borrow.rs.html#82-84">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/borrow.rs.html#86">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/borrow.rs.html#87">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/borrow.rs.html#91">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.86.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToString-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/string.rs.html#2758">Source</a><a href="#impl-ToString-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/alloc/string/trait.ToString.html" title="trait alloc::string::ToString">ToString</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.86.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.to_string" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/alloc/string.rs.html#2760">Source</a><a href="#method.to_string" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/alloc/string/trait.ToString.html#tymethod.to_string" class="fn">to_string</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class='docblock'>Converts the given value to a <code>String</code>. <a href="https://doc.rust-lang.org/1.86.0/alloc/string/trait.ToString.html#tymethod.to_string">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#807-809">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#811">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#814">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#792-794">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#796">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.86.0/src/core/convert/mod.rs.html#799">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.86.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-VZip%3CV%3E-for-T" class="impl"><a href="#impl-VZip%3CV%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;V, T&gt; VZip&lt;V&gt; for T<div class="where">where
+    V: MultiLane&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><section id="method.vzip" class="method trait-impl"><a href="#method.vzip" class="anchor">§</a><h4 class="code-header">fn <a class="fn">vzip</a>(self) -&gt; V</h4></section></div></details><section id="impl-DeserializeOwned-for-T" class="impl"><a class="src rightside" href="https://docs.rs/serde/1.0.219/src/serde/de/mod.rs.html#614">Source</a><a href="#impl-DeserializeOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://docs.rs/serde/1.0.219/serde/de/trait.DeserializeOwned.html" title="trait serde::de::DeserializeOwned">DeserializeOwned</a> for T<div class="where">where
+    T: for&lt;'de&gt; <a class="trait" href="https://docs.rs/serde/1.0.219/serde/de/trait.Deserialize.html" title="trait serde::de::Deserialize">Deserialize</a>&lt;'de&gt;,</div></h3></section></div></section></div></main></body></html>

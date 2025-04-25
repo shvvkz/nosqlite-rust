@@ -1,0 +1,3 @@
+var srcIndex = new Map(JSON.parse('[["nosqlite_rust",["",[["engine",[["error",[],["error_type.rs","handler.rs","mod.rs"]],["models",[["collection",[],["implem.rs","mod.rs","model.rs"]],["database",[],["implem.rs","mod.rs","model.rs"]],["document",[],["implem.rs","mod.rs","model.rs"]],["file",[],["implem.rs","mod.rs","model.rs"]]],["mod.rs","utils.rs"]],["services",[],["collection_service.rs","database_service.rs","document_service.rs","mod.rs"]]],["mod.rs","nosqlite.rs"]]],["lib.rs"]]]]'));
+createSrcSidebar();
+//{"start":36,"fragment_lengths":[454]}
