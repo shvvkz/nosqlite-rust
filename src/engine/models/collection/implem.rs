@@ -314,7 +314,7 @@ impl Collection {
     /// let schema = json!({ "id": "number", "name": "string", "age": "number" });
     /// let mut collection = Collection::new("users".to_string(), schema);
     ///
-    /// let mut handler = NosqliteErrorHandler::new("temp/data.nosqlite".to_string());
+    /// let mut handler = NosqliteErrorHandler::new("temp/data32.nosqlite".to_string());
     /// collection.add_document(json!({ "id": 1, "name": "Alice", "age": 30 }), &mut handler).unwrap();
     /// collection.add_document(json!({ "id": 2, "name": "Alice", "age": 28 }), &mut handler).unwrap();
     ///
@@ -325,8 +325,8 @@ impl Collection {
     ///
     /// # See Also
     ///
-    /// - [`Collection::update_document`] for full replacements.
-    /// - [`Collection::update_field_document`] for single-ID field updates.
+    /// - [`Collection::update_documents`] for full replacements.
+    /// - [`Collection::update_documents_field`] for single-ID field updates.
     pub fn update_documents_field(
         &mut self,
         field_name: &str,
@@ -373,24 +373,31 @@ impl Collection {
     }
 
     /// 🦀
-    /// Removes a document from the collection by its unique identifier.
+    /// Removes all documents from the collection where a specific field matches a given value.
     ///
-    /// This method searches for a document by its `id` and removes it from the collection if found.
-    /// It is a destructive operation — the document is permanently deleted from the in-memory store.
+    /// This method performs a **destructive delete** by removing every document where
+    /// `field_name == field_value`. The comparison supports nested fields using dot notation.
     ///
     /// # Parameters
     ///
-    /// - `id`: A string slice (`&str`) representing the unique identifier of the document to remove.
-    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`], used to log error cases such as "not found".
+    /// - `field_name`: The name of the field to filter on (e.g., `"username"` or `"profile.id"`).
+    /// - `field_value`: The value to match for deletion.
+    /// - `handler`: A mutable reference to a [`NosqliteErrorHandler`] for logging deletion errors.
     ///
     /// # Returns
     ///
-    /// - `Ok(())` if the document was found and successfully deleted.
-    /// - `Err(NosqliteError)` if the document could not be found.
+    /// - `Ok(())` if one or more documents were successfully deleted.
+    /// - `Err(NosqliteError)` if no matching document is found.
+    ///
+    /// # Behavior
+    ///
+    /// - This is a destructive operation; matching documents are permanently removed from memory.
+    /// - All matches are deleted in one call.
+    /// - If no match is found, an error is returned and logged.
     ///
     /// # Errors
     ///
-    /// - [`NosqliteError::DocumentNotFound`] is returned if no document with the specified `id` exists in the collection.
+    /// - [`NosqliteError::DocumentNotFound`] is returned if no document matches the field/value condition.
     ///
     /// # Example
     ///
@@ -401,61 +408,65 @@ impl Collection {
     ///
     /// let schema = json!({ "id": "number", "title": "string" });
     /// let mut collection = Collection::new("notes".to_string(), schema);
-    ///
     /// let mut handler = NosqliteErrorHandler::new("temp/data33.nosqlite".to_string());
-    /// collection.add_document(json!({ "id": 1, "title": "First note" }), &mut handler).unwrap();
     ///
-    /// let doc_id = collection.documents[0].id.clone();
-    /// collection.delete_document(&doc_id, &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 1, "title": "First" }), &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 2, "title": "First" }), &mut handler).unwrap();
     ///
+    /// collection.delete_documents("title", &json!("First"), &mut handler).unwrap();
     /// assert!(collection.documents.is_empty());
     /// ```
     ///
-    /// # Behavior
-    ///
-    /// - Performs a linear search for the document by ID.
-    /// - If found, the document is removed from the internal `documents` vector.
-    /// - If not found, an error is returned and logged via the provided `handler`.
-    ///
     /// # See Also
     ///
-    /// - [`Collection::add_document`] for inserting documents
-    /// - [`Collection::update_document`] for replacing document content
-    /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`Document`]
-    pub fn delete_document(
+    /// - [`Collection::update_documents`] — for replacing document content.
+    /// - [`Collection::add_document`] — for inserting new documents.
+    /// - [`NosqliteErrorHandler`], [`NosqliteError`], [`get_nested_value`]
+    pub fn delete_documents(
         &mut self,
-        id: &str,
+        field_name: &str,
+        field_value: &Value,
         handler: &mut NosqliteErrorHandler,
     ) -> Result<(), NosqliteError> {
-        let position = self
-            .documents
-            .iter()
-            .position(|d| d.id == id)
-            .ok_or_else(|| {
-                let error = NosqliteError::DocumentNotFound(id.to_string());
-                handler.log_error(error.clone());
-                error
-            })?;
+        let original_len = self.documents.len();
 
-        self.documents.remove(position);
+        self.documents.retain(|doc| {
+            let keep = get_nested_value(&doc.data, field_name) != Some(field_value);
+            // Log matched deletions (optional: could add handler logging here if needed)
+            keep
+        });
+
+        let new_len = self.documents.len();
+
+        if new_len == original_len {
+            let error = NosqliteError::DocumentNotFound(format!(
+                "No document found where '{}' == '{}'",
+                field_name, field_value
+            ));
+            handler.log_error(error.clone());
+            return Err(error);
+        }
+
         Ok(())
     }
 
     /// 🦀
-    /// Retrieves a reference to a document from the collection by its unique identifier.
+    /// Retrieves the first document from the collection where a specific field matches a given value.
     ///
-    /// This method performs a non-mutating lookup in the collection’s document list, searching
-    /// for a document with the specified `id`. If found, a reference to the [`Document`] is returned.
-    /// If no match is found, `None` is returned.
+    /// This method performs a non-mutating search through the collection's documents and
+    /// returns a reference to the first [`Document`] where the field value matches the given input.
+    ///
+    /// Supports dot-notation for nested fields (e.g., `"profile.username"`).
     ///
     /// # Parameters
     ///
-    /// - `id`: A string slice (`&str`) representing the unique ID of the document to retrieve.
+    /// - `field_name`: The name of the field to query (e.g., `"name"` or `"profile.email"`).
+    /// - `field_value`: The value to match against.
     ///
     /// # Returns
     ///
-    /// - `Some(&Document)` if a document with the given ID exists in the collection.
-    /// - `None` if no document matches the given ID.
+    /// - `Some(&Document)` if a document with the given field/value pair is found.
+    /// - `None` if no such document exists.
     ///
     /// # Example
     ///
@@ -468,27 +479,27 @@ impl Collection {
     /// let mut collection = Collection::new("articles".to_string(), schema);
     /// let mut handler = NosqliteErrorHandler::new("temp/data34.nosqlite".to_string());
     ///
-    /// let doc = json!({ "id": 1, "title": "Intro to Rust" });
-    /// collection.add_document(doc, &mut handler).unwrap();
+    /// collection.add_document(json!({ "id": 1, "title": "Intro to Rust" }), &mut handler).unwrap();
     ///
-    /// let doc_id = collection.documents[0].id.clone();
-    /// let result = collection.get_document(&doc_id);
+    /// let result = collection.get_document("title", &json!("Intro to Rust"));
     /// assert!(result.is_some());
-    /// assert_eq!(result.unwrap().data["title"], json!("Intro to Rust"));
+    /// assert_eq!(result.unwrap().data["id"], json!(1));
     /// ```
     ///
     /// # Performance
     ///
-    /// - Performs a linear scan through the collection's internal document vector.
-    /// - For large collections, consider indexing for more efficient lookups.
+    /// - Performs a linear scan over the internal document list.
+    /// - Stops at the **first match**. Use another method if you expect multiple matches.
     ///
     /// # See Also
     ///
-    /// - [`Collection::add_document`] for inserting new documents
-    /// - [`Collection::delete_document`] for removing documents
-    /// - [`Document`] for the structure being returned
-    pub fn get_document(&self, id: &str) -> Option<&Document> {
-        self.documents.iter().find(|d| d.id == id)
+    /// - [`Collection::all_documents`] — to retrieve all documents
+    /// - [`Collection::delete_documents`] — for deletion using a field filter
+    /// - [`get_nested_value`] — for resolving field paths
+    pub fn get_document(&self, field_name: &str, field_value: &Value) -> Option<&Document> {
+        self.documents
+            .iter()
+            .find(|doc| get_nested_value(&doc.data, field_name) == Some(field_value))
     }
 
     /// 🦀
@@ -526,7 +537,7 @@ impl Collection {
     /// # Notes
     ///
     /// - The returned reference is read-only. To modify document contents, use methods like
-    ///   [`Collection::update_document`], [`Collection::update_field_document`], or create a mutable variant.
+    ///   [`Collection::update_documents`], [`Collection::update_documents_field`], or create a mutable variant.
     /// - The order of documents in the vector reflects the order of insertion, unless modified.
     ///
     /// # Performance
@@ -577,7 +588,7 @@ impl Collection {
     ///
     /// - [`Collection::all_documents`] — for retrieving a reference to all stored documents
     /// - [`Collection::add_document`] — for inserting new documents
-    /// - [`Collection::delete_document`] — for removing documents
+    /// - [`Collection::delete_documents`] — for removing documents
     pub fn document_count(&self) -> usize {
         self.documents.len()
     }

@@ -194,8 +194,8 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`update_document`] — for replacing an existing document
-    /// - [`delete_document`] — for removing one by ID
+    /// - [`update_documents`] — for replacing an existing document
+    /// - [`delete_documents`] — for removing one by ID
     pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), NosqliteError> {
         let result = insert_document(&mut self.db, collection, data, &mut self.error_handler);
         if result.is_ok() {
@@ -324,7 +324,7 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_document_by_id`] — for inspecting before or after
-    /// - [`delete_document`] — for removing by ID
+    /// - [`delete_documents`] — for removing by ID
     pub fn update_documents_field(
         &mut self,
         collection: &str,
@@ -357,7 +357,8 @@ impl Nosqlite {
     /// # Parameters
     ///
     /// - `collection`: The name of the collection.
-    /// - `id`: The unique ID of the document to delete.
+    /// - `field_name`: The field name to search by (e.g., `"id"`).
+    /// - `field_value`: The value to match against the field (e.g., `"doc-123"`).
     ///
     /// # Returns
     ///
@@ -374,9 +375,7 @@ impl Nosqlite {
     /// let mut db = Nosqlite::open("temp/data7.nosqlite")?;
     /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": "doc-123", "name": "Alice" }))?;
-    /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// db.delete_document("users", &docs[0].id)?;
+    /// db.delete_documents("users", "id", &json!("doc-123"))?;
     /// Ok::<(), NosqliteError>(())
     /// ```
     ///
@@ -384,8 +383,19 @@ impl Nosqlite {
     ///
     /// - [`insert_document`] — to add new documents
     /// - [`get_document_by_id`] — for checking if a document exists before deletion
-    pub fn delete_document(&mut self, collection: &str, id: &str) -> Result<(), NosqliteError> {
-        let result = delete_document(&mut self.db, collection, id, &mut self.error_handler);
+    pub fn delete_documents(
+        &mut self,
+        collection: &str,
+        field_name: &str,
+        field_value: &Value,
+    ) -> Result<(), NosqliteError> {
+        let result = delete_documents(
+            &mut self.db,
+            collection,
+            field_name,
+            field_value,
+            &mut self.error_handler,
+        );
         if result.is_ok() {
             self.auto_save();
         }
@@ -401,7 +411,8 @@ impl Nosqlite {
     /// # Parameters
     ///
     /// - `collection`: The name of the collection.
-    /// - `id`: The ID of the document to retrieve.
+    /// - `field_name`: The field name to search by (e.g., `"id"`).
+    /// - `field_value`: The value to match against the field (e.g., `"abc123"`).
     ///
     /// # Returns
     ///
@@ -418,9 +429,7 @@ impl Nosqlite {
     /// let mut db = Nosqlite::open("temp/data8.nosqlite")?;
     /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": "abc123", "name": "Alice" }))?;
-    /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// let doc = db.get_document_by_id("users", &docs[0].id)?;
+    /// let doc = db.get_document("users", "id", &json!("abc123"))?;
     /// println!("Found doc: {}", doc);
     /// Ok::<(), NosqliteError>(())
     /// ```
@@ -428,13 +437,20 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for bulk access
-    /// - [`update_document`] — for full mutation
-    pub fn get_document_by_id(
+    /// - [`update_documents`] — for full mutation
+    pub fn get_document(
         &mut self,
         collection: &str,
-        id: &str,
+        field_name: &str,
+        field_value: &Value,
     ) -> Result<&Document, NosqliteError> {
-        get_document_by_id(&self.db, collection, id, &mut self.error_handler)
+        get_document(
+            &self.db,
+            collection,
+            field_name,
+            field_value,
+            &mut self.error_handler,
+        )
     }
 
     /// 🦀
@@ -506,7 +522,7 @@ impl Nosqlite {
     /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
     /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
     ///
-    /// let results = db.get_documents_by_field("posts", "author", "alice")?;
+    /// let results = db.get_documents("posts", "author", "alice")?;
     /// for post in results {
     ///     println!("{}", post);
     /// }
@@ -521,13 +537,13 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_all_documents`] — for manual filtering
-    pub fn get_documents_by_field(
+    pub fn get_documents(
         &mut self,
         collection: &str,
         field: &str,
         value: &str,
     ) -> Result<Vec<&Document>, NosqliteError> {
-        get_documents_by_field(&self.db, collection, field, value, &mut self.error_handler)
+        get_documents(&self.db, collection, field, value, &mut self.error_handler)
     }
 
     /// 🦀

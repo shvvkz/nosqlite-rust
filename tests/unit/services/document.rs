@@ -33,7 +33,6 @@ fn insert_invalid_document_should_fail() {
 fn update_document_should_replace_correctly() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "Carol" }), &mut handler).unwrap();
-    let id = db.get_collection("users").unwrap().documents[0].id.clone();
 
     let res = update_documents(
         &mut db,
@@ -44,7 +43,7 @@ fn update_document_should_replace_correctly() {
         &mut handler,
     );
     assert!(res.is_ok());
-    let doc = get_document_by_id(&db, "users", &id, &mut handler).unwrap();
+    let doc = get_document(&db, "users", "name", &json!("New Carol"), &mut handler).unwrap();
     assert_eq!(doc.data["name"], "New Carol");
 }
 
@@ -52,7 +51,6 @@ fn update_document_should_replace_correctly() {
 fn update_field_should_work() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "David" }), &mut handler).unwrap();
-    let id = db.get_collection("users").unwrap().documents[0].id.clone();
     let res = update_documents_field(
         &mut db,
         "users",
@@ -63,28 +61,25 @@ fn update_field_should_work() {
         &mut handler,
     );
     assert!(res.is_ok());
-    let doc = get_document_by_id(&db, "users", &id, &mut handler).unwrap();
+    let doc = get_document(&db, "users", "name", &json!("Dave"), &mut handler).unwrap();
     assert_eq!(doc.data["name"], "Dave");
 }
 
 #[test]
-fn delete_document_should_remove() {
+fn delete_documents_should_remove() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "Eva" }), &mut handler).unwrap();
-    let id = db.get_collection("users").unwrap().documents[0].id.clone();
 
-    let res = delete_document(&mut db, "users", &id, &mut handler);
+    let res = delete_documents(&mut db, "users", "name", &json!("Eva"), &mut handler);
     assert!(res.is_ok());
-    assert!(get_document_by_id(&db, "users", &id, &mut handler).is_err());
+    assert!(get_document(&db, "users", "name", &json!("Eva"), &mut handler).is_err());
 }
 
 #[test]
-fn get_document_by_id_should_return_doc() {
+fn get_document_should_return_doc() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "Fred" }), &mut handler).unwrap();
-    let id = db.get_collection("users").unwrap().documents[0].id.clone();
-
-    let doc = get_document_by_id(&db, "users", &id, &mut handler);
+    let doc = get_document(&db, "users", "name", &json!("Fred"), &mut handler);
     assert!(doc.is_ok());
     assert_eq!(doc.unwrap().data["name"], "Fred");
 }
@@ -106,7 +101,7 @@ fn get_documents_by_field_should_return_filtered() {
     insert_document(&mut db, "users", json!({ "name": "John" }), &mut handler).unwrap();
     insert_document(&mut db, "users", json!({ "name": "Ivy" }), &mut handler).unwrap();
 
-    let docs = get_documents_by_field(&db, "users", "name", "Ivy", &mut handler).unwrap();
+    let docs = get_documents(&db, "users", "name", "Ivy", &mut handler).unwrap();
     assert_eq!(docs.len(), 2);
 }
 
@@ -133,8 +128,14 @@ fn update_nonexistent_document_should_fail() {
 }
 
 #[test]
-fn delete_nonexistent_document_should_fail() {
+fn delete_nonexistent_documents_should_fail() {
     let (mut db, mut handler) = create_db_and_collection();
-    let res = delete_document(&mut db, "users", "non-existent", &mut handler);
+    let res = delete_documents(
+        &mut db,
+        "users",
+        "non-existent",
+        &json!("non-existent"),
+        &mut handler,
+    );
     assert!(res.is_err());
 }
