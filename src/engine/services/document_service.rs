@@ -214,7 +214,8 @@ pub fn update_documents_field(
 ///
 /// - `db`: A mutable reference to the [`Database`] instance.
 /// - `collection_name`: The name of the target collection.
-/// - `id`: The ID of the document to delete.
+/// - `field_name`: The field name used to search for the document (e.g., `"id"`).
+/// - `field_value`: The value to match against `field_name`.
 /// - `handler`: Used to log document/collection errors.
 ///
 /// # Returns
@@ -227,25 +228,22 @@ pub fn update_documents_field(
 /// ```rust
 /// use serde_json::json;
 /// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Collection, Database, Document, File}};
-/// use nosqlite_rust::engine::services::document_service::delete_document;
+/// use nosqlite_rust::engine::services::document_service::delete_documents;
 ///
 /// let mut db = Database::new("temp/data25.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data25.nosqlite".to_string());
 /// db.add_collection("users", json!({}), &mut handler)?;
-/// let docs = {
-///     let col = db.get_collection_mut("users").unwrap();
-///     col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
-///     col.all_documents().clone()
-/// };
+/// let col = db.get_collection_mut("users").unwrap();
+/// col.add_document(json!({ "id": "abc123", "name": "Alice" }), &mut handler)?;
 ///
-/// let mut db_clone = db.clone();
-/// delete_document(&mut db_clone, "users", &docs[0].id, &mut handler)?;
+/// delete_documents(&mut db, "users", "id", &json!("abc123"), &mut handler)?;
 /// Ok::<(), NosqliteError>(())
 /// ```
-pub fn delete_document(
+pub fn delete_documents(
     db: &mut Database,
     collection_name: &str,
-    id: &str,
+    field_name: &str,
+    field_value: &Value,
     handler: &mut NosqliteErrorHandler,
 ) -> Result<(), NosqliteError> {
     let collection = db.get_collection_mut(collection_name).ok_or_else(|| {
@@ -257,7 +255,7 @@ pub fn delete_document(
         error
     })?;
 
-    collection.delete_document(id, handler)
+    collection.delete_documents(field_name, field_value, handler)
 }
 
 /// 🦀

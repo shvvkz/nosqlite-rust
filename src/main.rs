@@ -58,5 +58,15 @@ fn main() -> Result<(), NosqliteError> {
         println!("{}", doc);
     }
 
+    db.delete_documents("users", "_id", &json!("u123"))?;
+    println!("\n🗑️ Document avec _id = \"u123\" supprimé.");
+
+    // Étape 7 — Vérifier les documents après suppression
+    let remaining_docs = db.get_all_documents("users")?;
+    println!("\n📄 Documents restants après suppression :");
+    for doc in remaining_docs {
+        println!("{}", doc);
+    }
+
     Ok(())
 }

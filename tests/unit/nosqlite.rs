@@ -189,7 +189,7 @@ mod tests {
     }
 
     #[test]
-    fn delete_document_should_succeed() {
+    fn delete_documents_should_succeed() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -198,9 +198,7 @@ mod tests {
             .unwrap();
         db.insert_document("users", json!({ "name": "ToDelete" }))
             .unwrap();
-
-        let doc_id = db.get_all_documents("users").unwrap()[0].id.clone();
-        let result = db.delete_document("users", &doc_id);
+        let result = db.delete_documents("users", "name", &json!("ToDelete"));
         assert!(result.is_ok());
 
         let remaining = db.get_all_documents("users").unwrap();
@@ -208,7 +206,7 @@ mod tests {
     }
 
     #[test]
-    fn delete_document_should_fail() {
+    fn delete_documents_should_fail() {
         let db_path = create_random_file_path();
         let db_path_str = db_path.as_str();
 
@@ -217,7 +215,7 @@ mod tests {
             .unwrap();
 
         // Supprimer un document inexistant
-        let result = db.delete_document("users", "invalid-id");
+        let result = db.delete_documents("users", "invalid-id", &json!("nonexistent"));
         assert!(result.is_err());
     }
 

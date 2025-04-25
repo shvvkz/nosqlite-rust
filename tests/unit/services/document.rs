@@ -68,12 +68,12 @@ fn update_field_should_work() {
 }
 
 #[test]
-fn delete_document_should_remove() {
+fn delete_documents_should_remove() {
     let (mut db, mut handler) = create_db_and_collection();
     insert_document(&mut db, "users", json!({ "name": "Eva" }), &mut handler).unwrap();
     let id = db.get_collection("users").unwrap().documents[0].id.clone();
 
-    let res = delete_document(&mut db, "users", &id, &mut handler);
+    let res = delete_documents(&mut db, "users", "name", &json!("Eva"), &mut handler);
     assert!(res.is_ok());
     assert!(get_document_by_id(&db, "users", &id, &mut handler).is_err());
 }
@@ -133,8 +133,8 @@ fn update_nonexistent_document_should_fail() {
 }
 
 #[test]
-fn delete_nonexistent_document_should_fail() {
+fn delete_nonexistent_documents_should_fail() {
     let (mut db, mut handler) = create_db_and_collection();
-    let res = delete_document(&mut db, "users", "non-existent", &mut handler);
+    let res = delete_documents(&mut db, "users", "non-existent", &json!("non-existent"), &mut handler);
     assert!(res.is_err());
 }

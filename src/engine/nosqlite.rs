@@ -194,8 +194,8 @@ impl Nosqlite {
     ///
     /// # See Also
     ///
-    /// - [`update_document`] — for replacing an existing document
-    /// - [`delete_document`] — for removing one by ID
+    /// - [`update_documents`] — for replacing an existing document
+    /// - [`delete_documents`] — for removing one by ID
     pub fn insert_document(&mut self, collection: &str, data: Value) -> Result<(), NosqliteError> {
         let result = insert_document(&mut self.db, collection, data, &mut self.error_handler);
         if result.is_ok() {
@@ -324,7 +324,7 @@ impl Nosqlite {
     /// # See Also
     ///
     /// - [`get_document_by_id`] — for inspecting before or after
-    /// - [`delete_document`] — for removing by ID
+    /// - [`delete_documents`] — for removing by ID
     pub fn update_documents_field(
         &mut self,
         collection: &str,
@@ -374,9 +374,7 @@ impl Nosqlite {
     /// let mut db = Nosqlite::open("temp/data7.nosqlite")?;
     /// db.create_collection("users", json!({ "id": "string", "name": "string" }))?;
     /// db.insert_document("users", json!({ "id": "doc-123", "name": "Alice" }))?;
-    /// let mut db_clone = db.clone();
-    /// let docs = db_clone.get_all_documents("users")?;
-    /// db.delete_document("users", &docs[0].id)?;
+    /// db.delete_documents("users", "id", &json!("doc-123"))?;
     /// Ok::<(), NosqliteError>(())
     /// ```
     ///
@@ -384,8 +382,19 @@ impl Nosqlite {
     ///
     /// - [`insert_document`] — to add new documents
     /// - [`get_document_by_id`] — for checking if a document exists before deletion
-    pub fn delete_document(&mut self, collection: &str, id: &str) -> Result<(), NosqliteError> {
-        let result = delete_document(&mut self.db, collection, id, &mut self.error_handler);
+    pub fn delete_documents(
+        &mut self,
+        collection: &str,
+        field_name: &str,
+        field_value: &Value,
+    ) -> Result<(), NosqliteError> {
+        let result = delete_documents(
+            &mut self.db,
+            collection,
+            field_name,
+            field_value,
+            &mut self.error_handler,
+        );
         if result.is_ok() {
             self.auto_save();
         }

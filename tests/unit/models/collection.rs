@@ -264,22 +264,20 @@ fn update_field_on_nonexistent_document_should_fail() {
 }
 
 #[test]
-fn delete_existing_document_should_succeed() {
+fn delete_existing_documents_should_succeed() {
     let mut col = make_collection();
     let mut handler = make_error_handler();
     col.add_document(json!({ "field": "ok" }), &mut handler)
         .unwrap();
-    let id = &col.documents[0].id.clone();
-
-    let res = col.delete_document(id, &mut handler);
+    let res = col.delete_documents("field", &json!("ok"), &mut handler);
     assert!(res.is_ok());
     assert!(col.documents.is_empty());
 }
 
 #[test]
-fn delete_nonexistent_document_should_fail() {
+fn delete_nonexistent_documents_should_fail() {
     let mut col = make_collection();
     let mut handler = make_error_handler();
-    let res = col.delete_document("not-found-id", &mut handler);
+    let res = col.delete_documents("not-found-id", &json!("not-found"), &mut handler);
     assert!(res.is_err());
 }
