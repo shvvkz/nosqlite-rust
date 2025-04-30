@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["create_collection","list_collections"]};
