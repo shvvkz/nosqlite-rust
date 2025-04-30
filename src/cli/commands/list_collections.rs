@@ -1,5 +1,4 @@
-use crate::engine::nosqlite::Nosqlite;
-use serde_json::Value;
+use crate::engine::Nosqlite;
 
 /// 🦀
 /// Parses and executes the `db.createCollection()` command from the CLI,
@@ -32,32 +31,16 @@ use serde_json::Value;
 /// # See Also
 ///
 /// - [`todo!`]
-pub fn handle_create_collection(input: &str, db: &mut Nosqlite) -> Result<String, String> {
-    let (name, schema) = parse_command_args(input)?;
-    db.create_collection(name, schema)
-        .map(|_| format!("Collection '{}' created successfully", name))
-        .map_err(|e| format!("Failed to create collection: {e}"))
-}
+pub fn handle_list_collections(db: &mut Nosqlite) -> Result<String, String> {
+    let collections = db.list_collections();
+    if collections.is_empty() {
+        return Ok("No collections found.".to_string());
+    }
 
-fn parse_command_args(input: &str) -> Result<(&str, Value), String> {
-    let args = input
-        .strip_prefix("db.createCollection(")
-        .and_then(|s| s.strip_suffix(')'))
-        .ok_or_else(|| "Syntax error: missing closing ')'".to_string())?;
-
-    let mut parts = args.splitn(2, ',').map(str::trim);
-
-    let name_raw = parts
-        .next()
-        .ok_or_else(|| "Syntax error: collection name missing".to_string())?
-        .trim_matches(|c| c == '"' || c == '\'');
-
-    let schema = match parts.next() {
-        Some(json_str) => {
-            let json_str = json_str.replace('\'', "\"");
-            serde_json::from_str(&json_str).map_err(|_| "Invalid JSON schema".to_string())?
-        }
-        None => Value::Object(serde_json::Map::new()),
-    };
-    Ok((name_raw, schema))
+    let output = collections
+        .iter()
+        .map(|collection| collection.to_string())
+        .collect::<Vec<String>>()
+        .join("\n");
+    Ok(output)
 }

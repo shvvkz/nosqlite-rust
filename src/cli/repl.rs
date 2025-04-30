@@ -1,4 +1,6 @@
 use crate::cli::commands::create_collection::handle_create_collection;
+use crate::cli::commands::list_collections::handle_list_collections;
+
 use crate::engine::nosqlite::Nosqlite;
 use std::env;
 use std::io::{self, Write};
@@ -74,6 +76,8 @@ fn get_db_path(args: Vec<String>) -> String {
 pub fn execute_command(input: &str, db: &mut Nosqlite) -> Result<String, String> {
     if input.starts_with("db.createCollection(") {
         return handle_create_collection(input, db);
+    } else if input.starts_with("db.listCollections()") {
+        return handle_list_collections(db);
     }
 
     Err("Unknown or unsupported command".to_string())
