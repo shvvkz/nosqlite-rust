@@ -8,6 +8,7 @@ pub enum NosqliteError {
     InvalidDatabaseFormat(String),
     CollectionAlreadyExists(String),
     CollectionNotFound(String),
+    CollectionNameEmpty(),
     InvalidCollectionStructure(String),
     DocumentInvalid(String),
     DocumentNotFound(String),
@@ -41,6 +42,9 @@ impl Display for NosqliteError {
             }
             NosqliteError::CollectionNotFound(name) => {
                 write!(f, "Collection not found: `{}`", name)
+            }
+            NosqliteError::CollectionNameEmpty() => {
+                write!(f, "Collection name is empty")
             }
             NosqliteError::InvalidCollectionStructure(msg) => {
                 write!(f, "Invalid collection structure: {}", msg)

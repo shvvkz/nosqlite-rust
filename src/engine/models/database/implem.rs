@@ -104,7 +104,11 @@ impl Database {
             handler.log_error(error.clone());
             return Err(error);
         }
-
+        if name.is_empty() {
+            let error = NosqliteError::CollectionNameEmpty();
+            handler.log_error(error.clone());
+            return Err(error);
+        }
         if !structure.is_object() {
             let error =
                 NosqliteError::DocumentInvalid("The structure must be a JSON object".into());
