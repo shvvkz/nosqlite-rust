@@ -1,3 +1,3 @@
 pub mod commands;
-pub mod repl;
 pub mod flags;
+pub mod repl;

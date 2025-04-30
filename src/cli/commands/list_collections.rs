@@ -1,36 +1,31 @@
 use crate::engine::Nosqlite;
 
 /// 🦀
-/// Parses and executes the `db.createCollection()` command from the CLI,
-/// extracting the collection name and optional schema from the input.
+/// Parses and executes the `db.listCollections()` command from the CLI,
+/// retrieving the list of all collections in the database.
 ///
 /// This function does the following:
-/// - Parses the input to extract the collection name and an optional JSON schema
-/// - Falls back to an empty schema (`{}`) if no schema is provided
-/// - Calls [`Nosqlite::create_collection`] to create and register the collection in the database
+/// - Calls [`Nosqlite::list_collections`] to fetch the list of collections
+/// - Formats the output as a newline-separated string
+/// - Returns a message if no collections are found
 ///
 /// # Parameters
 ///
-/// - `input`: A string containing the CLI command to create the collection. Must follow the format:
-///   - `db.createCollection("name")`
-///   - `db.createCollection("name", {schema})`
-/// - `db`: A mutable reference to the [`Nosqlite`] instance where the collection should be added.
+/// - `db`: A mutable reference to the [`Nosqlite`] instance from which the collections are listed.
 ///
 /// # Returns
 ///
-/// - `Ok(String)` containing a success message if the collection is created successfully.
-/// - `Err(String)` describing the error if parsing fails or collection creation fails.
+/// - `Ok(String)` containing the list of collections as a newline-separated string if successful.
+/// - `Ok(String)` with a message indicating no collections are found if the database is empty.
+/// - `Err(String)` describing any errors encountered during the operation.
 ///
 /// # Errors
 ///
-/// - Returns a string describing:
-///   - Syntax errors (e.g. missing closing parenthesis or name)
-///   - Invalid JSON in the schema
-///   - Errors returned by the internal `create_collection` call
+/// - Returns a string describing errors if the operation fails unexpectedly.
 ///
 /// # See Also
 ///
-/// - [`todo!`]
+/// - [`Nosqlite::list_collections`]
 pub fn handle_list_collections(db: &mut Nosqlite) -> Result<String, String> {
     let collections = db.list_collections();
     if collections.is_empty() {

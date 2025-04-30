@@ -1,11 +1,11 @@
 use crate::cli::commands::create_collection::handle_create_collection;
 use crate::cli::commands::list_collections::handle_list_collections;
 
+use crate::cli::flags::{parse_and_clean_args, CliFlags};
 use crate::engine::nosqlite::Nosqlite;
 use std::env;
 use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
-use crate::cli::flags::{parse_and_clean_args, CliFlags};
 
 pub fn start_repl() {
     let (flags, args) = parse_and_clean_args();
@@ -63,9 +63,11 @@ pub fn start_repl() {
     }
 }
 
-
 fn get_db_path(args: Vec<String>) -> String {
-    let raw = args.first().cloned().unwrap_or_else(|| "db.nosqlite".to_string());
+    let raw = args
+        .first()
+        .cloned()
+        .unwrap_or_else(|| "db.nosqlite".to_string());
     if raw.ends_with(".nosqlite") {
         raw
     } else {
