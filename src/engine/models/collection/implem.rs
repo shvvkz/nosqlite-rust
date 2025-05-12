@@ -631,11 +631,10 @@ impl Display for Collection {
     /// - [`Collection`] — the data structure being formatted
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Collection '{}'", self.name)?;
-        writeln!(f, "  Required Structure: {}", self.structure)?;
-        writeln!(f, "  {} document(s):", self.documents.len())?;
-        for doc in &self.documents {
-            writeln!(f, "    - {}", doc.id)?;
+        if !self.structure.is_object() || !self.structure.as_object().unwrap().is_empty() {
+            writeln!(f, "  Required Structure: {}", self.structure)?;
         }
+        writeln!(f, "  {} document(s)", self.documents.len())?;
         Ok(())
     }
 }
