@@ -1,11 +1,13 @@
 use crate::cli::commands::create_collection::handle_create_collection;
+use crate::cli::commands::insert_document::handle_insert_document;
 use crate::cli::commands::list_collections::handle_list_collections;
-
 use crate::cli::flags::{parse_and_clean_args, CliFlags};
 use crate::engine::nosqlite::Nosqlite;
-use std::env;
-use std::io::{self, Write};
-use std::time::{Duration, SystemTime};
+
+use rustyline::error::ReadlineError;
+use rustyline::history::FileHistory;
+use rustyline::Editor;
+use std::time::SystemTime;
 
 pub fn start_repl() {
     let (flags, args) = parse_and_clean_args();
@@ -14,53 +16,68 @@ pub fn start_repl() {
     let mut db = match Nosqlite::open(&path) {
         Ok(db) => db,
         Err(e) => {
-            eprintln!("Failed to open or create database: {}", e);
+            eprintln!("Failed to open or create database: {e}");
             return;
         }
     };
 
     println!("Welcome to NoSQLite REPL");
-    println!("Database loaded: {}", path);
+    println!("Database loaded: {path}");
     println!("Type '.exit' to quit.\n");
 
-    let stdin = io::stdin();
-    let mut stdout = io::stdout();
+    let mut rl = Editor::<(), FileHistory>::new().unwrap();
 
     loop {
-        print!("> ");
-        stdout.flush().unwrap();
+        match rl.readline("> ") {
+            Ok(line) => {
+                let input = line.trim();
+                if input.is_empty() {
+                    continue;
+                }
+                rl.add_history_entry(input);
 
-        let mut input = String::new();
-        if stdin.read_line(&mut input).is_err() {
-            eprintln!("Error reading input");
-            continue;
+                if handle_input(input, &flags, &mut db) {
+                    break;
+                }
+            }
+            Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
+                println!("Exiting.");
+                break;
+            }
+            Err(err) => {
+                eprintln!("Error reading line: {err}");
+                break;
+            }
         }
+    }
+}
 
-        let input = input.trim();
+fn handle_input(input_raw: &str, flags: &[CliFlags], db: &mut Nosqlite) -> bool {
+    let input = input_raw.trim_end_matches(';');
+    if input == ".exit" {
+        println!("Exiting.");
+        return true;
+    }
 
-        if input == ".exit" {
-            println!("Exiting.");
-            break;
-        }
+    let start_time = if flags.contains(&CliFlags::Timing) {
+        Some(SystemTime::now())
+    } else {
+        None
+    };
 
-        let start_time = if flags.contains(&CliFlags::Timing) {
-            Some(SystemTime::now())
-        } else {
-            None
-        };
-        match execute_command(input, &mut db) {
-            Ok(msg) => {
-                println!("{msg}");
-                if flags.contains(&CliFlags::Timing) {
-                    let elapsed = start_time
-                        .map(|start| start.elapsed().unwrap_or_default())
-                        .unwrap_or_default();
+    match execute_command(input, db) {
+        Ok(msg) => {
+            println!("{msg}");
+            if let Some(start) = start_time {
+                if let Ok(elapsed) = start.elapsed() {
                     println!("⏱ Time taken: {:?}", elapsed);
                 }
             }
-            Err(e) => eprintln!("Error: {e}"),
         }
+        Err(e) => eprintln!("Error: {e}"),
     }
+
+    false
 }
 
 fn get_db_path(args: Vec<String>) -> String {
@@ -77,10 +94,12 @@ fn get_db_path(args: Vec<String>) -> String {
 
 pub fn execute_command(input: &str, db: &mut Nosqlite) -> Result<String, String> {
     if input.starts_with("db.createCollection(") {
-        return handle_create_collection(input, db);
-    } else if input.starts_with("db.listCollections()") {
-        return handle_list_collections(db);
+        handle_create_collection(input, db)
+    } else if input.starts_with("db.listCollections(") {
+        handle_list_collections(db)
+    } else if input.starts_with("db.insertDocument(") {
+        handle_insert_document(input, db)
+    } else {
+        Err("Unknown or unsupported command".to_string())
     }
-
-    Err("Unknown or unsupported command".to_string())
 }
