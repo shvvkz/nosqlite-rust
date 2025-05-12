@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["collection_service","database_service","document_service"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["execute_command","get_db_path","handle_input","start_repl"]};

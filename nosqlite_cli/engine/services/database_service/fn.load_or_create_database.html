@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="🦀 Loads a `Database` instance from disk, or creates a new one if the file doesn’t exist."><title>load_or_create_database in nosqlite_cli::engine::services::database_service - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="nosqlite_cli" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../static.files/storage-3a5871a4.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../../../nosqlite_cli/index.html">nosqlite_<wbr>cli</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">load_<wbr>or_<wbr>create_<wbr>database</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#parameters" title="Parameters">Parameters</a></li><li><a href="#returns" title="Returns">Returns</a></li><li><a href="#example" title="Example">Example</a></li><li><a href="#notes" title="Notes">Notes</a></li><li><a href="#see-also" title="See Also">See Also</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In nosqlite_<wbr>cli::<wbr>engine::<wbr>services::<wbr>database_<wbr>service</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../../../index.html">nosqlite_cli</a>::<wbr><a href="../../index.html">engine</a>::<wbr><a href="../index.html">services</a>::<wbr><a href="index.html">database_service</a></div><h1>Function <span class="fn">load_or_create_database</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../../../src/nosqlite_cli/engine/services/database_service.rs.html#55-66">Source</a> </span></div><pre class="rust item-decl"><code>pub fn load_or_create_database(
+    path: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
+    error_handler: &amp;mut <a class="struct" href="../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database">Database</a>, <a class="enum" href="../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>🦀
+Loads a <a href="../../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database"><code>Database</code></a> instance from disk, or creates a new one if the file doesn’t exist.</p>
+<p>This high-level helper wraps the internal <a href="../../models/file/model/struct.File.html#method.load_or_create" title="associated function nosqlite_cli::engine::models::file::model::File::load_or_create"><code>File::load_or_create</code></a> function, providing a convenient
+way to bootstrap your NoSQL engine from persistent storage. If the target file:</p>
+<ul>
+<li>
+<p><strong>Exists</strong>:</p>
+<ul>
+<li>Attempts to read and decrypt it</li>
+<li>Deserializes the contents into a <a href="../../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database"><code>Database</code></a> instance</li>
+</ul>
+</li>
+<li>
+<p><strong>Does not exist</strong>:</p>
+<ul>
+<li>Creates a new empty <a href="../../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database"><code>Database</code></a> with the specified path</li>
+</ul>
+</li>
+</ul>
+<p>Any encountered errors are logged using the provided <a href="../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> and returned.</p>
+<h2 id="parameters"><a class="doc-anchor" href="#parameters">§</a>Parameters</h2>
+<ul>
+<li><code>path</code>: The file path to the encrypted <code>.nosqlite</code> database file.</li>
+<li><code>error_handler</code>: A mutable reference to a <a href="../../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler"><code>NosqliteErrorHandler</code></a> for structured logging.</li>
+</ul>
+<h2 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h2>
+<ul>
+<li><code>Ok(Database)</code> if the file is successfully read and parsed, or a new instance is created</li>
+<li><code>Err(NosqliteError)</code> if the file cannot be read, decrypted, or deserialized</li>
+</ul>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>nosqlite_rust::engine::models::database::model::Database;
+<span class="kw">use </span>nosqlite_rust::engine::error::{NosqliteErrorHandler, NosqliteError};
+<span class="kw">use </span>nosqlite_rust::engine::services::database_service::load_or_create_database;
+
+<span class="kw">let </span><span class="kw-2">mut </span>handler = NosqliteErrorHandler::new(<span class="string">"temp/data20.nosqlite"</span>.to_string());
+<span class="kw">let </span>db = load_or_create_database(<span class="string">"temp/data20.nosqlite"</span>, <span class="kw-2">&amp;mut </span>handler)<span class="question-mark">?</span>;
+<span class="macro">println!</span>(<span class="string">"{}"</span>, db);
+<span class="prelude-val">Ok</span>::&lt;(), NosqliteError&gt;(())</code></pre></div>
+<h2 id="notes"><a class="doc-anchor" href="#notes">§</a>Notes</h2>
+<ul>
+<li>This function handles decryption, format validation, and automatic creation in one call.</li>
+<li>Uses internal AES-256-GCM encryption via the <a href="../../models/file/model/struct.File.html" title="struct nosqlite_cli::engine::models::file::model::File"><code>File</code></a> module.</li>
+</ul>
+<h2 id="see-also"><a class="doc-anchor" href="#see-also">§</a>See Also</h2>
+<ul>
+<li><a href="fn.save_database.html" title="fn nosqlite_cli::engine::services::database_service::save_database"><code>save_database</code></a> — for persisting the database back to disk</li>
+<li><a href="../../models/file/model/struct.File.html#method.load_or_create" title="associated function nosqlite_cli::engine::models::file::model::File::load_or_create"><code>File::load_or_create</code></a> — internal loader implementation</li>
+<li><a href="../../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError"><code>NosqliteError</code></a> — structured error type</li>
+</ul>
+</div></details></section></div></main></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["handle_insert_document","parse_command_args"]};

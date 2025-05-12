@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["load_or_create_database","save_database"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["delete_documents","get_all_documents","get_document","get_documents","insert_document","update_documents","update_documents_field"]};
