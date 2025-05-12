@@ -31,7 +31,7 @@ use serde_json::Value;
 ///
 /// # See Also
 ///
-/// - [`todo!`]
+/// - [`Nosqlite::create_collection`]
 pub fn handle_create_collection(input: &str, db: &mut Nosqlite) -> Result<String, String> {
     let (name, schema) = parse_command_args(input)?;
     db.create_collection(name, schema)

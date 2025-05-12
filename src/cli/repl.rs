@@ -26,7 +26,6 @@ pub fn start_repl() {
     println!("Type '.exit' to quit.\n");
 
     let mut rl = Editor::<(), FileHistory>::new().unwrap();
-    rl.load_history(".repl_history").ok();
 
     loop {
         match rl.readline("> ") {
@@ -51,11 +50,10 @@ pub fn start_repl() {
             }
         }
     }
-
-    rl.save_history(".repl_history").ok();
 }
 
-fn handle_input(input: &str, flags: &[CliFlags], db: &mut Nosqlite) -> bool {
+fn handle_input(input_raw: &str, flags: &[CliFlags], db: &mut Nosqlite) -> bool {
+    let input = input_raw.trim_end_matches(';');
     if input == ".exit" {
         println!("Exiting.");
         return true;
