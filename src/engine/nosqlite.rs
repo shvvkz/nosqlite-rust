@@ -496,21 +496,22 @@ impl Nosqlite {
     }
 
     /// 🦀
-    /// Retrieves all documents in a collection where a specific field equals a given value.
+    /// Retrieves documents matching the specified JSON filter and applies an optional projection.
     ///
-    /// This function performs a linear scan of the collection and returns all documents
-    /// whose JSON object contains a field equal to the provided string value.
+    /// This function performs a multi-field filter directly in the database engine,
+    /// supporting type-aware comparisons (e.g., strings, numbers, booleans).
+    /// Projection allows you to limit the fields returned in the final result.
     ///
     /// # Parameters
     ///
     /// - `collection`: The name of the collection to query.
-    /// - `field`: The field key to match against.
-    /// - `value`: The string value to compare against the document field (equality check).
+    /// - `filter`: A JSON object specifying the filter (e.g., `{ "name": "Alice" }`). Use `{}` for no filtering.
+    /// - `projection`: A JSON object specifying the fields to include (e.g., `{ "name": 1 }`). Use `{}` to return all fields.
     ///
     /// # Returns
     ///
-    /// - `Ok(Vec<&Document>)` with matching documents
-    /// - `Err(NosqliteError)` if the collection is not found
+    /// - `Ok(Vec<Value>)` with matching documents as JSON objects.
+    /// - `Err(NosqliteError)` if the collection is not found.
     ///
     /// # Example
     ///
@@ -524,7 +525,13 @@ impl Nosqlite {
     /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
     /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
     ///
-    /// let results = db.get_documents("posts", "author", "alice")?;
+    /// // Find posts authored by "alice", return only "id" field.
+    /// let results = db.get_documents(
+    ///     "posts",
+    ///     &json!({ "author": "alice" }),
+    ///     &json!({ "id": 1 })
+    /// )?;
+    ///
     /// for post in results {
     ///     println!("{}", post);
     /// }
@@ -533,19 +540,27 @@ impl Nosqlite {
     ///
     /// # Notes
     ///
-    /// - Only supports string equality (`==`) comparisons.
-    /// - Documents must be valid JSON objects with the specified field.
+    /// - Supports exact value comparisons on all JSON types.
+    /// - Use empty `{}` objects for no filtering or full document returns.
+    /// - Advanced filters (e.g., `$gt`, `$lt`) are not yet supported.
     ///
     /// # See Also
     ///
-    /// - [`get_all_documents`] — for manual filtering
+    /// - [`get_all_documents`] — fetch all and manually filter.
     pub fn get_documents(
         &mut self,
         collection: &str,
-        field: &str,
-        value: &str,
-    ) -> Result<Vec<&Document>, NosqliteError> {
-        get_documents(&self.db, collection, field, value, &mut self.error_handler)
+        filter: &Value,
+        projection: &Value,
+    ) -> Result<Vec<Value>, NosqliteError> {
+        // Appel de la nouvelle méthode générique dans le service
+        get_documents(
+            &self.db,
+            collection,
+            filter,
+            projection,
+            &mut self.error_handler,
+        )
     }
 
     /// 🦀

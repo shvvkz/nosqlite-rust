@@ -1,7 +1,7 @@
 use crate::engine::error::{NosqliteError, NosqliteErrorHandler};
 use crate::engine::models::database::model::Database;
 use crate::engine::models::document::model::Document;
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 /// 🦀
 /// Inserts a new document into the specified collection.
@@ -382,57 +382,74 @@ pub fn get_all_documents<'a>(
 }
 
 /// 🦀
-/// Retrieves documents where a specific field equals the given value (string match).
+/// Retrieves documents matching the specified JSON filter and applies an optional projection.
 ///
-/// This function performs a filter on all documents in the collection,
-/// returning only those where the given field exists and equals the specified value.
+/// This function performs a multi-field filter on all documents in the collection,
+/// allowing type-aware comparisons (e.g., strings, numbers, booleans).
+/// If a projection is provided, only the specified fields will be included in the results.
 ///
 /// # Parameters
 ///
 /// - `db`: A reference to the [`Database`] instance.
 /// - `collection_name`: The name of the collection to query.
-/// - `field`: The field name to match against.
-/// - `value`: The expected field value (as a string).
-/// - `handler`: For logging collection lookup failures.
+/// - `filter`: A JSON object specifying the fields and values to match (e.g., `{ "name": "Alice", "age": 30 }`).
+///   If empty, all documents are matched.
+/// - `projection`: A JSON object specifying which fields to include in the result (e.g., `{ "name": 1, "email": 1 }`).
+///   If empty, all fields are returned.
+/// - `handler`: The [`NosqliteErrorHandler`] used for logging errors (e.g., missing collections).
 ///
 /// # Returns
 ///
-/// - `Ok(Vec<&Document>)` with matching documents
-/// - `Err(NosqliteError)` if the collection is not found
+/// - `Ok(Vec<Value>)` containing the filtered and projected documents as JSON objects.
+/// - `Err(NosqliteError)` if the collection is not found.
 ///
 /// # Example
 ///
 /// ```rust
 /// use serde_json::json;
-/// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
+/// use nosqlite_rust::engine::{
+///     error::{NosqliteErrorHandler, NosqliteError},
+///     models::{Database, Collection}
+/// };
 /// use nosqlite_rust::engine::services::document_service::get_documents;
 ///
 /// let mut db = Database::new("temp/data28.nosqlite");
 /// let mut handler = NosqliteErrorHandler::new("temp/data28.nosqlite".to_string());
-/// db.add_collection("posts", json!({}) ,&mut handler)?;
+/// db.add_collection("posts", json!({}), &mut handler)?;
 /// let col = db.get_collection_mut("posts").unwrap();
-/// col.add_document(json!({ "id": "post1", "author": "alice" }), &mut handler)?;
-/// col.add_document(json!({ "id": "post2", "author": "bob" }), &mut handler)?;
-/// let results = get_documents(&db, "posts", "author", "alice", &mut handler)?;
+/// col.add_document(json!({ "id": "post1", "author": "alice", "likes": 10 }), &mut handler)?;
+/// col.add_document(json!({ "id": "post2", "author": "bob", "likes": 5 }), &mut handler)?;
+///
+/// // Filter: author is "alice", Projection: only "id" field
+/// let results = get_documents(
+///     &db,
+///     "posts",
+///     &json!({ "author": "alice" }),
+///     &json!({ "id": 1 }),
+///     &mut handler
+/// )?;
+///
 /// println!("Found {} posts by Alice", results.len());
 /// Ok::<(), NosqliteError>(())
 /// ```
 ///
 /// # Notes
 ///
-/// - Only exact string matches are supported.
-/// - No schema validation is enforced here.
+/// - Supports exact match comparisons on all JSON types (`string`, `number`, `bool`, etc.).
+/// - If `filter` is empty, all documents are returned.
+/// - If `projection` is empty, full documents are returned.
+/// - No advanced operators (e.g., `$gt`, `$lt`) are supported yet.
 ///
 /// # See Also
 ///
-/// - [`get_all_documents`] — fetch all then filter manually
-pub fn get_documents<'a>(
-    db: &'a Database,
+/// - [`get_all_documents`] — fetch all then filter manually.
+pub fn get_documents(
+    db: &Database,
     collection_name: &str,
-    field: &str,
-    value: &str,
+    filter: &Value,
+    projection: &Value,
     handler: &mut NosqliteErrorHandler,
-) -> Result<Vec<&'a Document>, NosqliteError> {
+) -> Result<Vec<Value>, NosqliteError> {
     let collection = db.get_collection(collection_name).ok_or_else(|| {
         let error = NosqliteError::CollectionNotFound(format!(
             "Collection '{}' not found",
@@ -442,11 +459,55 @@ pub fn get_documents<'a>(
         error
     })?;
 
-    let result = collection
-        .all_documents()
+    let docs = collection.all_documents();
+
+    let filtered_docs = docs
         .iter()
-        .filter(|doc| doc.data.get(field).is_some_and(|v| v == value))
+        .filter_map(|doc| {
+            let doc_data = &doc.data;
+            if matches_filter(doc_data, filter) {
+                Some(apply_projection(doc_data, projection))
+            } else {
+                None
+            }
+        })
         .collect();
 
-    Ok(result)
+    Ok(filtered_docs)
+}
+
+fn matches_filter(doc: &Value, filter: &Value) -> bool {
+    if let (Value::Object(doc_obj), Value::Object(filter_obj)) = (doc, filter) {
+        for (key, expected_val) in filter_obj {
+            match doc_obj.get(key) {
+                Some(actual_val) if actual_val == expected_val => continue,
+                _ => return false,
+            }
+        }
+        true
+    } else {
+        true
+    }
+}
+
+fn apply_projection(doc: &Value, projection: &Value) -> Value {
+    if let (Value::Object(doc_obj), Value::Object(proj_obj)) = (doc, projection) {
+        let mut projected = Map::new();
+
+        if proj_obj.is_empty() {
+            return Value::Object(doc_obj.clone());
+        }
+
+        for (key, include_flag) in proj_obj {
+            if include_flag == &Value::from(1) {
+                if let Some(value) = doc_obj.get(key) {
+                    projected.insert(key.clone(), value.clone());
+                }
+            }
+        }
+
+        Value::Object(projected)
+    } else {
+        doc.clone()
+    }
 }

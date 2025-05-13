@@ -9,6 +9,8 @@ use rustyline::history::FileHistory;
 use rustyline::Editor;
 use std::time::SystemTime;
 
+use super::commands::find_documents::handle_find_documents;
+
 pub fn start_repl() {
     let (flags, args) = parse_and_clean_args();
     let path = get_db_path(args);
@@ -99,6 +101,8 @@ pub fn execute_command(input: &str, db: &mut Nosqlite) -> Result<String, String>
         handle_list_collections(db)
     } else if input.starts_with("db.insertDocument(") {
         handle_insert_document(input, db)
+    } else if input.starts_with("db.findDocuments(") {
+        handle_find_documents(input, db)
     } else {
         Err("Unknown or unsupported command".to_string())
     }
