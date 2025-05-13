@@ -496,112 +496,127 @@
 <a href=#496 id=496 data-nosnippet>496</a>    }
 <a href=#497 id=497 data-nosnippet>497</a>
 <a href=#498 id=498 data-nosnippet>498</a>    <span class="doccomment">/// 🦀
-<a href=#499 id=499 data-nosnippet>499</a>    /// Retrieves all documents in a collection where a specific field equals a given value.
+<a href=#499 id=499 data-nosnippet>499</a>    /// Retrieves documents matching the specified JSON filter and applies an optional projection.
 <a href=#500 id=500 data-nosnippet>500</a>    ///
-<a href=#501 id=501 data-nosnippet>501</a>    /// This function performs a linear scan of the collection and returns all documents
-<a href=#502 id=502 data-nosnippet>502</a>    /// whose JSON object contains a field equal to the provided string value.
-<a href=#503 id=503 data-nosnippet>503</a>    ///
-<a href=#504 id=504 data-nosnippet>504</a>    /// # Parameters
-<a href=#505 id=505 data-nosnippet>505</a>    ///
-<a href=#506 id=506 data-nosnippet>506</a>    /// - `collection`: The name of the collection to query.
-<a href=#507 id=507 data-nosnippet>507</a>    /// - `field`: The field key to match against.
-<a href=#508 id=508 data-nosnippet>508</a>    /// - `value`: The string value to compare against the document field (equality check).
-<a href=#509 id=509 data-nosnippet>509</a>    ///
-<a href=#510 id=510 data-nosnippet>510</a>    /// # Returns
-<a href=#511 id=511 data-nosnippet>511</a>    ///
-<a href=#512 id=512 data-nosnippet>512</a>    /// - `Ok(Vec&lt;&amp;Document&gt;)` with matching documents
-<a href=#513 id=513 data-nosnippet>513</a>    /// - `Err(NosqliteError)` if the collection is not found
-<a href=#514 id=514 data-nosnippet>514</a>    ///
-<a href=#515 id=515 data-nosnippet>515</a>    /// # Example
-<a href=#516 id=516 data-nosnippet>516</a>    ///
-<a href=#517 id=517 data-nosnippet>517</a>    /// ```rust
-<a href=#518 id=518 data-nosnippet>518</a>    /// use serde_json::json;
-<a href=#519 id=519 data-nosnippet>519</a>    /// use nosqlite_rust::engine::Nosqlite;
-<a href=#520 id=520 data-nosnippet>520</a>    /// use nosqlite_rust::engine::error::NosqliteError;
-<a href=#521 id=521 data-nosnippet>521</a>    ///
-<a href=#522 id=522 data-nosnippet>522</a>    /// let mut db = Nosqlite::open("temp/data10.nosqlite")?;
-<a href=#523 id=523 data-nosnippet>523</a>    /// db.create_collection("posts", json!({ "id": "string", "author": "string" }))?;
-<a href=#524 id=524 data-nosnippet>524</a>    /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
-<a href=#525 id=525 data-nosnippet>525</a>    /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
-<a href=#526 id=526 data-nosnippet>526</a>    ///
-<a href=#527 id=527 data-nosnippet>527</a>    /// let results = db.get_documents("posts", "author", "alice")?;
-<a href=#528 id=528 data-nosnippet>528</a>    /// for post in results {
-<a href=#529 id=529 data-nosnippet>529</a>    ///     println!("{}", post);
-<a href=#530 id=530 data-nosnippet>530</a>    /// }
-<a href=#531 id=531 data-nosnippet>531</a>    /// Ok::&lt;(), NosqliteError&gt;(())
-<a href=#532 id=532 data-nosnippet>532</a>    /// ```
-<a href=#533 id=533 data-nosnippet>533</a>    ///
-<a href=#534 id=534 data-nosnippet>534</a>    /// # Notes
-<a href=#535 id=535 data-nosnippet>535</a>    ///
-<a href=#536 id=536 data-nosnippet>536</a>    /// - Only supports string equality (`==`) comparisons.
-<a href=#537 id=537 data-nosnippet>537</a>    /// - Documents must be valid JSON objects with the specified field.
-<a href=#538 id=538 data-nosnippet>538</a>    ///
-<a href=#539 id=539 data-nosnippet>539</a>    /// # See Also
+<a href=#501 id=501 data-nosnippet>501</a>    /// This function performs a multi-field filter directly in the database engine,
+<a href=#502 id=502 data-nosnippet>502</a>    /// supporting type-aware comparisons (e.g., strings, numbers, booleans).
+<a href=#503 id=503 data-nosnippet>503</a>    /// Projection allows you to limit the fields returned in the final result.
+<a href=#504 id=504 data-nosnippet>504</a>    ///
+<a href=#505 id=505 data-nosnippet>505</a>    /// # Parameters
+<a href=#506 id=506 data-nosnippet>506</a>    ///
+<a href=#507 id=507 data-nosnippet>507</a>    /// - `collection`: The name of the collection to query.
+<a href=#508 id=508 data-nosnippet>508</a>    /// - `filter`: A JSON object specifying the filter (e.g., `{ "name": "Alice" }`). Use `{}` for no filtering.
+<a href=#509 id=509 data-nosnippet>509</a>    /// - `projection`: A JSON object specifying the fields to include (e.g., `{ "name": 1 }`). Use `{}` to return all fields.
+<a href=#510 id=510 data-nosnippet>510</a>    ///
+<a href=#511 id=511 data-nosnippet>511</a>    /// # Returns
+<a href=#512 id=512 data-nosnippet>512</a>    ///
+<a href=#513 id=513 data-nosnippet>513</a>    /// - `Ok(Vec&lt;Value&gt;)` with matching documents as JSON objects.
+<a href=#514 id=514 data-nosnippet>514</a>    /// - `Err(NosqliteError)` if the collection is not found.
+<a href=#515 id=515 data-nosnippet>515</a>    ///
+<a href=#516 id=516 data-nosnippet>516</a>    /// # Example
+<a href=#517 id=517 data-nosnippet>517</a>    ///
+<a href=#518 id=518 data-nosnippet>518</a>    /// ```rust
+<a href=#519 id=519 data-nosnippet>519</a>    /// use serde_json::json;
+<a href=#520 id=520 data-nosnippet>520</a>    /// use nosqlite_rust::engine::Nosqlite;
+<a href=#521 id=521 data-nosnippet>521</a>    /// use nosqlite_rust::engine::error::NosqliteError;
+<a href=#522 id=522 data-nosnippet>522</a>    ///
+<a href=#523 id=523 data-nosnippet>523</a>    /// let mut db = Nosqlite::open("temp/data10.nosqlite")?;
+<a href=#524 id=524 data-nosnippet>524</a>    /// db.create_collection("posts", json!({ "id": "string", "author": "string" }))?;
+<a href=#525 id=525 data-nosnippet>525</a>    /// db.insert_document("posts", json!({ "id": "post-1", "author": "alice" }))?;
+<a href=#526 id=526 data-nosnippet>526</a>    /// db.insert_document("posts", json!({ "id": "post-2", "author": "bob" }))?;
+<a href=#527 id=527 data-nosnippet>527</a>    ///
+<a href=#528 id=528 data-nosnippet>528</a>    /// // Find posts authored by "alice", return only "id" field.
+<a href=#529 id=529 data-nosnippet>529</a>    /// let results = db.get_documents(
+<a href=#530 id=530 data-nosnippet>530</a>    ///     "posts",
+<a href=#531 id=531 data-nosnippet>531</a>    ///     &amp;json!({ "author": "alice" }),
+<a href=#532 id=532 data-nosnippet>532</a>    ///     &amp;json!({ "id": 1 })
+<a href=#533 id=533 data-nosnippet>533</a>    /// )?;
+<a href=#534 id=534 data-nosnippet>534</a>    ///
+<a href=#535 id=535 data-nosnippet>535</a>    /// for post in results {
+<a href=#536 id=536 data-nosnippet>536</a>    ///     println!("{}", post);
+<a href=#537 id=537 data-nosnippet>537</a>    /// }
+<a href=#538 id=538 data-nosnippet>538</a>    /// Ok::&lt;(), NosqliteError&gt;(())
+<a href=#539 id=539 data-nosnippet>539</a>    /// ```
 <a href=#540 id=540 data-nosnippet>540</a>    ///
-<a href=#541 id=541 data-nosnippet>541</a>    /// - [`get_all_documents`] — for manual filtering
-<a href=#542 id=542 data-nosnippet>542</a>    </span><span class="kw">pub fn </span>get_documents(
-<a href=#543 id=543 data-nosnippet>543</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-<a href=#544 id=544 data-nosnippet>544</a>        collection: <span class="kw-2">&amp;</span>str,
-<a href=#545 id=545 data-nosnippet>545</a>        field: <span class="kw-2">&amp;</span>str,
-<a href=#546 id=546 data-nosnippet>546</a>        value: <span class="kw-2">&amp;</span>str,
-<a href=#547 id=547 data-nosnippet>547</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>Document&gt;, NosqliteError&gt; {
-<a href=#548 id=548 data-nosnippet>548</a>        get_documents(<span class="kw-2">&amp;</span><span class="self">self</span>.db, collection, field, value, <span class="kw-2">&amp;mut </span><span class="self">self</span>.error_handler)
-<a href=#549 id=549 data-nosnippet>549</a>    }
-<a href=#550 id=550 data-nosnippet>550</a>
-<a href=#551 id=551 data-nosnippet>551</a>    <span class="doccomment">/// 🦀
-<a href=#552 id=552 data-nosnippet>552</a>    /// Lists all collections currently stored in the database.
-<a href=#553 id=553 data-nosnippet>553</a>    ///
-<a href=#554 id=554 data-nosnippet>554</a>    /// Returns an immutable reference to all [`Collection`]s registered in the system.
-<a href=#555 id=555 data-nosnippet>555</a>    /// Useful for introspection, UI display, or admin tools.
-<a href=#556 id=556 data-nosnippet>556</a>    ///
-<a href=#557 id=557 data-nosnippet>557</a>    /// # Returns
-<a href=#558 id=558 data-nosnippet>558</a>    ///
-<a href=#559 id=559 data-nosnippet>559</a>    /// - A `Vec&lt;&amp;Collection&gt;` representing the list of known collections.
-<a href=#560 id=560 data-nosnippet>560</a>    ///
-<a href=#561 id=561 data-nosnippet>561</a>    /// # Example
-<a href=#562 id=562 data-nosnippet>562</a>    ///
-<a href=#563 id=563 data-nosnippet>563</a>    /// ```rust
-<a href=#564 id=564 data-nosnippet>564</a>    /// use nosqlite_rust::engine::Nosqlite;
-<a href=#565 id=565 data-nosnippet>565</a>    /// use nosqlite_rust::engine::error::NosqliteError;
-<a href=#566 id=566 data-nosnippet>566</a>    ///
-<a href=#567 id=567 data-nosnippet>567</a>    /// let mut db = Nosqlite::open("temp/data11.nosqlite")?;
-<a href=#568 id=568 data-nosnippet>568</a>    /// for col in db.list_collections() {
-<a href=#569 id=569 data-nosnippet>569</a>    ///     println!("Collection: {}", col.name);
-<a href=#570 id=570 data-nosnippet>570</a>    /// }
-<a href=#571 id=571 data-nosnippet>571</a>    /// Ok::&lt;(), NosqliteError&gt;(())
-<a href=#572 id=572 data-nosnippet>572</a>    /// ```
+<a href=#541 id=541 data-nosnippet>541</a>    /// # Notes
+<a href=#542 id=542 data-nosnippet>542</a>    ///
+<a href=#543 id=543 data-nosnippet>543</a>    /// - Supports exact value comparisons on all JSON types.
+<a href=#544 id=544 data-nosnippet>544</a>    /// - Use empty `{}` objects for no filtering or full document returns.
+<a href=#545 id=545 data-nosnippet>545</a>    /// - Advanced filters (e.g., `$gt`, `$lt`) are not yet supported.
+<a href=#546 id=546 data-nosnippet>546</a>    ///
+<a href=#547 id=547 data-nosnippet>547</a>    /// # See Also
+<a href=#548 id=548 data-nosnippet>548</a>    ///
+<a href=#549 id=549 data-nosnippet>549</a>    /// - [`get_all_documents`] — fetch all and manually filter.
+<a href=#550 id=550 data-nosnippet>550</a>    </span><span class="kw">pub fn </span>get_documents(
+<a href=#551 id=551 data-nosnippet>551</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+<a href=#552 id=552 data-nosnippet>552</a>        collection: <span class="kw-2">&amp;</span>str,
+<a href=#553 id=553 data-nosnippet>553</a>        filter: <span class="kw-2">&amp;</span>Value,
+<a href=#554 id=554 data-nosnippet>554</a>        projection: <span class="kw-2">&amp;</span>Value,
+<a href=#555 id=555 data-nosnippet>555</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Value&gt;, NosqliteError&gt; {
+<a href=#556 id=556 data-nosnippet>556</a>        <span class="comment">// Appel de la nouvelle méthode générique dans le service
+<a href=#557 id=557 data-nosnippet>557</a>        </span>get_documents(
+<a href=#558 id=558 data-nosnippet>558</a>            <span class="kw-2">&amp;</span><span class="self">self</span>.db,
+<a href=#559 id=559 data-nosnippet>559</a>            collection,
+<a href=#560 id=560 data-nosnippet>560</a>            filter,
+<a href=#561 id=561 data-nosnippet>561</a>            projection,
+<a href=#562 id=562 data-nosnippet>562</a>            <span class="kw-2">&amp;mut </span><span class="self">self</span>.error_handler,
+<a href=#563 id=563 data-nosnippet>563</a>        )
+<a href=#564 id=564 data-nosnippet>564</a>    }
+<a href=#565 id=565 data-nosnippet>565</a>
+<a href=#566 id=566 data-nosnippet>566</a>    <span class="doccomment">/// 🦀
+<a href=#567 id=567 data-nosnippet>567</a>    /// Lists all collections currently stored in the database.
+<a href=#568 id=568 data-nosnippet>568</a>    ///
+<a href=#569 id=569 data-nosnippet>569</a>    /// Returns an immutable reference to all [`Collection`]s registered in the system.
+<a href=#570 id=570 data-nosnippet>570</a>    /// Useful for introspection, UI display, or admin tools.
+<a href=#571 id=571 data-nosnippet>571</a>    ///
+<a href=#572 id=572 data-nosnippet>572</a>    /// # Returns
 <a href=#573 id=573 data-nosnippet>573</a>    ///
-<a href=#574 id=574 data-nosnippet>574</a>    /// # See Also
+<a href=#574 id=574 data-nosnippet>574</a>    /// - A `Vec&lt;&amp;Collection&gt;` representing the list of known collections.
 <a href=#575 id=575 data-nosnippet>575</a>    ///
-<a href=#576 id=576 data-nosnippet>576</a>    /// - [`create_collection`] — to define a new collection
-<a href=#577 id=577 data-nosnippet>577</a>    /// - [`delete_collection`] — to remove one
-<a href=#578 id=578 data-nosnippet>578</a>    </span><span class="kw">pub fn </span>list_collections(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;<span class="kw-2">&amp;</span>Collection&gt; {
-<a href=#579 id=579 data-nosnippet>579</a>        list_collections(<span class="kw-2">&amp;</span><span class="self">self</span>.db)
-<a href=#580 id=580 data-nosnippet>580</a>    }
-<a href=#581 id=581 data-nosnippet>581</a>
-<a href=#582 id=582 data-nosnippet>582</a>    <span class="doccomment">/// 🦀
-<a href=#583 id=583 data-nosnippet>583</a>    /// Persists the current in-memory database state to disk.
-<a href=#584 id=584 data-nosnippet>584</a>    ///
-<a href=#585 id=585 data-nosnippet>585</a>    /// This internal utility is automatically invoked after successful mutations
-<a href=#586 id=586 data-nosnippet>586</a>    /// (e.g., inserting, updating, or deleting documents or collections).
-<a href=#587 id=587 data-nosnippet>587</a>    ///
-<a href=#588 id=588 data-nosnippet>588</a>    /// It delegates to [`save_database`], using the path associated with the current instance
-<a href=#589 id=589 data-nosnippet>589</a>    /// and logs any encountered errors using the internal [`NosqliteErrorHandler`].
+<a href=#576 id=576 data-nosnippet>576</a>    /// # Example
+<a href=#577 id=577 data-nosnippet>577</a>    ///
+<a href=#578 id=578 data-nosnippet>578</a>    /// ```rust
+<a href=#579 id=579 data-nosnippet>579</a>    /// use nosqlite_rust::engine::Nosqlite;
+<a href=#580 id=580 data-nosnippet>580</a>    /// use nosqlite_rust::engine::error::NosqliteError;
+<a href=#581 id=581 data-nosnippet>581</a>    ///
+<a href=#582 id=582 data-nosnippet>582</a>    /// let mut db = Nosqlite::open("temp/data11.nosqlite")?;
+<a href=#583 id=583 data-nosnippet>583</a>    /// for col in db.list_collections() {
+<a href=#584 id=584 data-nosnippet>584</a>    ///     println!("Collection: {}", col.name);
+<a href=#585 id=585 data-nosnippet>585</a>    /// }
+<a href=#586 id=586 data-nosnippet>586</a>    /// Ok::&lt;(), NosqliteError&gt;(())
+<a href=#587 id=587 data-nosnippet>587</a>    /// ```
+<a href=#588 id=588 data-nosnippet>588</a>    ///
+<a href=#589 id=589 data-nosnippet>589</a>    /// # See Also
 <a href=#590 id=590 data-nosnippet>590</a>    ///
-<a href=#591 id=591 data-nosnippet>591</a>    /// # Returns
-<a href=#592 id=592 data-nosnippet>592</a>    ///
-<a href=#593 id=593 data-nosnippet>593</a>    /// - `Ok(())` if the save completes successfully.
-<a href=#594 id=594 data-nosnippet>594</a>    /// - `Err(NosqliteError)` if serialization, encryption, or I/O fails.
-<a href=#595 id=595 data-nosnippet>595</a>    ///
-<a href=#596 id=596 data-nosnippet>596</a>    /// # Notes
-<a href=#597 id=597 data-nosnippet>597</a>    ///
-<a href=#598 id=598 data-nosnippet>598</a>    /// - This method should not be called directly in most cases — it's managed automatically.
+<a href=#591 id=591 data-nosnippet>591</a>    /// - [`create_collection`] — to define a new collection
+<a href=#592 id=592 data-nosnippet>592</a>    /// - [`delete_collection`] — to remove one
+<a href=#593 id=593 data-nosnippet>593</a>    </span><span class="kw">pub fn </span>list_collections(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;<span class="kw-2">&amp;</span>Collection&gt; {
+<a href=#594 id=594 data-nosnippet>594</a>        list_collections(<span class="kw-2">&amp;</span><span class="self">self</span>.db)
+<a href=#595 id=595 data-nosnippet>595</a>    }
+<a href=#596 id=596 data-nosnippet>596</a>
+<a href=#597 id=597 data-nosnippet>597</a>    <span class="doccomment">/// 🦀
+<a href=#598 id=598 data-nosnippet>598</a>    /// Persists the current in-memory database state to disk.
 <a href=#599 id=599 data-nosnippet>599</a>    ///
-<a href=#600 id=600 data-nosnippet>600</a>    /// # See Also
-<a href=#601 id=601 data-nosnippet>601</a>    ///
-<a href=#602 id=602 data-nosnippet>602</a>    /// - [`save_database`] — internal implementation
-<a href=#603 id=603 data-nosnippet>603</a>    </span><span class="kw">fn </span>auto_save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), NosqliteError&gt; {
-<a href=#604 id=604 data-nosnippet>604</a>        save_database(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.db, <span class="kw-2">&amp;mut </span><span class="self">self</span>.error_handler)<span class="question-mark">?</span>;
-<a href=#605 id=605 data-nosnippet>605</a>        <span class="prelude-val">Ok</span>(())
-<a href=#606 id=606 data-nosnippet>606</a>    }
-<a href=#607 id=607 data-nosnippet>607</a>}</code></pre></div></section></main></body></html>
+<a href=#600 id=600 data-nosnippet>600</a>    /// This internal utility is automatically invoked after successful mutations
+<a href=#601 id=601 data-nosnippet>601</a>    /// (e.g., inserting, updating, or deleting documents or collections).
+<a href=#602 id=602 data-nosnippet>602</a>    ///
+<a href=#603 id=603 data-nosnippet>603</a>    /// It delegates to [`save_database`], using the path associated with the current instance
+<a href=#604 id=604 data-nosnippet>604</a>    /// and logs any encountered errors using the internal [`NosqliteErrorHandler`].
+<a href=#605 id=605 data-nosnippet>605</a>    ///
+<a href=#606 id=606 data-nosnippet>606</a>    /// # Returns
+<a href=#607 id=607 data-nosnippet>607</a>    ///
+<a href=#608 id=608 data-nosnippet>608</a>    /// - `Ok(())` if the save completes successfully.
+<a href=#609 id=609 data-nosnippet>609</a>    /// - `Err(NosqliteError)` if serialization, encryption, or I/O fails.
+<a href=#610 id=610 data-nosnippet>610</a>    ///
+<a href=#611 id=611 data-nosnippet>611</a>    /// # Notes
+<a href=#612 id=612 data-nosnippet>612</a>    ///
+<a href=#613 id=613 data-nosnippet>613</a>    /// - This method should not be called directly in most cases — it's managed automatically.
+<a href=#614 id=614 data-nosnippet>614</a>    ///
+<a href=#615 id=615 data-nosnippet>615</a>    /// # See Also
+<a href=#616 id=616 data-nosnippet>616</a>    ///
+<a href=#617 id=617 data-nosnippet>617</a>    /// - [`save_database`] — internal implementation
+<a href=#618 id=618 data-nosnippet>618</a>    </span><span class="kw">fn </span>auto_save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), NosqliteError&gt; {
+<a href=#619 id=619 data-nosnippet>619</a>        save_database(<span class="kw-2">&amp;</span><span class="self">self</span>.path, <span class="kw-2">&amp;</span><span class="self">self</span>.db, <span class="kw-2">&amp;mut </span><span class="self">self</span>.error_handler)<span class="question-mark">?</span>;
+<a href=#620 id=620 data-nosnippet>620</a>        <span class="prelude-val">Ok</span>(())
+<a href=#621 id=621 data-nosnippet>621</a>    }
+<a href=#622 id=622 data-nosnippet>622</a>}</code></pre></div></section></main></body></html>

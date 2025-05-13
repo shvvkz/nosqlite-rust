@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["create_collection","insert_document","list_collections"]};
+window.SIDEBAR_ITEMS = {"mod":["create_collection","find_documents","insert_document","list_collections"]};

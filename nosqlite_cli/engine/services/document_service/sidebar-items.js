@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["delete_documents","get_all_documents","get_document","get_documents","insert_document","update_documents","update_documents_field"]};
+window.SIDEBAR_ITEMS = {"fn":["apply_projection","delete_documents","get_all_documents","get_document","get_documents","insert_document","matches_filter","update_documents","update_documents_field"]};

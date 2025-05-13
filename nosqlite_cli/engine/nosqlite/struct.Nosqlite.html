@@ -2,7 +2,7 @@
     path: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>,
     error_handler: <a class="struct" href="../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a>,
     db: <a class="struct" href="../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database">Database</a>,
-}</code></pre><h2 id="fields" class="fields section-header">Fields<a href="#fields" class="anchor">§</a></h2><span id="structfield.path" class="structfield section-header"><a href="#structfield.path" class="anchor field">§</a><code>path: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></code></span><span id="structfield.error_handler" class="structfield section-header"><a href="#structfield.error_handler" class="anchor field">§</a><code>error_handler: <a class="struct" href="../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a></code></span><span id="structfield.db" class="structfield section-header"><a href="#structfield.db" class="anchor field">§</a><code>db: <a class="struct" href="../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database">Database</a></code></span><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Nosqlite" class="impl"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#22-607">Source</a><a href="#impl-Nosqlite" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Nosqlite.html" title="struct nosqlite_cli::engine::nosqlite::Nosqlite">Nosqlite</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.open" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#60-69">Source</a><h4 class="code-header">pub fn <a href="#method.open" class="fn">open</a>(path: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+}</code></pre><h2 id="fields" class="fields section-header">Fields<a href="#fields" class="anchor">§</a></h2><span id="structfield.path" class="structfield section-header"><a href="#structfield.path" class="anchor field">§</a><code>path: <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></code></span><span id="structfield.error_handler" class="structfield section-header"><a href="#structfield.error_handler" class="anchor field">§</a><code>error_handler: <a class="struct" href="../error/handler/struct.NosqliteErrorHandler.html" title="struct nosqlite_cli::engine::error::handler::NosqliteErrorHandler">NosqliteErrorHandler</a></code></span><span id="structfield.db" class="structfield section-header"><a href="#structfield.db" class="anchor field">§</a><code>db: <a class="struct" href="../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database">Database</a></code></span><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Nosqlite" class="impl"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#22-622">Source</a><a href="#impl-Nosqlite" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Nosqlite.html" title="struct nosqlite_cli::engine::nosqlite::Nosqlite">Nosqlite</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.open" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#60-69">Source</a><h4 class="code-header">pub fn <a href="#method.open" class="fn">open</a>(path: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
 Opens or initializes a new NoSQLite database from the given file path.</p>
 <p>This method performs a secure load operation from an encrypted <code>.nosqlite</code> file.
 If the file does not exist, a new empty <a href="../models/database/model/struct.Database.html" title="struct nosqlite_cli::engine::models::database::model::Database"><code>Database</code></a> is created and persisted.</p>
@@ -350,25 +350,26 @@ db.insert_document(<span class="string">"users"</span>, <span class="macro">json
 <ul>
 <li><a href="../services/document_service/fn.get_documents.html" title="fn nosqlite_cli::engine::services::document_service::get_documents"><code>get_documents</code></a> — for filtering based on field values</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.get_documents" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#542-549">Source</a><h4 class="code-header">pub fn <a href="#method.get_documents" class="fn">get_documents</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.get_documents" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#550-564">Source</a><h4 class="code-header">pub fn <a href="#method.get_documents" class="fn">get_documents</a>(
     &amp;mut self,
     collection: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
-    field: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
-    value: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.str.html">str</a>,
-) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;&amp;<a class="struct" href="../models/document/model/struct.Document.html" title="struct nosqlite_cli::engine::models::document::model::Document">Document</a>&gt;, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
-Retrieves all documents in a collection where a specific field equals a given value.</p>
-<p>This function performs a linear scan of the collection and returns all documents
-whose JSON object contains a field equal to the provided string value.</p>
+    filter: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+    projection: &amp;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="enum" href="https://docs.rs/serde_json/1.0.140/serde_json/value/enum.Value.html" title="enum serde_json::value::Value">Value</a>&gt;, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+Retrieves documents matching the specified JSON filter and applies an optional projection.</p>
+<p>This function performs a multi-field filter directly in the database engine,
+supporting type-aware comparisons (e.g., strings, numbers, booleans).
+Projection allows you to limit the fields returned in the final result.</p>
 <h5 id="parameters-9"><a class="doc-anchor" href="#parameters-9">§</a>Parameters</h5>
 <ul>
 <li><code>collection</code>: The name of the collection to query.</li>
-<li><code>field</code>: The field key to match against.</li>
-<li><code>value</code>: The string value to compare against the document field (equality check).</li>
+<li><code>filter</code>: A JSON object specifying the filter (e.g., <code>{ "name": "Alice" }</code>). Use <code>{}</code> for no filtering.</li>
+<li><code>projection</code>: A JSON object specifying the fields to include (e.g., <code>{ "name": 1 }</code>). Use <code>{}</code> to return all fields.</li>
 </ul>
 <h5 id="returns-9"><a class="doc-anchor" href="#returns-9">§</a>Returns</h5>
 <ul>
-<li><code>Ok(Vec&lt;&amp;Document&gt;)</code> with matching documents</li>
-<li><code>Err(NosqliteError)</code> if the collection is not found</li>
+<li><code>Ok(Vec&lt;Value&gt;)</code> with matching documents as JSON objects.</li>
+<li><code>Err(NosqliteError)</code> if the collection is not found.</li>
 </ul>
 <h5 id="example-9"><a class="doc-anchor" href="#example-9">§</a>Example</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>serde_json::json;
@@ -380,21 +381,28 @@ db.create_collection(<span class="string">"posts"</span>, <span class="macro">js
 db.insert_document(<span class="string">"posts"</span>, <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"post-1"</span>, <span class="string">"author"</span>: <span class="string">"alice" </span>}))<span class="question-mark">?</span>;
 db.insert_document(<span class="string">"posts"</span>, <span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="string">"post-2"</span>, <span class="string">"author"</span>: <span class="string">"bob" </span>}))<span class="question-mark">?</span>;
 
-<span class="kw">let </span>results = db.get_documents(<span class="string">"posts"</span>, <span class="string">"author"</span>, <span class="string">"alice"</span>)<span class="question-mark">?</span>;
+<span class="comment">// Find posts authored by "alice", return only "id" field.
+</span><span class="kw">let </span>results = db.get_documents(
+    <span class="string">"posts"</span>,
+    <span class="kw-2">&amp;</span><span class="macro">json!</span>({ <span class="string">"author"</span>: <span class="string">"alice" </span>}),
+    <span class="kw-2">&amp;</span><span class="macro">json!</span>({ <span class="string">"id"</span>: <span class="number">1 </span>})
+)<span class="question-mark">?</span>;
+
 <span class="kw">for </span>post <span class="kw">in </span>results {
     <span class="macro">println!</span>(<span class="string">"{}"</span>, post);
 }
 <span class="prelude-val">Ok</span>::&lt;(), NosqliteError&gt;(())</code></pre></div>
 <h5 id="notes-2"><a class="doc-anchor" href="#notes-2">§</a>Notes</h5>
 <ul>
-<li>Only supports string equality (<code>==</code>) comparisons.</li>
-<li>Documents must be valid JSON objects with the specified field.</li>
+<li>Supports exact value comparisons on all JSON types.</li>
+<li>Use empty <code>{}</code> objects for no filtering or full document returns.</li>
+<li>Advanced filters (e.g., <code>$gt</code>, <code>$lt</code>) are not yet supported.</li>
 </ul>
 <h5 id="see-also-9"><a class="doc-anchor" href="#see-also-9">§</a>See Also</h5>
 <ul>
-<li><a href="../services/document_service/fn.get_all_documents.html" title="fn nosqlite_cli::engine::services::document_service::get_all_documents"><code>get_all_documents</code></a> — for manual filtering</li>
+<li><a href="../services/document_service/fn.get_all_documents.html" title="fn nosqlite_cli::engine::services::document_service::get_all_documents"><code>get_all_documents</code></a> — fetch all and manually filter.</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.list_collections" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#578-580">Source</a><h4 class="code-header">pub fn <a href="#method.list_collections" class="fn">list_collections</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;&amp;<a class="struct" href="../models/collection/model/struct.Collection.html" title="struct nosqlite_cli::engine::models::collection::model::Collection">Collection</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+</div></details><details class="toggle method-toggle" open><summary><section id="method.list_collections" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#593-595">Source</a><h4 class="code-header">pub fn <a href="#method.list_collections" class="fn">list_collections</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.86.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;&amp;<a class="struct" href="../models/collection/model/struct.Collection.html" title="struct nosqlite_cli::engine::models::collection::model::Collection">Collection</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
 Lists all collections currently stored in the database.</p>
 <p>Returns an immutable reference to all <a href="../models/collection/model/struct.Collection.html" title="struct nosqlite_cli::engine::models::collection::model::Collection"><code>Collection</code></a>s registered in the system.
 Useful for introspection, UI display, or admin tools.</p>
@@ -416,7 +424,7 @@ Useful for introspection, UI display, or admin tools.</p>
 <li><a href="../services/collection_service/fn.create_collection.html" title="fn nosqlite_cli::engine::services::collection_service::create_collection"><code>create_collection</code></a> — to define a new collection</li>
 <li><a href="../services/collection_service/fn.delete_collection.html" title="fn nosqlite_cli::engine::services::collection_service::delete_collection"><code>delete_collection</code></a> — to remove one</li>
 </ul>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.auto_save" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#603-606">Source</a><h4 class="code-header">fn <a href="#method.auto_save" class="fn">auto_save</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auto_save" class="method"><a class="src rightside" href="../../../src/nosqlite_cli/engine/nosqlite.rs.html#618-621">Source</a><h4 class="code-header">fn <a href="#method.auto_save" class="fn">auto_save</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.86.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.86.0/std/primitive.unit.html">()</a>, <a class="enum" href="../error/error_type/enum.NosqliteError.html" title="enum nosqlite_cli::engine::error::error_type::NosqliteError">NosqliteError</a>&gt;</h4></section></summary><div class="docblock"><p>🦀
 Persists the current in-memory database state to disk.</p>
 <p>This internal utility is automatically invoked after successful mutations
 (e.g., inserting, updating, or deleting documents or collections).</p>

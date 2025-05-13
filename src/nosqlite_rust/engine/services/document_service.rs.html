@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/engine/services/document_service.rs`."><title>document_service.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="nosqlite_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../../../static.files/storage-3a5871a4.js"></script><script defer src="../../../../static.files/src-script-b8d3f215.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">nosqlite_rust/engine/services/</div>document_service.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span><span class="kw">crate</span>::engine::error::{NosqliteError, NosqliteErrorHandler};
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span><span class="kw">crate</span>::engine::models::database::model::Database;
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use </span><span class="kw">crate</span>::engine::models::document::model::Document;
-<a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>serde_json::Value;
+<a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>serde_json::{Map, Value};
 <a href=#5 id=5 data-nosnippet>5</a>
 <a href=#6 id=6 data-nosnippet>6</a><span class="doccomment">/// 🦀
 <a href=#7 id=7 data-nosnippet>7</a>/// Inserts a new document into the specified collection.
@@ -382,71 +382,132 @@
 <a href=#382 id=382 data-nosnippet>382</a>}
 <a href=#383 id=383 data-nosnippet>383</a>
 <a href=#384 id=384 data-nosnippet>384</a><span class="doccomment">/// 🦀
-<a href=#385 id=385 data-nosnippet>385</a>/// Retrieves documents where a specific field equals the given value (string match).
+<a href=#385 id=385 data-nosnippet>385</a>/// Retrieves documents matching the specified JSON filter and applies an optional projection.
 <a href=#386 id=386 data-nosnippet>386</a>///
-<a href=#387 id=387 data-nosnippet>387</a>/// This function performs a filter on all documents in the collection,
-<a href=#388 id=388 data-nosnippet>388</a>/// returning only those where the given field exists and equals the specified value.
-<a href=#389 id=389 data-nosnippet>389</a>///
-<a href=#390 id=390 data-nosnippet>390</a>/// # Parameters
-<a href=#391 id=391 data-nosnippet>391</a>///
-<a href=#392 id=392 data-nosnippet>392</a>/// - `db`: A reference to the [`Database`] instance.
-<a href=#393 id=393 data-nosnippet>393</a>/// - `collection_name`: The name of the collection to query.
-<a href=#394 id=394 data-nosnippet>394</a>/// - `field`: The field name to match against.
-<a href=#395 id=395 data-nosnippet>395</a>/// - `value`: The expected field value (as a string).
-<a href=#396 id=396 data-nosnippet>396</a>/// - `handler`: For logging collection lookup failures.
-<a href=#397 id=397 data-nosnippet>397</a>///
-<a href=#398 id=398 data-nosnippet>398</a>/// # Returns
-<a href=#399 id=399 data-nosnippet>399</a>///
-<a href=#400 id=400 data-nosnippet>400</a>/// - `Ok(Vec&lt;&amp;Document&gt;)` with matching documents
-<a href=#401 id=401 data-nosnippet>401</a>/// - `Err(NosqliteError)` if the collection is not found
+<a href=#387 id=387 data-nosnippet>387</a>/// This function performs a multi-field filter on all documents in the collection,
+<a href=#388 id=388 data-nosnippet>388</a>/// allowing type-aware comparisons (e.g., strings, numbers, booleans).
+<a href=#389 id=389 data-nosnippet>389</a>/// If a projection is provided, only the specified fields will be included in the results.
+<a href=#390 id=390 data-nosnippet>390</a>///
+<a href=#391 id=391 data-nosnippet>391</a>/// # Parameters
+<a href=#392 id=392 data-nosnippet>392</a>///
+<a href=#393 id=393 data-nosnippet>393</a>/// - `db`: A reference to the [`Database`] instance.
+<a href=#394 id=394 data-nosnippet>394</a>/// - `collection_name`: The name of the collection to query.
+<a href=#395 id=395 data-nosnippet>395</a>/// - `filter`: A JSON object specifying the fields and values to match (e.g., `{ "name": "Alice", "age": 30 }`).
+<a href=#396 id=396 data-nosnippet>396</a>///   If empty, all documents are matched.
+<a href=#397 id=397 data-nosnippet>397</a>/// - `projection`: A JSON object specifying which fields to include in the result (e.g., `{ "name": 1, "email": 1 }`).
+<a href=#398 id=398 data-nosnippet>398</a>///   If empty, all fields are returned.
+<a href=#399 id=399 data-nosnippet>399</a>/// - `handler`: The [`NosqliteErrorHandler`] used for logging errors (e.g., missing collections).
+<a href=#400 id=400 data-nosnippet>400</a>///
+<a href=#401 id=401 data-nosnippet>401</a>/// # Returns
 <a href=#402 id=402 data-nosnippet>402</a>///
-<a href=#403 id=403 data-nosnippet>403</a>/// # Example
-<a href=#404 id=404 data-nosnippet>404</a>///
-<a href=#405 id=405 data-nosnippet>405</a>/// ```rust
-<a href=#406 id=406 data-nosnippet>406</a>/// use serde_json::json;
-<a href=#407 id=407 data-nosnippet>407</a>/// use nosqlite_rust::engine::{error::{NosqliteErrorHandler, NosqliteError}, models::{Database,Collection}};
-<a href=#408 id=408 data-nosnippet>408</a>/// use nosqlite_rust::engine::services::document_service::get_documents;
-<a href=#409 id=409 data-nosnippet>409</a>///
-<a href=#410 id=410 data-nosnippet>410</a>/// let mut db = Database::new("temp/data28.nosqlite");
-<a href=#411 id=411 data-nosnippet>411</a>/// let mut handler = NosqliteErrorHandler::new("temp/data28.nosqlite".to_string());
-<a href=#412 id=412 data-nosnippet>412</a>/// db.add_collection("posts", json!({}) ,&amp;mut handler)?;
-<a href=#413 id=413 data-nosnippet>413</a>/// let col = db.get_collection_mut("posts").unwrap();
-<a href=#414 id=414 data-nosnippet>414</a>/// col.add_document(json!({ "id": "post1", "author": "alice" }), &amp;mut handler)?;
-<a href=#415 id=415 data-nosnippet>415</a>/// col.add_document(json!({ "id": "post2", "author": "bob" }), &amp;mut handler)?;
-<a href=#416 id=416 data-nosnippet>416</a>/// let results = get_documents(&amp;db, "posts", "author", "alice", &amp;mut handler)?;
-<a href=#417 id=417 data-nosnippet>417</a>/// println!("Found {} posts by Alice", results.len());
-<a href=#418 id=418 data-nosnippet>418</a>/// Ok::&lt;(), NosqliteError&gt;(())
-<a href=#419 id=419 data-nosnippet>419</a>/// ```
-<a href=#420 id=420 data-nosnippet>420</a>///
-<a href=#421 id=421 data-nosnippet>421</a>/// # Notes
+<a href=#403 id=403 data-nosnippet>403</a>/// - `Ok(Vec&lt;Value&gt;)` containing the filtered and projected documents as JSON objects.
+<a href=#404 id=404 data-nosnippet>404</a>/// - `Err(NosqliteError)` if the collection is not found.
+<a href=#405 id=405 data-nosnippet>405</a>///
+<a href=#406 id=406 data-nosnippet>406</a>/// # Example
+<a href=#407 id=407 data-nosnippet>407</a>///
+<a href=#408 id=408 data-nosnippet>408</a>/// ```rust
+<a href=#409 id=409 data-nosnippet>409</a>/// use serde_json::json;
+<a href=#410 id=410 data-nosnippet>410</a>/// use nosqlite_rust::engine::{
+<a href=#411 id=411 data-nosnippet>411</a>///     error::{NosqliteErrorHandler, NosqliteError},
+<a href=#412 id=412 data-nosnippet>412</a>///     models::{Database, Collection}
+<a href=#413 id=413 data-nosnippet>413</a>/// };
+<a href=#414 id=414 data-nosnippet>414</a>/// use nosqlite_rust::engine::services::document_service::get_documents;
+<a href=#415 id=415 data-nosnippet>415</a>///
+<a href=#416 id=416 data-nosnippet>416</a>/// let mut db = Database::new("temp/data28.nosqlite");
+<a href=#417 id=417 data-nosnippet>417</a>/// let mut handler = NosqliteErrorHandler::new("temp/data28.nosqlite".to_string());
+<a href=#418 id=418 data-nosnippet>418</a>/// db.add_collection("posts", json!({}), &amp;mut handler)?;
+<a href=#419 id=419 data-nosnippet>419</a>/// let col = db.get_collection_mut("posts").unwrap();
+<a href=#420 id=420 data-nosnippet>420</a>/// col.add_document(json!({ "id": "post1", "author": "alice", "likes": 10 }), &amp;mut handler)?;
+<a href=#421 id=421 data-nosnippet>421</a>/// col.add_document(json!({ "id": "post2", "author": "bob", "likes": 5 }), &amp;mut handler)?;
 <a href=#422 id=422 data-nosnippet>422</a>///
-<a href=#423 id=423 data-nosnippet>423</a>/// - Only exact string matches are supported.
-<a href=#424 id=424 data-nosnippet>424</a>/// - No schema validation is enforced here.
-<a href=#425 id=425 data-nosnippet>425</a>///
-<a href=#426 id=426 data-nosnippet>426</a>/// # See Also
-<a href=#427 id=427 data-nosnippet>427</a>///
-<a href=#428 id=428 data-nosnippet>428</a>/// - [`get_all_documents`] — fetch all then filter manually
-<a href=#429 id=429 data-nosnippet>429</a></span><span class="kw">pub fn </span>get_documents&lt;<span class="lifetime">'a</span>&gt;(
-<a href=#430 id=430 data-nosnippet>430</a>    db: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Database,
-<a href=#431 id=431 data-nosnippet>431</a>    collection_name: <span class="kw-2">&amp;</span>str,
-<a href=#432 id=432 data-nosnippet>432</a>    field: <span class="kw-2">&amp;</span>str,
-<a href=#433 id=433 data-nosnippet>433</a>    value: <span class="kw-2">&amp;</span>str,
-<a href=#434 id=434 data-nosnippet>434</a>    handler: <span class="kw-2">&amp;mut </span>NosqliteErrorHandler,
-<a href=#435 id=435 data-nosnippet>435</a>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&gt;, NosqliteError&gt; {
-<a href=#436 id=436 data-nosnippet>436</a>    <span class="kw">let </span>collection = db.get_collection(collection_name).ok_or_else(|| {
-<a href=#437 id=437 data-nosnippet>437</a>        <span class="kw">let </span>error = NosqliteError::CollectionNotFound(<span class="macro">format!</span>(
-<a href=#438 id=438 data-nosnippet>438</a>            <span class="string">"Collection '{}' not found"</span>,
-<a href=#439 id=439 data-nosnippet>439</a>            collection_name
-<a href=#440 id=440 data-nosnippet>440</a>        ));
-<a href=#441 id=441 data-nosnippet>441</a>        handler.log_error(error.clone());
-<a href=#442 id=442 data-nosnippet>442</a>        error
-<a href=#443 id=443 data-nosnippet>443</a>    })<span class="question-mark">?</span>;
-<a href=#444 id=444 data-nosnippet>444</a>
-<a href=#445 id=445 data-nosnippet>445</a>    <span class="kw">let </span>result = collection
-<a href=#446 id=446 data-nosnippet>446</a>        .all_documents()
-<a href=#447 id=447 data-nosnippet>447</a>        .iter()
-<a href=#448 id=448 data-nosnippet>448</a>        .filter(|doc| doc.data.get(field).is_some_and(|v| v == value))
-<a href=#449 id=449 data-nosnippet>449</a>        .collect();
-<a href=#450 id=450 data-nosnippet>450</a>
-<a href=#451 id=451 data-nosnippet>451</a>    <span class="prelude-val">Ok</span>(result)
-<a href=#452 id=452 data-nosnippet>452</a>}</code></pre></div></section></main></body></html>
+<a href=#423 id=423 data-nosnippet>423</a>/// // Filter: author is "alice", Projection: only "id" field
+<a href=#424 id=424 data-nosnippet>424</a>/// let results = get_documents(
+<a href=#425 id=425 data-nosnippet>425</a>///     &amp;db,
+<a href=#426 id=426 data-nosnippet>426</a>///     "posts",
+<a href=#427 id=427 data-nosnippet>427</a>///     &amp;json!({ "author": "alice" }),
+<a href=#428 id=428 data-nosnippet>428</a>///     &amp;json!({ "id": 1 }),
+<a href=#429 id=429 data-nosnippet>429</a>///     &amp;mut handler
+<a href=#430 id=430 data-nosnippet>430</a>/// )?;
+<a href=#431 id=431 data-nosnippet>431</a>///
+<a href=#432 id=432 data-nosnippet>432</a>/// println!("Found {} posts by Alice", results.len());
+<a href=#433 id=433 data-nosnippet>433</a>/// Ok::&lt;(), NosqliteError&gt;(())
+<a href=#434 id=434 data-nosnippet>434</a>/// ```
+<a href=#435 id=435 data-nosnippet>435</a>///
+<a href=#436 id=436 data-nosnippet>436</a>/// # Notes
+<a href=#437 id=437 data-nosnippet>437</a>///
+<a href=#438 id=438 data-nosnippet>438</a>/// - Supports exact match comparisons on all JSON types (`string`, `number`, `bool`, etc.).
+<a href=#439 id=439 data-nosnippet>439</a>/// - If `filter` is empty, all documents are returned.
+<a href=#440 id=440 data-nosnippet>440</a>/// - If `projection` is empty, full documents are returned.
+<a href=#441 id=441 data-nosnippet>441</a>/// - No advanced operators (e.g., `$gt`, `$lt`) are supported yet.
+<a href=#442 id=442 data-nosnippet>442</a>///
+<a href=#443 id=443 data-nosnippet>443</a>/// # See Also
+<a href=#444 id=444 data-nosnippet>444</a>///
+<a href=#445 id=445 data-nosnippet>445</a>/// - [`get_all_documents`] — fetch all then filter manually.
+<a href=#446 id=446 data-nosnippet>446</a></span><span class="kw">pub fn </span>get_documents(
+<a href=#447 id=447 data-nosnippet>447</a>    db: <span class="kw-2">&amp;</span>Database,
+<a href=#448 id=448 data-nosnippet>448</a>    collection_name: <span class="kw-2">&amp;</span>str,
+<a href=#449 id=449 data-nosnippet>449</a>    filter: <span class="kw-2">&amp;</span>Value,
+<a href=#450 id=450 data-nosnippet>450</a>    projection: <span class="kw-2">&amp;</span>Value,
+<a href=#451 id=451 data-nosnippet>451</a>    handler: <span class="kw-2">&amp;mut </span>NosqliteErrorHandler,
+<a href=#452 id=452 data-nosnippet>452</a>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Value&gt;, NosqliteError&gt; {
+<a href=#453 id=453 data-nosnippet>453</a>    <span class="kw">let </span>collection = db.get_collection(collection_name).ok_or_else(|| {
+<a href=#454 id=454 data-nosnippet>454</a>        <span class="kw">let </span>error = NosqliteError::CollectionNotFound(<span class="macro">format!</span>(
+<a href=#455 id=455 data-nosnippet>455</a>            <span class="string">"Collection '{}' not found"</span>,
+<a href=#456 id=456 data-nosnippet>456</a>            collection_name
+<a href=#457 id=457 data-nosnippet>457</a>        ));
+<a href=#458 id=458 data-nosnippet>458</a>        handler.log_error(error.clone());
+<a href=#459 id=459 data-nosnippet>459</a>        error
+<a href=#460 id=460 data-nosnippet>460</a>    })<span class="question-mark">?</span>;
+<a href=#461 id=461 data-nosnippet>461</a>
+<a href=#462 id=462 data-nosnippet>462</a>    <span class="kw">let </span>docs = collection.all_documents();
+<a href=#463 id=463 data-nosnippet>463</a>
+<a href=#464 id=464 data-nosnippet>464</a>    <span class="kw">let </span>filtered_docs = docs
+<a href=#465 id=465 data-nosnippet>465</a>        .iter()
+<a href=#466 id=466 data-nosnippet>466</a>        .filter_map(|doc| {
+<a href=#467 id=467 data-nosnippet>467</a>            <span class="kw">let </span>doc_data = <span class="kw-2">&amp;</span>doc.data;
+<a href=#468 id=468 data-nosnippet>468</a>            <span class="kw">if </span>matches_filter(doc_data, filter) {
+<a href=#469 id=469 data-nosnippet>469</a>                <span class="prelude-val">Some</span>(apply_projection(doc_data, projection))
+<a href=#470 id=470 data-nosnippet>470</a>            } <span class="kw">else </span>{
+<a href=#471 id=471 data-nosnippet>471</a>                <span class="prelude-val">None
+<a href=#472 id=472 data-nosnippet>472</a>            </span>}
+<a href=#473 id=473 data-nosnippet>473</a>        })
+<a href=#474 id=474 data-nosnippet>474</a>        .collect();
+<a href=#475 id=475 data-nosnippet>475</a>
+<a href=#476 id=476 data-nosnippet>476</a>    <span class="prelude-val">Ok</span>(filtered_docs)
+<a href=#477 id=477 data-nosnippet>477</a>}
+<a href=#478 id=478 data-nosnippet>478</a>
+<a href=#479 id=479 data-nosnippet>479</a><span class="kw">fn </span>matches_filter(doc: <span class="kw-2">&amp;</span>Value, filter: <span class="kw-2">&amp;</span>Value) -&gt; bool {
+<a href=#480 id=480 data-nosnippet>480</a>    <span class="kw">if let </span>(Value::Object(doc_obj), Value::Object(filter_obj)) = (doc, filter) {
+<a href=#481 id=481 data-nosnippet>481</a>        <span class="kw">for </span>(key, expected_val) <span class="kw">in </span>filter_obj {
+<a href=#482 id=482 data-nosnippet>482</a>            <span class="kw">match </span>doc_obj.get(key) {
+<a href=#483 id=483 data-nosnippet>483</a>                <span class="prelude-val">Some</span>(actual_val) <span class="kw">if </span>actual_val == expected_val =&gt; <span class="kw">continue</span>,
+<a href=#484 id=484 data-nosnippet>484</a>                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="bool-val">false</span>,
+<a href=#485 id=485 data-nosnippet>485</a>            }
+<a href=#486 id=486 data-nosnippet>486</a>        }
+<a href=#487 id=487 data-nosnippet>487</a>        <span class="bool-val">true
+<a href=#488 id=488 data-nosnippet>488</a>    </span>} <span class="kw">else </span>{
+<a href=#489 id=489 data-nosnippet>489</a>        <span class="bool-val">true
+<a href=#490 id=490 data-nosnippet>490</a>    </span>}
+<a href=#491 id=491 data-nosnippet>491</a>}
+<a href=#492 id=492 data-nosnippet>492</a>
+<a href=#493 id=493 data-nosnippet>493</a><span class="kw">fn </span>apply_projection(doc: <span class="kw-2">&amp;</span>Value, projection: <span class="kw-2">&amp;</span>Value) -&gt; Value {
+<a href=#494 id=494 data-nosnippet>494</a>    <span class="kw">if let </span>(Value::Object(doc_obj), Value::Object(proj_obj)) = (doc, projection) {
+<a href=#495 id=495 data-nosnippet>495</a>        <span class="kw">let </span><span class="kw-2">mut </span>projected = Map::new();
+<a href=#496 id=496 data-nosnippet>496</a>
+<a href=#497 id=497 data-nosnippet>497</a>        <span class="kw">if </span>proj_obj.is_empty() {
+<a href=#498 id=498 data-nosnippet>498</a>            <span class="kw">return </span>Value::Object(doc_obj.clone());
+<a href=#499 id=499 data-nosnippet>499</a>        }
+<a href=#500 id=500 data-nosnippet>500</a>
+<a href=#501 id=501 data-nosnippet>501</a>        <span class="kw">for </span>(key, include_flag) <span class="kw">in </span>proj_obj {
+<a href=#502 id=502 data-nosnippet>502</a>            <span class="kw">if </span>include_flag == <span class="kw-2">&amp;</span>Value::from(<span class="number">1</span>) {
+<a href=#503 id=503 data-nosnippet>503</a>                <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = doc_obj.get(key) {
+<a href=#504 id=504 data-nosnippet>504</a>                    projected.insert(key.clone(), value.clone());
+<a href=#505 id=505 data-nosnippet>505</a>                }
+<a href=#506 id=506 data-nosnippet>506</a>            }
+<a href=#507 id=507 data-nosnippet>507</a>        }
+<a href=#508 id=508 data-nosnippet>508</a>
+<a href=#509 id=509 data-nosnippet>509</a>        Value::Object(projected)
+<a href=#510 id=510 data-nosnippet>510</a>    } <span class="kw">else </span>{
+<a href=#511 id=511 data-nosnippet>511</a>        doc.clone()
+<a href=#512 id=512 data-nosnippet>512</a>    }
+<a href=#513 id=513 data-nosnippet>513</a>}</code></pre></div></section></main></body></html>
